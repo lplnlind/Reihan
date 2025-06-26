@@ -1,0 +1,49 @@
+﻿@inherits LayoutComponentBase
+
+<MudRTLProvider RightToLeft="true">
+    <MudThemeProvider Theme="MyCustomTheme" />
+    <MudPopoverProvider />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
+
+    <MudLayout>
+        <NavMenu></NavMenu>
+
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+</MudRTLProvider>
+
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+    MudTheme MyCustomTheme = new MudTheme()
+    {
+        Typography = new Typography()
+        {
+            Default = new DefaultTypography()
+            {
+                FontFamily = new[] { "Dana", "Segoe UI" }
+            },
+
+            H5 = new H5Typography()
+            {
+                FontWeight = "800"
+            },
+
+            H6 = new H6Typography()
+            {
+                FontSize = "1.20rem",
+                FontWeight = "700"
+            }
+        }
+    };
+}

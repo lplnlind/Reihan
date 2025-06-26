@@ -1,0 +1,29 @@
+﻿@using Reihan.Client.Models.Order
+@inject ICartClient CartClient
+@inject IOrderClient OrderClient
+@inject NavigationManager Navigation
+
+<h3>نهایی‌سازی سفارش</h3>
+
+<EditForm Model="OrderModel" OnValidSubmit="SubmitOrder">
+    <InputText @bind-Value="OrderModel.ShippingAddress.Street" />
+    <InputText @bind-Value="OrderModel.ShippingAddress.City" />
+    <InputText @bind-Value="OrderModel.ShippingAddress.ZipCode" />
+    <button type="submit">ثبت سفارش</button>
+</EditForm>
+
+@code {
+    private CreateOrderRequest OrderModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var cart = await CartClient.GetCartAsync();
+        OrderModel.CartItems = cart.Items;
+    }
+
+    private async Task SubmitOrder()
+    {
+        await OrderClient.CreateOrderAsync(OrderModel);
+        Navigation.NavigateTo("/orders");
+    }
+}

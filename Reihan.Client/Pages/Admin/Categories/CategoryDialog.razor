@@ -1,0 +1,32 @@
+﻿@using Reihan.Client.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField Label="نام دسته‌بندی" Disabled="IsDisable" @bind-Value="Category.Name" Required="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">لغو</MudButton>
+        <MudButton OnClick="Submit" Variant="Variant.Filled" Color="@Color">@ButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public CategoryDto Category { get; set; } = new CategoryDto();
+
+    [Parameter]
+    public string ButtonText { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public bool IsDisable { get; set; } = false;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(Category));
+
+    private void Cancel() => MudDialog.Cancel();
+}

@@ -1,0 +1,46 @@
+﻿@page "/login"
+@using Reihan.Client.Models.Auth
+@inject IAuthClient AuthClient
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@inject ILocalStorageService LocalStorage
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+<MudPaper Elevation="3" Class="mx-auto mt-12 p-6" MaxWidth="400px">
+    <MudText Typo="Typo.h5" Class="mb-4 text-center">ورود به حساب کاربری</MudText>
+
+    <MudTextField Label="ایمیل" @bind-Value="_model.UserName" Required="true" />
+    <MudTextField Label="رمز عبور" @bind-Value="_model.Password" InputType="InputType.Password" Required="true" />
+
+    <MudButton OnClick="LoginUser" Color="Color.Primary" Class="mt-4" FullWidth="true" Variant="Variant.Filled">ورود</MudButton>
+    <MudText Class="mt-4">
+        <MudLink Href="/forgot-password">رمز عبور را فراموش کرده‌اید؟</MudLink>
+    </MudText>
+
+    <MudText>
+        حساب کاربری ندارید؟
+        <MudLink Href="/register">ثبت‌نام</MudLink>
+    </MudText>
+</MudPaper>
+
+@code {
+    private LoginRequest _model = new();
+
+    private string _email = "";
+    private string _password = "";
+
+    private async Task LoginUser()
+    {
+        var result = await AuthClient.LoginAsync(_model);
+
+        if (result)
+        {
+            Snackbar.Add("ورود موفقیت‌آمیز بود", Severity.Success);
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            Snackbar.Add( "ورود ناموفق بود", Severity.Error);
+        }
+    }
+}

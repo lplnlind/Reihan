@@ -1,0 +1,70 @@
+﻿@inject IAuthClient AuthClient
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<h3>پروفایل</h3>
+
+<EditForm Model="@profile" OnValidSubmit="UpdateProfile">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+
+    <label>نام کامل:</label>
+    <InputText @bind-Value="profile.FullName" class="form-control" />
+
+    <label>ایمیل:</label>
+    <InputText @bind-Value="profile.Email" class="form-control" />
+
+    <label>خیابان:</label>
+    <InputText @bind-Value="profile.Address.Street" class="form-control" />
+
+    <label>شهر:</label>
+    <InputText @bind-Value="profile.Address.City" class="form-control" />
+
+    <label>کد پستی:</label>
+    <InputText @bind-Value="profile.Address.ZipCode" class="form-control" />
+
+    <button type="submit">ذخیره تغییرات</button>
+</EditForm>
+
+<hr />
+<h4>تغییر رمز عبور</h4>
+
+<EditForm Model="@changePassword" OnValidSubmit="ChangePassword">
+    <InputText @bind-Value="changePassword.CurrentPassword" type="password" />
+    <InputText @bind-Value="changePassword.NewPassword" type="password" />
+    <button type="submit">تغییر رمز</button>
+</EditForm>
+
+@code {
+    private UpdateProfileRequest profile = new();
+    private ChangePasswordRequest changePassword = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var current = await AuthClient.GetProfileAsync();
+        profile = new UpdateProfileRequest
+            {
+                FullName = current.FullName,
+                Email = current.Email,
+                Address = new AddressDto
+                {
+                    Street = current.Street,
+                    City = current.City,
+                    ZipCode = current.ZipCode
+                }
+            };
+    }
+
+    private async Task UpdateProfile()
+    {
+        await AuthClient.UpdateProfileAsync(profile);
+        Snackbar.Add("تغییرات ذخیره شد", Severity.Success);
+    }
+
+    private async Task ChangePassword()
+    {
+        await AuthClient.ChangePasswordAsync(changePassword);
+        Snackbar.Add("رمز عبور با موفقیت تغییر کرد", Severity.Success);
+    }
+}

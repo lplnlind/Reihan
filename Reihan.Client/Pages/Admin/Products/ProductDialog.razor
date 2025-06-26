@@ -1,0 +1,42 @@
+﻿@using Reihan.Client.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField Label="نام محصول" Disabled="IsDisable" @bind-Value="Product.Name" Required="true" />
+        <MudTextField Label="قیمت" @bind-Value="Product.Price" Required="true" />
+        <MudSelect T="int" Label="دسته‌بندی" @bind-Value="Product.CategoryId" Required="true">
+            @foreach (var category in categories)
+            {
+                <MudSelectItem Value="@category.Id">@category.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">لغو</MudButton>
+        <MudButton OnClick="Submit" Variant="Variant.Filled" Color="@Color">@ButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public ProductDto Product { get; set; } = new ProductDto();
+
+    [Parameter] 
+    public List<CategoryDto> categories { get; set; } = new();
+
+    [Parameter]
+    public string ButtonText { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public bool IsDisable { get; set; } = false;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(Product));
+
+    private void Cancel() => MudDialog.Cancel();
+}

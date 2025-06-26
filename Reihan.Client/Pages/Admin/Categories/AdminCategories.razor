@@ -1,0 +1,122 @@
+﻿@page "/admin/categories"
+@using Reihan.Client.Models
+@attribute [Authorize(Roles ="Admin")]
+@inject ICategoryClient CategoryClient
+@inject IDialogService DialogService
+
+<PageTitle>مدیریت دسته‌بندی‌ها</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    <MudPaper Class="p-4 mt-10 rounded-xl">
+        <MudTable Class="rounded-xl" Items="_categories" Hover="true" Dense="true">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">لیست دسته بندی ها</MudText>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog" Class="ma-1 pa-2"></MudIconButton>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>شناسه</MudTh>
+                <MudTh>نام</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="شناسه">@context.Id</MudTd>
+                <MudTd DataLabel="نام">
+                    <MudStack Spacing="0">
+                        <MudText>@context.Name</MudText>
+                        <MudText Typo="Typo.caption">تعداد محصولات: 20</MudText>
+                    </MudStack>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => OpenEditDialog(context))"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(() => OpenDeleteDialog(context))"></MudIconButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    private List<CategoryDto> _categories = new();
+    private CategoryDialog? _categoryDialog;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task OpenDeleteDialog(CategoryDto category)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, CloseButton = true };
+        var parameters = new DialogParameters<CategoryDialog>
+        {
+            { x => x.Category, category },
+            { x => x.ButtonText, "حذف"},
+            { x => x.Color, Color.Error},
+            { x => x.IsDisable, true}
+        };
+
+        var dialog = await DialogService.ShowAsync<CategoryDialog>("حذف دسته بندی", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null)
+            if (!result.Canceled)
+            {
+                await CategoryClient.DeleteAsync(category.Id);
+                await LoadCategories();
+            }
+    }
+
+    private async Task OpenAddDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large, CloseButton = true };
+        var parameters = new DialogParameters<CategoryDialog>
+        {
+            { x => x.ButtonText, "ثبت"},
+            { x => x.Color, Color.Primary}
+        };
+
+        var dialog = await DialogService.ShowAsync<CategoryDialog>("ثبت دسته بندی", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null)
+            if (!result.Canceled)
+            {
+                if (result.Data is not null)
+                {
+                    CategoryDto category = (CategoryDto)result.Data;
+                    await CategoryClient.CreateAsync(category);
+                    await LoadCategories();
+                }
+            }
+    }
+
+    private async Task OpenEditDialog(CategoryDto category)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, CloseButton = true };
+        var parameters = new DialogParameters<CategoryDialog>
+        {
+            { x => x.Category, category },
+            { x => x.ButtonText, "ویرایش"},
+            { x => x.Color, Color.Primary}
+        };
+
+        var dialog = await DialogService.ShowAsync<CategoryDialog>("ویرایش دسته بندی", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null)
+            if (!result.Canceled)
+            {
+                if (result.Data is not null)
+                {
+                    CategoryDto categoryEdit = (CategoryDto)result.Data;
+                    await CategoryClient.UpdateAsync(categoryEdit);
+                    await LoadCategories();
+                }
+            }
+    }
+
+    private async Task LoadCategories() => 
+        _categories = (await CategoryClient.GetAllAsync()).ToList();
+}
