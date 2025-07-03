@@ -1,0 +1,95 @@
+﻿@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+@inject IUserClient UserClient
+@inject ISnackbar Snackbar
+
+<PageTitle>مدیریت کاربران</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Outlined="true" Class="rounded-xl pa-2" Elevation="2">
+        <MudTable Class="rounded-xl mt-1" Elevation="0" Items="@_users" Loading="@_loading" Hover="true" Dense="false" Filter="new Func<UserDto, bool>(FilterFunc1)" @bind-SelectedIte="_users">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">لیست کابران</MudText>
+                <MudSpacer />
+                <MudItem lg="3"><MudTextField @bind-Value="searchString1" Placeholder="جستجو" Margin="Margin.Dense" Typo="Typo.caption" Adornment="Adornment.Start" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Rounded.Search" IconSize="Size.Medium" Class="ma-0"></MudTextField></MudItem>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Id)">شناسه</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.FullName)">نام</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.UserName)">نام کاربری</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Email)">ایمیل</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Role)">نقش</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.IsActive)">وضعیت</MudTableSortLabel></MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="شناسه">@context.Id</MudTd>
+                <MudTd DataLabel="نام">@context.FullName</MudTd>
+                <MudTd DataLabel="نام کاربری">@context.UserName</MudTd>
+                <MudTd DataLabel="ایمیل">@context.Email</MudTd>
+                <MudTd DataLabel="نقش">
+                    <MudSelect T="string" ValueChanged="@(v => UpdateRole(context.Id, v))" Value="context.Role" Variant="Variant.Outlined" Dense="true" Margin="Margin.Dense" Typo="Typo.caption">
+                        @foreach (var role in roles)
+                        {
+                            <MudSelectItem Value="role">@role</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd DataLabel="وضعیت">@(context.IsActive ? "فعال" : "غیرفعال")</MudTd>
+                <MudTd>
+                    <MudButton @onclick="() => ToggleStatus(context.Id, !context.IsActive)">@(context.IsActive ? "غیرفعال‌سازی" : "فعال‌سازی")</MudButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<UserDto> _users = new();
+    private List<string> roles = new() { "Customer", "Admin" };
+    private string searchString1 = "";
+    private bool _loading = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _users = await UserClient.GetAllUsersAsync();
+
+        if (_users is not null)
+            _loading = false;
+    }
+
+
+    private async Task UpdateRole(int userId, string? role)
+    {
+        if (role is null) return;
+        _users.FirstOrDefault(u => u.Id == userId)!.Role = role;
+        await UserClient.UpdateUserRoleAsync(userId, role);
+        Snackbar.Add("نقش کاربر بروزرسانی شد", Severity.Success);
+    }
+
+    private async Task ToggleStatus(int userId, bool newStatus)
+    {
+        await UserClient.ToggleUserStatusAsync(userId, newStatus);
+        var user = _users!.FirstOrDefault(u => u.Id == userId);
+        if (user is not null) user.IsActive = newStatus;
+        Snackbar.Add("وضعیت کاربر تغییر کرد", Severity.Info);
+    }
+
+
+    private bool FilterFunc1(UserDto user) => FilterFunc(user, searchString1);
+
+    private bool FilterFunc(UserDto user, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (user.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{user.UserName} {user.Email}".Contains(searchString))
+            return true;
+        return false;
+    }
+}

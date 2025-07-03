@@ -1,0 +1,132 @@
+﻿@inject ISnackbar Snackbar
+@inject IProductClient ProductClient
+
+@if (IsDisable)
+{
+    <MudDialog>
+        <DialogContent>
+            <MudText>آیا از حذف محصول با نام "@Product.Name" مطمئن هستید؟</MudText>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel">لغو</MudButton>
+            <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit" ButtonType="ButtonType.Submit">@ButtonText</MudButton>
+        </DialogActions>
+    </MudDialog>
+}
+else
+{
+    <MudForm @ref="form" Model="@Product" Validation="OnValidated">
+        <MudDialog>
+            <DialogContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6"><MudTextField Label="نام محصول" @bind-Value="Product.Name" For="@(() => Product.Name)" Required="true" Disabled="IsDisable" Variant="Variant.Outlined" /></MudItem>
+                    <MudItem xs="12" sm="6"><MudNumericField Label="قیمت" @bind-Value="Product.Price" For="@(() => Product.Price)" Required="true" Disabled="IsDisable" Variant="Variant.Outlined" /></MudItem>
+                    <MudItem xs="12" sm="6"><MudNumericField Label="تعداد" @bind-Value="Product.StockQuantity" For="@(() => Product.StockQuantity)" Required="true" Disabled="IsDisable" Variant="Variant.Outlined" /></MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int" Label="دسته‌بندی" @bind-Value="Product.CategoryId" For="@(() => Product.CategoryId)" Required="true" Variant="Variant.Outlined">
+                            @foreach (var category in categories)
+                            {
+                                <MudSelectItem Value="@category.Id">@category.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="12">
+                        <MudTextField Label="توضیحات" @bind-Value="Product.Description" For="@(() => Product.Description)" Lines="3" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="12">
+                        <MudPaper Outlined="true" Class="rounded-gl pa-1">
+                            <MudStack Justify="Justify.Center">
+                                <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
+                                    <ActivatorContent>
+                                        <MudButton Variant="Variant.Filled" FullWidth="true"
+                                                   Color="Color.Primary"
+                                                   StartIcon="@Icons.Material.Rounded.UploadFile">
+                                            بارگذاری عکس
+                                        </MudButton>
+                                    </ActivatorContent>
+                                </MudFileUpload>
+                                <MudStack Row="true" Justify="Justify.Center" Wrap="Wrap.Wrap">
+                                    @foreach (var img in Product.ImageUrls)
+                                    {
+                                        <MudImage Src="@img" Width="100" Height="100" ObjectFit="ObjectFit.Cover" Alt="product pic" Elevation="1" Class="rounded-lg" />
+                                    }
+                                </MudStack>
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </DialogContent>
+            <DialogActions>
+                <MudButton OnClick="Cancel">لغو</MudButton>
+                <MudButton OnClick="Submit" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="@Color">@ButtonText</MudButton>
+            </DialogActions>
+        </MudDialog>
+    </MudForm>
+}
+
+@code {
+    [Parameter]
+    public ProductDto Product { get; set; } = new ProductDto();
+
+    [Parameter]
+    public List<CategoryDto> categories { get; set; } = new();
+
+    [Parameter]
+    public string ButtonText { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public bool IsDisable { get; set; } = false;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    IList<IBrowserFile> files = new List<IBrowserFile>();
+
+
+    private async void Submit()
+    {
+        if (IsDisable)
+            MudDialog.Close(DialogResult.Ok(Product));
+
+        else
+        {
+            await form.Validate();
+            if (form.IsValid)
+                MudDialog.Close(DialogResult.Ok(Product));
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task UploadFiles(IReadOnlyList<IBrowserFile> files)
+    {
+        if (files is null || !files.Any())
+            return;
+
+        foreach (var file in files)
+        {
+            this.files.Add(file);
+
+            var content = new MultipartFormDataContent();
+            var stream = file.OpenReadStream(5 * 1024 * 1024); // حداکثر ۵ مگابایت
+            var fileContent = new StreamContent(stream);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+            content.Add(content: fileContent, name: "image", fileName: file.Name);
+
+            var response = await ProductClient.Upload(content);
+            Product.ImageUrls.Add(response!.ImageUrl);
+        }
+
+        Snackbar.Add("همه فایل‌ها با موفقیت آپلود شدند", Severity.Success);
+    }
+
+    private void OnValidated()
+    {
+        Console.WriteLine("فرم اعتبارسنجی شد");
+    }
+}

@@ -1,6 +1,6 @@
-﻿using Reihan.Client.Models.Cart;
+﻿using Reihan.Client.Models;
 
-namespace Reihan.Client.Models.Order
+namespace Reihan.Client.Models
 {
     public class CreateOrderRequest
     {

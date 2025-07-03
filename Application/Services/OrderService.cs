@@ -14,12 +14,59 @@ namespace Application.Services
         private readonly ICartRepository _cartRepo;
         private readonly IOrderRepository _orderRepo;
         private readonly IProductRepository _productRepo;
+        private readonly IOrderItemRepository _orderItemRepo;
+        private readonly IUserRepository _userRepo;
 
-        public OrderService(ICartRepository cartRepo, IOrderRepository orderRepo, IProductRepository productRepo)
+        public OrderService(ICartRepository cartRepo,
+            IOrderRepository orderRepo,
+            IProductRepository productRepo,
+            IOrderItemRepository orderItemRepo,
+            IUserRepository userRepo)
         {
             _cartRepo = cartRepo;
             _orderRepo = orderRepo;
             _productRepo = productRepo;
+            _orderItemRepo = orderItemRepo;
+            _userRepo = userRepo;
+        }
+
+        public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
+        {
+            var orders = await _orderRepo.GetAllAsync();
+
+            var users = await _userRepo.GetAllAsync();
+            var userDict = users.ToDictionary(u => u.Id, u => u.FullName);
+
+            var orderItems = await _orderItemRepo.GetAllAsync();
+            var orderItemCount = orderItems
+                .GroupBy(p => p.OrderId)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            return orders.Select(c => new OrderDto
+            {
+                Id = c.Id,
+                OrderDate = c.OrderDate,
+                TotalAmount = c.TotalAmount,
+                Status = c.Status.ToString(),
+                City = c.ShippingAddress.City,
+                ZipCode = c.ShippingAddress.ZipCode,
+                UserId = c.UserId,
+                UserFullName = userDict.GetValueOrDefault(c.UserId, "ناشناس"),
+                OrderItemCount = orderItemCount.GetValueOrDefault(c.Id, 0),
+            });
+        }
+
+        public async Task UpdateOrderStatusAsync(int Id, string newStatus)
+        {
+            var order = await _orderRepo.GetByIdAsync(Id);
+            if (order == null)
+                throw new Exception("سفارش یافت نشد.");
+
+            if (!Enum.TryParse<OrderStatus>(newStatus, out var status))
+                throw new Exception("وضعیت نامعتبر است.");
+
+            order.SetStatus(status);
+            await _orderRepo.UpdateAsync(order);
         }
 
         public async Task<int> CreateOrderAsync(int userId, CreateOrderRequest request)

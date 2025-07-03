@@ -1,22 +1,22 @@
 ﻿@page "/admin/categories"
-@using Reihan.Client.Models
-@attribute [Authorize(Roles ="Admin")]
+@attribute [Authorize(Roles = "Admin")]
 @inject ICategoryClient CategoryClient
 @inject IDialogService DialogService
 
 <PageTitle>مدیریت دسته‌بندی‌ها</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small">
-    <MudPaper Class="p-4 mt-10 rounded-xl">
-        <MudTable Class="rounded-xl" Items="_categories" Hover="true" Dense="true">
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Outlined="true" Class="rounded-xl pa-2" Elevation="2">
+        <MudTable Class="rounded-xl mt-1" Elevation="0" Items="@_categories" Loading="@_loading" Hover="true" Dense="false" Filter="new Func<CategoryDto, bool>(FilterFunc1)" @bind-SelectedIte="_categories">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">لیست دسته بندی ها</MudText>
                 <MudSpacer />
-                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog" Class="ma-1 pa-2"></MudIconButton>
+                <MudItem lg="3"><MudTextField @bind-Value="searchString1" Placeholder="جستجو" Margin="Margin.Dense" Typo="Typo.caption" Adornment="Adornment.Start" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Rounded.Search" IconSize="Size.Medium" Class="ma-0"></MudTextField></MudItem>
+                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog" Color="Color.Primary" Variant="Variant.Filled" Class="mr-5 rounded-xl"></MudIconButton>
             </ToolBarContent>
             <HeaderContent>
-                <MudTh>شناسه</MudTh>
-                <MudTh>نام</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<CategoryDto, object>(x => x.Id)">شناسه</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<CategoryDto, object>(x => x.Name)"></MudTableSortLabel></MudTh>
                 <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -24,12 +24,15 @@
                 <MudTd DataLabel="نام">
                     <MudStack Spacing="0">
                         <MudText>@context.Name</MudText>
-                        <MudText Typo="Typo.caption">تعداد محصولات: 20</MudText>
+                        <MudText Typo="Typo.caption">تعداد محصولات: @context.ProductsInThisCategory</MudText>
                     </MudStack>
                 </MudTd>
                 <MudTd>
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => OpenEditDialog(context))"></MudIconButton>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(() => OpenDeleteDialog(context))"></MudIconButton>
+                    @if (context.ProductsInThisCategory == 0)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(() => OpenDeleteDialog(context))"></MudIconButton>
+                    }
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -40,15 +43,22 @@
 @code {
     private List<CategoryDto> _categories = new();
     private CategoryDialog? _categoryDialog;
+    private string searchString1 = "";
+    private bool _loading = true;
+
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCategories();
+
+        if (_categories is not null)
+            _loading = false;
     }
+
 
     private async Task OpenDeleteDialog(CategoryDto category)
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, CloseButton = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, CloseButton = true, FullWidth = true };
         var parameters = new DialogParameters<CategoryDialog>
         {
             { x => x.Category, category },
@@ -70,7 +80,7 @@
 
     private async Task OpenAddDialog()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large, CloseButton = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, CloseButton = true, FullWidth = true };
         var parameters = new DialogParameters<CategoryDialog>
         {
             { x => x.ButtonText, "ثبت"},
@@ -94,7 +104,7 @@
 
     private async Task OpenEditDialog(CategoryDto category)
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, CloseButton = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, CloseButton = true, FullWidth = true };
         var parameters = new DialogParameters<CategoryDialog>
         {
             { x => x.Category, category },
@@ -117,6 +127,19 @@
             }
     }
 
-    private async Task LoadCategories() => 
+
+    private async Task LoadCategories() =>
         _categories = (await CategoryClient.GetAllAsync()).ToList();
+
+
+    private bool FilterFunc1(CategoryDto category) => FilterFunc(category, searchString1);
+
+    private bool FilterFunc(CategoryDto category, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (category.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
 }

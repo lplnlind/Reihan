@@ -26,7 +26,9 @@ namespace Infrastructure.DependencyInjection
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
-
+            services.AddScoped<IProductImageRepository, ProductImageRepository>();
+            services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+            
             return services;
         }
     }

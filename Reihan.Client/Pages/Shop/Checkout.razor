@@ -1,5 +1,4 @@
-﻿@using Reihan.Client.Models.Order
-@inject ICartClient CartClient
+﻿@inject ICartClient CartClient
 @inject IOrderClient OrderClient
 @inject NavigationManager Navigation
 
@@ -23,7 +22,7 @@
 
     private async Task SubmitOrder()
     {
-        await OrderClient.CreateOrderAsync(OrderModel);
+        await OrderClient.CreateAsync(OrderModel);
         Navigation.NavigateTo("/orders");
     }
 }

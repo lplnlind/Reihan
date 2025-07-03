@@ -22,4 +22,6 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddServices();
 
+builder.HostEnvironment.IsDevelopment();
+
 await builder.Build().RunAsync();

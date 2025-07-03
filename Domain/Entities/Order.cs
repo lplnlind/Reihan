@@ -1,6 +1,7 @@
 ﻿using Domain.Common;
 using Domain.Enums;
 using Domain.ValueObjects;
+using System.Data;
 
 namespace Domain.Entities
 {
@@ -11,10 +12,8 @@ namespace Domain.Entities
         public Address ShippingAddress { get; private set; }
         public decimal TotalAmount { get; private set; }
 
-        // وضعیت سفارش
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
-        // ارتباط با کاربر و آیتم‌های سفارش
         public User User { get; set; } = null!;
         public List<OrderItem> OrderItems { get; set; } = new();
 
@@ -27,6 +26,12 @@ namespace Domain.Entities
             OrderItems = items;
             TotalAmount = OrderItems.Sum(x => x.UnitPrice * x.Quantity);
             Status = orderStatus;
+        }
+
+        public void SetStatus(OrderStatus status)
+        {
+            Status = status;
+            SetUpdated();
         }
     }
 }

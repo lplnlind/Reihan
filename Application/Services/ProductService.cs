@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Repositories;
 
@@ -8,21 +9,34 @@ namespace Application.Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly IProductImageRepository _productImageRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository, 
+            IProductImageRepository productImageRepository,
+            ICategoryRepository categoryRepository)
         {
             _productRepository = productRepository;
+            _productImageRepository = productImageRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
             var products = await _productRepository.GetAllAsync();
+            var productImages = await _productImageRepository.GetAllAsync();
+            var categories = await _categoryRepository.GetAllAsync();
+            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
+
             return products.Select(p => new ProductDto
             {
                 Id = p.Id,
                 Name = p.Name,
                 Price = p.Price,
-                CategoryId = p.CategoryId
+                StockQuantity = p.StockQuantity,
+                CategoryId = p.CategoryId,
+                CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
+                ImageUrls = productImages.Where(w => w.ProductId == p.Id).Select(s => s.Url).ToList()
             });
         }
 
@@ -31,12 +45,19 @@ namespace Application.Services
             var product = await _productRepository.GetByIdAsync(id);
             if (product is null) return null;
 
+            var productImages = await _productImageRepository.GetByProductIdAsync(product.Id);
+            var category = await _categoryRepository.GetByIdAsync(product.CategoryId);
+
             return new ProductDto
             {
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
-                CategoryId = product.CategoryId
+                StockQuantity= product.StockQuantity,
+                Description = product.Description,
+                CategoryId = product.CategoryId,
+                CategoryName = category?.Name,
+                ImageUrls = productImages.Select(url => url.Url).ToList()
             };
         }
 
@@ -47,10 +68,22 @@ namespace Application.Services
                 Name = dto.Name,
                 Price = dto.Price,
                 CategoryId = dto.CategoryId,
-                ImageUrl = dto.ImageUrl ?? string.Empty
+                StockQuantity = dto.StockQuantity,
+                Description = dto.Description,
             };
 
             await _productRepository.AddAsync(product);
+
+            if (dto.ImageUrls is not null && dto.ImageUrls.Any())
+            {
+                var images = dto.ImageUrls.Select(url => new ProductImage
+                {
+                    ProductId = product.Id, 
+                    Url = url
+                }).ToList();
+
+                await _productImageRepository.AddRangeAsync(images);
+            }
         }
 
         public async Task UpdateProductAsync(ProductDto dto)
@@ -61,16 +94,39 @@ namespace Application.Services
             product.Name = dto.Name;
             product.Price = dto.Price;
             product.CategoryId = dto.CategoryId;
-            product.ImageUrl = dto.ImageUrl ?? string.Empty;
+            product.StockQuantity = dto.StockQuantity;
+            product.Description = dto.Description;
 
             await _productRepository.UpdateAsync(product);
+
+            if (dto.ImageUrls is not null && dto.ImageUrls.Any())
+            {
+                var images = dto.ImageUrls.Select(url => new ProductImage
+                {
+                    ProductId = product.Id,
+                    Url = url
+                }).ToList();
+
+                await _productImageRepository.AddRangeAsync(images);
+            }
         }
 
         public async Task DeleteProductAsync(int id)
         {
             var product = await _productRepository.GetByIdAsync(id);
-            if (product is not null)
-                await _productRepository.DeleteAsync(product.Id);
+            if (product is null) return;
+
+            var images = await _productImageRepository.GetByProductIdAsync(id);
+
+            foreach (var image in images)
+            {
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
+
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
+
+            await _productRepository.DeleteAsync(product.Id);
         }
     }
 }

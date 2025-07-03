@@ -1,4 +1,4 @@
-﻿using Reihan.Client.Models.Auth;
+﻿using Reihan.Client.Models;
 
 namespace Reihan.Client.Services
 {

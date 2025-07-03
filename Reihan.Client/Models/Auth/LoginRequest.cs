@@ -1,4 +1,4 @@
-﻿namespace Reihan.Client.Models.Auth
+﻿namespace Reihan.Client.Models
 {
     public class LoginRequest
     {

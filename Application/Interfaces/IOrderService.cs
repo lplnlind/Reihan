@@ -4,7 +4,9 @@ namespace Application.Interfaces
 {
     public interface IOrderService
     {
-        Task<int> CreateOrderAsync(int userId, CreateOrderRequest request);
+        Task<IEnumerable<OrderDto>> GetAllOrdersAsync();
+        Task UpdateOrderStatusAsync(int Id, string newStatus);
         Task<List<OrderDto>> GetOrdersByUserAsync(int userId);
+        Task<int> CreateOrderAsync(int userId, CreateOrderRequest request);
     }
 }

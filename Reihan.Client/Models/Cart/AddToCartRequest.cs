@@ -1,4 +1,4 @@
-﻿namespace Reihan.Client.Models.Cart
+﻿namespace Reihan.Client.Models
 {
     public class AddToCartRequest
     {

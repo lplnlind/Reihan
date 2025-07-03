@@ -1,4 +1,4 @@
-﻿using Reihan.Client.Models.User;
+﻿using Reihan.Client.Models;
 using System.Net.Http.Json;
 
 namespace Reihan.Client.Services

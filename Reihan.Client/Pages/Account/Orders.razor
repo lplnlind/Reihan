@@ -1,5 +1,4 @@
-﻿@using Reihan.Client.Models.Order
-@inject IOrderClient OrderClient
+﻿@inject IOrderClient OrderClient
 
 <h3>سفارش‌های من</h3>
 
@@ -41,6 +40,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await OrderClient.GetOrdersAsync();
+        orders = await OrderClient.GetOrdersByUserAsync();
     }
 }

@@ -22,4 +22,9 @@
 		<ProjectReference Include="..\Reihan.Client\Reihan.Client.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="wwwroot\images\" />
+	  <Folder Include="wwwroot\images\products\" />
+	</ItemGroup>
+
 </Project>

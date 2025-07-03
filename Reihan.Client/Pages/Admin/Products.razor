@@ -1,50 +1,64 @@
 ﻿@page "/admin/products"
-@using Reihan.Client.Models
-@attribute [Authorize(Roles ="Admin")]
+@attribute [Authorize(Roles = "Admin")]
 @inject IProductClient ProductClient
+@inject ICategoryClient CategoryClient
 @inject IDialogService DialogService
 
 <PageTitle>مدیریت محصولات</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small">
-    <MudPaper Class="p-4 mt-10 rounded-xl">
-        <MudTable Class="rounded-xl" Items="_product" Hover="true" Dense="true">
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Outlined="true" Class="rounded-xl pa-2" Elevation="2">
+        <MudTable Class="rounded-xl mt-1" Elevation="0" Items="@_product" Loading="@_loading" Hover="true" Dense="false" Filter="new Func<ProductDto, bool>(FilterFunc1)" @bind-SelectedIte="_product">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">لیست محصولات</MudText>
                 <MudSpacer />
-                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog" Class="ma-1 pa-2"></MudIconButton>
+                <MudItem lg="3"><MudTextField @bind-Value="searchString1" Placeholder="جستجو" Margin="Margin.Dense" Typo="Typo.caption" Adornment="Adornment.Start" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Rounded.Search" IconSize="Size.Medium" Class="ma-0"></MudTextField></MudItem>
+                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="OpenAddDialog" Color="Color.Primary" Variant="Variant.Filled" Class="mr-5 rounded-xl"></MudIconButton>
             </ToolBarContent>
             <HeaderContent>
-                <MudTh>شناسه</MudTh>
-                <MudTh>نام</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Id)">شناسه</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Name)">نام</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.CategoryName)">دسته بندی</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.StockQuantity)">تعداد</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Price)">قیمت</MudTableSortLabel></MudTh>
                 <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="شناسه">@context.Id</MudTd>
-                <MudTd DataLabel="نام">
-                    <MudStack Spacing="0">
-                        <MudText>@context.Name</MudText>
-                        <MudText Typo="Typo.caption">تعداد محصولات: 20</MudText>
-                    </MudStack>
-                </MudTd>
+                <MudTd DataLabel="نام">@context.Name</MudTd>
+                <MudTd DataLabel="دسته بندی">@context.CategoryName</MudTd>
+                <MudTd DataLabel="تعداد">@context.StockQuantity</MudTd>
+                <MudTd DataLabel="قیمت">@context.Price</MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => OpenEditDialog(context))"></MudIconButton>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(() => OpenDeleteDialog(context))"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Rounded.Edit" Size="Size.Small" OnClick="@(() => OpenEditDialog(context))"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Rounded.Delete" Size="Size.Small" OnClick="@(() => OpenDeleteDialog(context))"></MudIconButton>
                 </MudTd>
             </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
         </MudTable>
     </MudPaper>
 </MudContainer>
 
 
 @code {
+    private List<CategoryDto> _categories = new();
     private List<ProductDto> _product = new();
     private ProductDialog? _productDialog;
+    private string searchString1 = "";
+    private bool _loading = true;
+
 
     protected override async Task OnInitializedAsync()
     {
         await LoadProducts();
+        await LoadCategories();
+
+        if (_product is not null)
+            _loading = false;
     }
+
 
     private async Task OpenDeleteDialog(ProductDto product)
     {
@@ -70,9 +84,10 @@
 
     private async Task OpenAddDialog()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large, CloseButton = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, CloseButton = true, FullWidth = true };
         var parameters = new DialogParameters<ProductDialog>
         {
+            { x => x.categories, _categories},
             { x => x.ButtonText, "ثبت"},
             { x => x.Color, Color.Primary}
         };
@@ -98,6 +113,7 @@
         var parameters = new DialogParameters<ProductDialog>
         {
             { x => x.Product, product },
+            { x => x.categories, _categories},
             { x => x.ButtonText, "ویرایش"},
             { x => x.Color, Color.Primary}
         };
@@ -117,6 +133,24 @@
             }
     }
 
+
     private async Task LoadProducts() =>
         _product = (await ProductClient.GetAllAsync()).ToList();
+
+    private async Task LoadCategories() =>
+        _categories = (await CategoryClient.GetAllAsync()).ToList();
+
+
+    private bool FilterFunc1(ProductDto product) => FilterFunc(product, searchString1);
+
+    private bool FilterFunc(ProductDto product, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (product.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{product.Price} {product.StockQuantity}".Contains(searchString))
+            return true;
+        return false;
+    }
 }

@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
 <MudRTLProvider RightToLeft="true">
-    <MudThemeProvider Theme="MyCustomTheme" />
+    <MudThemeProvider Theme="MyCustomTheme" IsDarkMode="false" />
     <MudPopoverProvider />
     <MudDialogProvider />
     <MudSnackbarProvider />
@@ -9,24 +9,35 @@
     <MudLayout>
         <NavMenu></NavMenu>
 
-        <MudMainContent>
-            <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+        <MudMainContent Class="main-content">
+            <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="border border-solid rounded-xl pt-10 pb-10" Style="@($"border-color:{Colors.Gray.Lighten2}; background: white;")">
                 @Body
             </MudContainer>
         </MudMainContent>
     </MudLayout>
 </MudRTLProvider>
 
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
-
 @code {
     MudTheme MyCustomTheme = new MudTheme()
     {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#ec407a", // صورتی
+            Secondary = "#f48fb1", // صورتی روشن‌تر
+            Surface = "#ffffff",   // پس‌زمینه کارت‌ها و دیالوگ‌ها
+            Background = Colors.Gray.Lighten4,
+            AppbarBackground = Colors.Gray.Lighten4,
+            AppbarText = Colors.Gray.Darken4,
+            DrawerBackground = Colors.Gray.Lighten4,
+            DrawerText = Colors.Gray.Darken4,
+            TextPrimary = "#333333",
+            TextSecondary = "#888888",
+            Divider = "#e0e0e0",
+            Success = "#4caf50",
+            Warning = "#ff9800",
+            Error = "#f44336"
+        },
+
         Typography = new Typography()
         {
             Default = new DefaultTypography()

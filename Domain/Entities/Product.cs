@@ -13,7 +13,7 @@ namespace Domain.Entities
         // ارتباط با Category
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
-
+        public List<ProductImage> Images { get; set; } = new();
 
         public void ReduceStock(int quantity)
         {

@@ -1,0 +1,61 @@
+﻿
+@if (IsDisable)
+{
+    <MudDialog>
+        <DialogContent>
+            <MudText>آیا از حذف دسته بندی با نام "@Category.Name" مطمئن هستید؟</MudText>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel">لغو</MudButton>
+            <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit" ButtonType="ButtonType.Submit">@ButtonText</MudButton>
+        </DialogActions>
+    </MudDialog>
+}
+else
+{
+    <MudForm @ref="form" Model="@Category">
+        <MudDialog>
+            <DialogContent>
+                <MudTextField Label="نام دسته‌بندی" @bind-Value="Category.Name" For="@(() => Category.Name)" Required="true" Disabled="IsDisable" Variant="Variant.Outlined" />
+            </DialogContent>
+            <DialogActions>
+                <MudButton OnClick="Cancel">لغو</MudButton>
+                <MudButton OnClick="Submit" Variant="Variant.Filled" Color="@Color">@ButtonText</MudButton>
+            </DialogActions>
+        </MudDialog>
+    </MudForm>
+}
+
+@code {
+    [Parameter]
+    public CategoryDto Category { get; set; } = new CategoryDto();
+
+    [Parameter]
+    public string ButtonText { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+
+    [Parameter]
+    public bool IsDisable { get; set; } = false;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+
+
+    private async void Submit()
+    {
+        if(IsDisable)
+            MudDialog.Close(DialogResult.Ok(Category));
+        else
+        {
+            await form.Validate();
+            if(form.IsValid)
+                MudDialog.Close(DialogResult.Ok(Category));
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

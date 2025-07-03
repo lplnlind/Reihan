@@ -1,33 +1,45 @@
-﻿@inject AuthenticationStateProvider AuthProvider
+﻿@using System.Security.Claims
+@inject AuthenticationStateProvider AuthProvider
 @inject IAuthClient AuthClient
 @inject NavigationManager NavigationManager
 
-<MudAppBar>
-    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+<MudAppBar Elevation="0">
+    <MudIconButton Icon="@Icons.Material.Rounded.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
     <MudText>فروشگاه من</MudText>
     <MudSpacer />
     <AuthorizeView>
         <Authorized>
-            <MudText Typo="Typo.subtitle2" Class="mr-2">سلام، @Username</MudText>
-            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="Logout">خروج</MudButton>
+            <MudIconButton Icon="@Icons.Material.TwoTone.AccountCircle" Color="Color.Primary" Target="@($"/admin/profile/{userId}")"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Rounded.Logout" Color="Color.Error" OnClick="Logout"></MudIconButton>
         </Authorized>
         <NotAuthorized>
-            <MudButton Variant="Variant.Outlined" Color="Color.Inherit" OnClick='() => NavigationManager.NavigateTo("/login")'>ورود</MudButton>
+            <MudIconButton Icon="@Icons.Material.Rounded.Login" Color="Color.Primary" Target="/login"></MudIconButton>
         </NotAuthorized>
     </AuthorizeView>
 </MudAppBar>
 
-<MudDrawer @bind-Open="@_drawerOpen">
+<MudDrawer @bind-Open="@_drawerOpen" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true" Elevation="0">
     <MudDrawerHeader>
-        <MudText Typo="Typo.h6">ر ی ح ا ن</MudText>
+        <MudText Typo="Typo.h6">ر</MudText>
     </MudDrawerHeader>
 
-    <MudNavMenu>
-        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">صفحه اصلی</MudNavLink>
-        <MudNavLink Href="/admin/products" Icon="@Icons.Material.Filled.List">محصولات</MudNavLink>
-        <MudNavLink Href="/admin/categories" Icon="@Icons.Material.Filled.Category">دسته‌بندی‌ها</MudNavLink>
-        <MudNavLink Href="/cart" Match="NavLinkMatch.All">سبد خرید</MudNavLink>
-        <MudNavLink Href="/admin/users" Match="NavLinkMatch.All">کاربران</MudNavLink>
+    <MudNavMenu Color="Color.Primary" Rounded="true">
+        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.TwoTone.Home">صفحه اصلی</MudNavLink>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <MudNavLink Href="/admin/dashboard" Icon="@Icons.Material.TwoTone.Dashboard" Match="NavLinkMatch.All">داشبورد</MudNavLink>
+                <MudNavLink Href="/admin/products" Icon="@Icons.Material.TwoTone.Backpack" Match="NavLinkMatch.All">محصولات</MudNavLink>
+                <MudNavLink Href="/admin/categories" Icon="@Icons.Material.TwoTone.Category" Match="NavLinkMatch.All">دسته‌بندی‌ها</MudNavLink>
+                <MudNavLink Href="/admin/users" Icon="@Icons.Material.TwoTone.SupervisedUserCircle" Match="NavLinkMatch.All">کاربران</MudNavLink>
+                <MudNavLink Href="/admin/orders" Icon="@Icons.Material.TwoTone.ShoppingCart" Match="NavLinkMatch.All">سفارش ها</MudNavLink>
+                <MudNavLink Href="/admin/setting" Icon="@Icons.Material.TwoTone.Settings" Match="NavLinkMatch.All">تنظیمات</MudNavLink>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Customer">
+            <Authorized>
+                <MudNavLink Href="/cart" Match="NavLinkMatch.All">سبد خرید</MudNavLink>
+            </Authorized>
+        </AuthorizeView>
     </MudNavMenu>
 </MudDrawer>
 
@@ -41,7 +53,7 @@
     }
 
     private bool IsAuthenticated = false;
-    private string Username = "";
+    private string userId = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -51,7 +63,7 @@
         if (user.Identity is not null && user.Identity.IsAuthenticated)
         {
             IsAuthenticated = true;
-            Username = user.Identity.Name ?? user.FindFirst(c => c.Type == "email")?.Value ?? "کاربر";
+            userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub")?.Value ?? "کاربر";
         }
     }
 

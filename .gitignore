@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Reihan.Server/wwwroot/images/products
+/Infrastructure/Migrations/20250628100527_images-entity.cs
+/Infrastructure/Migrations/20250628100527_images-entity.Designer.cs
+/Infrastructure/Migrations/20250702140322_UpdateProductImageRelation.cs
+/Infrastructure/Migrations/20250702140322_UpdateProductImageRelation.Designer.cs
+/Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs

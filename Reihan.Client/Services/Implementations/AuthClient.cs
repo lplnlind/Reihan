@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Reihan.Client.Authentication;
-using Reihan.Client.Models.Auth;
+using Reihan.Client.Models;
 
 namespace Reihan.Client.Services
 {
