@@ -20,6 +20,7 @@ namespace Application.DependencyInjection
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserContextService, UserContextService>();
+            services.AddScoped<IAdminService, AdminService>();
 
             return services;
         }

@@ -12,5 +12,6 @@ namespace Reihan.Client.Services
         Task<UserProfileDto> GetProfileAsync();
         Task UpdateProfileAsync(UpdateProfileRequest request);
         Task ChangePasswordAsync(ChangePasswordRequest request);
+        Task<JwtUserDto?> GetCurrentUserAsync();
     }
 }

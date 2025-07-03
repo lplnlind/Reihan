@@ -1,3 +1,94 @@
 ﻿@page "/admin/dashboard"
+@inject IDashboardClient DashboardClient
+@inject IAuthClient AuthClient
 
-<h1>Dashboard</h1>
+<MudText Typo="Typo.h4">داشبورد مدیریت</MudText>
+
+<MudGrid>
+    <!-- کارت آمار -->
+    @foreach (var card in StatsCards)
+    {
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4 d-flex align-center">
+                <MudIcon Icon="@card.Icon" Size="Size.Medium" Class="me-2" />
+                <div>
+                    <MudText Typo="Typo.h6">@card.Title</MudText>
+                    <MudText Typo="Typo.h5">@card.Value</MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+    }
+</MudGrid>
+
+<MudPaper Class="mt-6 pa-4">
+    <MudText Typo="Typo.h6">نمودار فروش (۷ روز اخیر)</MudText>
+
+    <MudChart ChartType="ChartType.Line"
+              ChartSeries="@_series"
+              XAxisLabels="@_xAxisLabels"
+              Height="350px"
+              Width="100%"
+              ChartOptions="_chartOptions"
+              AxisChartOptions="_axisChartOptions" />
+</MudPaper>
+
+
+<MudPaper Class="mt-6 pa-4">
+    <MudText Typo="Typo.h6">آخرین سفارشات</MudText>
+    <MudTable Items="RecentOrders">
+        <HeaderContent>...</HeaderContent>
+        <RowTemplate>...</RowTemplate>
+    </MudTable>
+</MudPaper>
+
+<MudPaper Class="mt-6 pa-4">
+    <MudExpansionPanels>
+        <MudExpansionPanel Text="اطلاعات ادمین">
+            <MudText>نام: @Me.FullName</MudText>
+            <MudText>نقش: @Me.Role</MudText>
+            <MudText>زمان ورود: </MudText>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+</MudPaper>
+
+@code {
+    DashboardStatsDto Stats = new();
+    List<RecentOrderDto> RecentOrders = new();
+
+    List<(string Title, string Value, string Icon)> StatsCards = new();
+
+    JwtUserDto Me = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Stats = await DashboardClient.GetStatsAsync();
+        RecentOrders = await DashboardClient.GetRecentOrdersAsync();
+
+        StatsCards = new()
+        {
+            ("کاربران", Stats.TotalUsers.ToString(), Icons.Material.Filled.People),
+            ("محصولات", Stats.TotalProducts.ToString(), Icons.Material.Filled.Category),
+            ("سفارشات", Stats.TotalOrders.ToString(), Icons.Material.Filled.Receipt),
+            ("فروش کل", Stats.TotalSales.ToString("N0"), Icons.Material.Filled.AttachMoney),
+        };
+
+        Me = await AuthClient.GetCurrentUserAsync() ?? new();
+    }
+
+    private List<ChartSeries> _series = new();
+    private string[] _xAxisLabels = Array.Empty<string>();
+    private ChartOptions _chartOptions = new();
+    private AxisChartOptions _axisChartOptions = new();
+
+    private async Task LoadSalesChartAsync()
+    {
+        var to = DateTime.UtcNow;
+        var from = to.AddDays(-7);
+        var chartData = await DashboardClient.GetSalesChartAsync(from, to);
+
+        _xAxisLabels = chartData.Select(x => x.Date.ToString("MM/dd")).ToArray();
+
+        var salesPoints = chartData.Select(x => (double)x.Amount).ToArray();
+        _series = new List<ChartSeries> { new ChartSeries { Name = "فروش", Data = salesPoints } };
+    }
+}

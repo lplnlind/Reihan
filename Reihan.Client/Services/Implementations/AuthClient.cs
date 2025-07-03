@@ -1,10 +1,11 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using Reihan.Client.Authentication;
 using Reihan.Client.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Security.Claims;
 
 namespace Reihan.Client.Services
 {
@@ -101,5 +102,22 @@ namespace Reihan.Client.Services
             var response = await _http.PutAsJsonAsync("api/auth/change-password", request);
             response.EnsureSuccessStatusCode();
         }
+
+        public async Task<JwtUserDto?> GetCurrentUserAsync()
+        {
+            var token = await _localStorage.GetItemAsync<string>("authToken");
+            if (string.IsNullOrWhiteSpace(token)) return null;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+
+            return new JwtUserDto
+            {
+                Id = int.Parse(jwt.Claims.First(c => c.Type == "sub").Value),
+                FullName = jwt.Claims.FirstOrDefault(c => c.Type == "fullname")?.Value ?? "",
+                Role = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? ""
+            };
+        }
+
     }
 }
