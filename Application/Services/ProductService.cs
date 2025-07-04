@@ -154,5 +154,25 @@ namespace Application.Services
             var products = await _productRepository.GetAllAsync();
             return new(); 
         }
+
+        public async Task<List<ProductDto>> GetFilteredProductsAsync(int? categoryId = null)
+        {
+            var products = await _productRepository.GetAllAsync();
+            var images = await _productImageRepository.GetAllAsync();
+
+            if (categoryId is not null)
+                products = products.Where(p => p.CategoryId == categoryId).ToList();
+
+            return products.Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                StockQuantity = p.StockQuantity,
+                CategoryId = p.CategoryId,
+                ImageUrls = images.Where(i => i.ProductId == p.Id).Select(i => i.Url).ToList()
+            }).ToList();
+        }
+
     }
 }

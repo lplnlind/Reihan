@@ -11,5 +11,7 @@ namespace Reihan.Client.Services
         Task DeleteAsync(int id);
         Task<ImageUploadResult> Upload(MultipartFormDataContent content);
         Task<List<ProductDto>> GetLatestAsync();
+        Task<List<ProductDto>> FilterAsync(int? categoryId = null);
+
     }
 }

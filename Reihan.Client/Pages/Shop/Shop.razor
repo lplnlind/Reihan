@@ -1,5 +1,79 @@
-﻿<h3>Shop</h3>
+﻿@page "/shop"
+@using Microsoft.AspNetCore.WebUtilities
+@inject IProductClient ProductClient
+@inject ICategoryClient CategoryClient
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h5" Class="mb-4">فروشگاه</MudText>
+
+    <MudGrid>
+        <MudItem xs="12" md="3">
+            <!-- فیلتر دسته‌بندی -->
+            <MudPaper Class="pa-4">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">دسته‌بندی‌ها</MudText>
+                <MudList T="int" Dense="true">
+                    <MudListItem OnClick="@(() => SelectCategory(null))" Selected="@(_selectedCategory == null)">
+                        همه محصولات
+                    </MudListItem>
+                    @foreach (var cat in Categories)
+                    {
+                        <MudListItem OnClick="@(() => SelectCategory(cat.Id))" Selected="@(_selectedCategory == cat.Id)">
+                            @cat.Name (@cat.ProductsInThisCategory)
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="9">
+            <!-- لیست محصولات -->
+            <MudGrid>
+                @if (Products.Count == 0)
+                {
+                    <MudText Class="ma-4">محصولی یافت نشد.</MudText>
+                }
+                else
+                {
+                    @foreach (var product in Products)
+                    {
+                        <MudItem xs="12" sm="6" md="4">
+                            <ProductCard Product="product" />
+                        </MudItem>
+                    }
+                }
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
+    private List<ProductDto> Products = new();
+    private List<CategoryDto> Categories = new();
+    private int? _selectedCategory;
 
+    protected override async Task OnInitializedAsync()
+    {
+        Categories = await CategoryClient.GetAllAsync();
+
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("category", out var category))
+        {
+            if (int.TryParse(category, out var catId))
+                _selectedCategory = catId;
+        }
+
+        await LoadProductsAsync();
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        Products = await ProductClient.FilterAsync(_selectedCategory);
+    }
+
+    private async Task SelectCategory(int? categoryId)
+    {
+        _selectedCategory = categoryId;
+        await LoadProductsAsync();
+    }
 }

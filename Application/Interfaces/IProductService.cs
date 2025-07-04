@@ -16,6 +16,7 @@ namespace Application.Interfaces
         Task DeleteProductAsync(int id);
         Task<List<ProductDto>> GetLatestProductsAsync(int count = 8);
         Task<List<ProductDto>> GetBestSellingProductsAsync(int count = 8);
+        Task<List<ProductDto>> GetFilteredProductsAsync(int? categoryId = null);
 
     }
 }

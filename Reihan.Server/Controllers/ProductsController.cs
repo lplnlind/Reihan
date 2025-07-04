@@ -86,5 +86,13 @@ namespace Reihan.Server.Controllers
         public async Task<IActionResult> GetLatestProducts() =>
             Ok(await _productService.GetLatestProductsAsync());
 
+        [HttpGet("filter")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Filter([FromQuery] int? categoryId)
+        {
+            var result = await _productService.GetFilteredProductsAsync(categoryId);
+            return Ok(result);
+        }
+
     }
 }

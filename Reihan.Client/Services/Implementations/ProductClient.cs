@@ -56,5 +56,15 @@ namespace Reihan.Client.Services
         {
             return await _http.GetFromJsonAsync<List<ProductDto>>("api/products/latest") ?? new();
         }
+
+        public async Task<List<ProductDto>> FilterAsync(int? categoryId = null)
+        {
+            var url = "api/products/filter";
+            if (categoryId is not null)
+                url += $"?categoryId={categoryId}";
+
+            return await _http.GetFromJsonAsync<List<ProductDto>>(url) ?? new();
+        }
+
     }
 }
