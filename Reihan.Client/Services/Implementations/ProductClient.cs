@@ -51,5 +51,10 @@ namespace Reihan.Client.Services
             }
             return null;
         }
+
+        public async Task<List<ProductDto>> GetLatestAsync()
+        {
+            return await _http.GetFromJsonAsync<List<ProductDto>>("api/products/latest") ?? new();
+        }
     }
 }

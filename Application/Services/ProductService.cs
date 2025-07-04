@@ -128,5 +128,31 @@ namespace Application.Services
 
             await _productRepository.DeleteAsync(product.Id);
         }
+
+        public async Task<List<ProductDto>> GetLatestProductsAsync(int count = 8)
+        {
+            var products = await _productRepository.GetAllAsync();
+            var images = await _productImageRepository.GetAllAsync();
+
+            var latest = products
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(count)
+                .ToList();
+
+            return latest.Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                CategoryId = p.CategoryId,
+                ImageUrls = images.Where(i => i.ProductId == p.Id).Select(i => i.Url).ToList()
+            }).ToList();
+        }
+
+        public async Task<List<ProductDto>> GetBestSellingProductsAsync(int count = 8)
+        {
+            var products = await _productRepository.GetAllAsync();
+            return new(); 
+        }
     }
 }

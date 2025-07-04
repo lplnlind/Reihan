@@ -10,5 +10,6 @@ namespace Reihan.Client.Services
         Task UpdateAsync(ProductDto dto);
         Task DeleteAsync(int id);
         Task<ImageUploadResult> Upload(MultipartFormDataContent content);
+        Task<List<ProductDto>> GetLatestAsync();
     }
 }

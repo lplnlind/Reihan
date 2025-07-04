@@ -1,17 +1,52 @@
 ﻿@page "/"
+@inject IProductClient ProductClient
+@inject ICategoryClient CategoryClient
+@inject NavigationManager NavigationManager
 
-<PageTitle>Home</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Large">
+    <!-- معرفی -->
+    <MudPaper Class="pa-6 mb-6 d-flex justify-center align-center">
+        <MudText Typo="Typo.h5">به فروشگاه ریحان خوش آمدید</MudText>
+    </MudPaper>
 
-<h1>سلام بر ر ی ح ا ن</h1>
+    <!-- محصولات جدید -->
+    <MudText Typo="Typo.h6" Class="mb-2">🆕 محصولات جدید</MudText>
+    <MudGrid>
+        @foreach (var product in LatestProducts)
+        {
+            <MudItem xs="12" sm="6" md="3">
+                <ProductCard Product="product" />
+            </MudItem>
+        }
+    </MudGrid>
 
-و بالاخره فروشگاه ریحان
+    <!-- دسته‌بندی‌ها -->
+    <MudText Typo="Typo.h6" Class="mt-8 mb-2">🎯 دسته‌بندی‌ها</MudText>
+    <MudGrid>
+        @foreach (var category in Categories)
+        {
+            <MudItem xs="6" sm="4" md="3">
+                <MudPaper Class="pa-4 hover:shadow-lg cursor-pointer" @onclick="@(() => GoToCategory(category.Id))">
+                    <MudText Typo="Typo.subtitle1">@category.Name</MudText>
+                    <MudText Typo="Typo.caption">@category.ProductsInThisCategory محصول</MudText>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
 
-<br />
-<AuthorizeView>
-    <Authorized>
-        خاک برسرم شد
-    </Authorized>
-    <NotAuthorized>
-        خاک بر سرت شد
-    </NotAuthorized>
-</AuthorizeView>
+@code {
+    private List<ProductDto> LatestProducts = new();
+    private List<CategoryDto> Categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        LatestProducts = await ProductClient.GetLatestAsync();
+        Categories = await CategoryClient.GetAllAsync();
+    }
+
+    private void GoToCategory(int categoryId)
+    {
+        NavigationManager.NavigateTo($"/shop?category={categoryId}");
+    }
+}

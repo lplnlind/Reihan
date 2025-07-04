@@ -80,5 +80,11 @@ namespace Reihan.Server.Controllers
             var imageUrl = $"/images/products/{uniqueFileName}";
             return Ok(new { imageUrl });
         }
+
+        [HttpGet("latest")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetLatestProducts() =>
+            Ok(await _productService.GetLatestProductsAsync());
+
     }
 }

@@ -1,0 +1,14 @@
+﻿<MudCard>
+    <MudCardMedia Image="@Product.ImageUrls.FirstOrDefault()" Height="160" />
+    <MudCardContent>
+        <MudText Typo="Typo.subtitle1">@Product.Name</MudText>
+        <MudText Typo="Typo.body2">@($"{Product.Price:N0} تومان")</MudText>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Href="@Product.ImageUrls.FirstOrDefault()" Variant="Variant.Filled">مشاهده</MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter] public ProductDto Product { get; set; } = new();
+}
