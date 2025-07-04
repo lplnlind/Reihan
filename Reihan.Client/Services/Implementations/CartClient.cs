@@ -17,14 +17,16 @@ namespace Reihan.Client.Services
             return await _http.GetFromJsonAsync<CartDto>("api/cart");
         }
 
-        public async Task AddItemAsync(int productId, int quantity = 1)
+        public async Task AddItemAsync(AddToCartRequest request)
         {
-            await _http.PostAsJsonAsync("api/cart/items", new { ProductId = productId, Quantity = quantity });
+            var response = await _http.PostAsJsonAsync("api/cart/add", request);
+            response.EnsureSuccessStatusCode();
         }
 
         public async Task RemoveItemAsync(int productId)
         {
-            await _http.DeleteAsync($"api/cart/items/{productId}");
+            var response = await _http.DeleteAsync($"api/cart/remove/{productId}");
+            response.EnsureSuccessStatusCode();
         }
 
         public async Task ClearAsync()

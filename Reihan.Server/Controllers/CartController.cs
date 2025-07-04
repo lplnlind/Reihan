@@ -10,16 +10,18 @@ namespace Reihan.Server.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
+        private readonly IUserContextService _userContextService;
 
-        public CartController(ICartService cartService)
+        public CartController(ICartService cartService, IUserContextService userContextService)
         {
             _cartService = cartService;
+            _userContextService = userContextService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            int userId = GetUserId(); // از توکن بخون
+            int userId = _userContextService.GetUserId();
             var cart = await _cartService.GetCartAsync(userId);
             return Ok(cart);
         }
@@ -27,15 +29,15 @@ namespace Reihan.Server.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> Add(AddToCartRequest request)
         {
-            int userId = GetUserId();
-            await _cartService.AddItemAsync(userId, request.ProductId, request.Quantity, request.UnitPrice, request.ProductName);
+            int userId = _userContextService.GetUserId();
+            await _cartService.AddItemAsync(userId, request);
             return Ok();
         }
 
         [HttpDelete("remove/{productId}")]
         public async Task<IActionResult> Remove(int productId)
         {
-            int userId = GetUserId();
+            int userId = _userContextService.GetUserId();
             await _cartService.RemoveItemAsync(userId, productId);
             return Ok();
         }
@@ -43,14 +45,9 @@ namespace Reihan.Server.Controllers
         [HttpDelete("clear")]
         public async Task<IActionResult> Clear()
         {
-            int userId = GetUserId();
+            int userId = _userContextService.GetUserId();
             await _cartService.ClearCartAsync(userId);
             return Ok();
-        }
-
-        private int GetUserId()
-        {
-            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         }
     }
 }

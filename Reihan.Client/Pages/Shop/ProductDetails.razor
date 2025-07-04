@@ -1,5 +1,93 @@
-﻿<h3>ProductDetails</h3>
+﻿@page "/shop/product/{id:int}"
+@inject IProductClient ProductClient
+@inject ICartClient CartClient
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+@if (Loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (Product is null)
+{
+    <MudText Color="Color.Error">محصول یافت نشد.</MudText>
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            @if (Product.ImageUrls.Count > 1)
+            {
+                <MudCarousel TData="object">
+                    @foreach (var img in Product.ImageUrls)
+                    {
+                        <MudCarouselItem>
+                            <MudImage Src="@img" Alt="تصویر محصول" Width="100" />
+                        </MudCarouselItem>
+                    }
+                </MudCarousel>
+            }
+            else if (Product.ImageUrls.Any())
+            {
+                <MudImage Src="@Product.ImageUrls.First()" Width="100" />
+            }
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudText Typo="Typo.h5">@Product.Name</MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@($"{Product.Price:N0} تومان")</MudText>
+            <MudText Typo="Typo.body2" Class="mt-2 mb-2">@Product.Description</MudText>
+            <MudText Typo="Typo.caption">دسته‌بندی: @Product.CategoryName</MudText>
+
+            <MudNumericField T="int"
+                             @bind-Value="Quantity"
+                             Label="تعداد"
+                             Min="1"
+                             Max="@Product.StockQuantity"
+                             Class="mt-4 mb-4" />
+
+            <MudButton OnClick="AddToCart"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="Product.StockQuantity == 0">
+                افزودن به سبد خرید
+            </MudButton>
+
+            @if (Product.StockQuantity == 0)
+            {
+                <MudText Color="Color.Error" Class="mt-2">ناموجود</MudText>
+            }
+        </MudItem>
+    </MudGrid>
+}
+
 
 @code {
+    [Parameter] public int id { get; set; }
 
+    private ProductDto? Product;
+    private int Quantity = 1;
+    private bool Loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Product = await ProductClient.GetByIdAsync(id);
+        Loading = false;
+    }
+
+    private async Task AddToCart()
+    {
+        if (Product is null) return;
+
+        var addToCart = new AddToCartRequest
+        {
+            ProductId = Product.Id,
+            ProductName = Product.Name,
+            Quantity = Quantity,
+            UnitPrice = Product.Price
+        };
+
+        await CartClient.AddItemAsync(addToCart);
+        Snackbar.Add("محصول به سبد خرید اضافه شد", Severity.Success);
+    }
 }

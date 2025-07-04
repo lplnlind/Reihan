@@ -31,10 +31,10 @@ namespace Application.Services
             };
         }
 
-        public async Task AddItemAsync(int userId, int productId, int quantity, decimal price, string productName)
+        public async Task AddItemAsync(int userId, AddToCartRequest request)
         {
             var cart = await _cartRepository.GetByUserIdAsync(userId) ?? new Cart(userId);
-            cart.AddItem(productId, quantity, price, productName);
+            cart.AddItem(request.ProductId, request.Quantity, request.UnitPrice, request.ProductName);
             if (cart.Id == 0)
                 await _cartRepository.AddAsync(cart);
             else
