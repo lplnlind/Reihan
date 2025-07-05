@@ -1,11 +1,21 @@
-﻿<MudCard>
-    <MudCardMedia Image="@Product.ImageUrls.FirstOrDefault()" Height="160" />
+﻿
+
+<MudCard Class="rounded-xl pa-2">
+    <MudCardMedia Class="rounded-xl" Image="@Product.ImageUrls.FirstOrDefault()" Height="200" />
     <MudCardContent>
-        <MudText Typo="Typo.subtitle1">@Product.Name</MudText>
-        <MudText Typo="Typo.body2">@($"{Product.Price:N0} تومان")</MudText>
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudText Typo="Typo.h5">@Product.Name</MudText>
+            <MudIconButton Class="pa-1" Icon="@Icons.Material.Outlined.FavoriteBorder" Color="Color.Secondary" Size="Size.Small" aria-label="add to favorite" />
+        </MudStack>
+        <MudText Typo="Typo.body2">سایز: متوسط | جنس: چرم مصنوعی</MudText>
     </MudCardContent>
-    <MudCardActions>
-        <MudButton Href="@Product.ImageUrls.FirstOrDefault()" Variant="Variant.Filled">مشاهده</MudButton>
+    <MudCardActions Class="pt-0 justify-space-between">
+        <MudButton Class="ro rounded-xl" Variant="Variant.Text" Color="Color.Primary">اضافه کردن به سبد</MudButton>
+        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+            @* <MudText Inline="true">@(("500").En2Fa())</MudText> *@
+            <MudText Inline="true" typo="Typo.h5">@Product.Price.ToNumeric().En2Fa()</MudText>
+            <MudText Inline="true" Typo="Typo.caption">تومان</MudText>
+        </MudStack>
     </MudCardActions>
 </MudCard>
 
