@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.Application.Interfaces.Services;
 using Application.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Identity;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace Application.DependencyInjection
@@ -21,6 +22,7 @@ namespace Application.DependencyInjection
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IFavoriteService, FavoriteService>();
 
             return services;
         }

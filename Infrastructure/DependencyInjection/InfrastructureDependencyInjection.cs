@@ -28,7 +28,8 @@ namespace Infrastructure.DependencyInjection
             services.AddScoped<ICartRepository, CartRepository>();
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<IOrderItemRepository, OrderItemRepository>();
-            
+            services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+
             return services;
         }
     }

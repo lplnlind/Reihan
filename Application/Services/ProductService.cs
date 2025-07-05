@@ -8,24 +8,30 @@ namespace Application.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository;
-        private readonly IProductImageRepository _productImageRepository;
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly IProductRepository _productRepo;
+        private readonly IProductImageRepository _productImageRepo;
+        private readonly ICategoryRepository _categoryRepo;
+        private readonly ICartRepository _cartRepo;
+        private IUserContextService _userContextService;
 
-        public ProductService(IProductRepository productRepository, 
-            IProductImageRepository productImageRepository,
-            ICategoryRepository categoryRepository)
+        public ProductService(IProductRepository productRepo, 
+            IProductImageRepository productImageRepo,
+            ICategoryRepository categoryRepo,
+            ICartRepository cartRepo,
+            IUserContextService userContextService)
         {
-            _productRepository = productRepository;
-            _productImageRepository = productImageRepository;
-            _categoryRepository = categoryRepository;
+            _productRepo = productRepo;
+            _productImageRepo = productImageRepo;
+            _categoryRepo = categoryRepo;
+            _cartRepo = cartRepo;
+            _userContextService = userContextService;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
-            var products = await _productRepository.GetAllAsync();
-            var productImages = await _productImageRepository.GetAllAsync();
-            var categories = await _categoryRepository.GetAllAsync();
+            var products = await _productRepo.GetAllAsync();
+            var productImages = await _productImageRepo.GetAllAsync();
+            var categories = await _categoryRepo.GetAllAsync();
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
             return products.Select(p => new ProductDto
@@ -42,11 +48,11 @@ namespace Application.Services
 
         public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
-            var product = await _productRepository.GetByIdAsync(id);
+            var product = await _productRepo.GetByIdAsync(id);
             if (product is null) return null;
 
-            var productImages = await _productImageRepository.GetByProductIdAsync(product.Id);
-            var category = await _categoryRepository.GetByIdAsync(product.CategoryId);
+            var productImages = await _productImageRepo.GetByProductIdAsync(product.Id);
+            var category = await _categoryRepo.GetByIdAsync(product.CategoryId);
 
             return new ProductDto
             {
@@ -72,7 +78,7 @@ namespace Application.Services
                 Description = dto.Description,
             };
 
-            await _productRepository.AddAsync(product);
+            await _productRepo.AddAsync(product);
 
             if (dto.ImageUrls is not null && dto.ImageUrls.Any())
             {
@@ -82,13 +88,13 @@ namespace Application.Services
                     Url = url
                 }).ToList();
 
-                await _productImageRepository.AddRangeAsync(images);
+                await _productImageRepo.AddRangeAsync(images);
             }
         }
 
         public async Task UpdateProductAsync(ProductDto dto)
         {
-            var product = await _productRepository.GetByIdAsync(dto.Id);
+            var product = await _productRepo.GetByIdAsync(dto.Id);
             if (product is null) return;
 
             product.Name = dto.Name;
@@ -97,7 +103,7 @@ namespace Application.Services
             product.StockQuantity = dto.StockQuantity;
             product.Description = dto.Description;
 
-            await _productRepository.UpdateAsync(product);
+            await _productRepo.UpdateAsync(product);
 
             if (dto.ImageUrls is not null && dto.ImageUrls.Any())
             {
@@ -107,16 +113,16 @@ namespace Application.Services
                     Url = url
                 }).ToList();
 
-                await _productImageRepository.AddRangeAsync(images);
+                await _productImageRepo.AddRangeAsync(images);
             }
         }
 
         public async Task DeleteProductAsync(int id)
         {
-            var product = await _productRepository.GetByIdAsync(id);
+            var product = await _productRepo.GetByIdAsync(id);
             if (product is null) return;
 
-            var images = await _productImageRepository.GetByProductIdAsync(id);
+            var images = await _productImageRepo.GetByProductIdAsync(id);
 
             foreach (var image in images)
             {
@@ -126,53 +132,99 @@ namespace Application.Services
                     File.Delete(filePath);
             }
 
-            await _productRepository.DeleteAsync(product.Id);
+            await _productRepo.DeleteAsync(product.Id);
         }
 
-        public async Task<List<ProductDto>> GetLatestProductsAsync(int count = 8)
+        public async Task<List<ProductCardDto>> GetLatestProductsAsync(int count = 8)
         {
-            var products = await _productRepository.GetAllAsync();
-            var images = await _productImageRepository.GetAllAsync();
+            var products = await _productRepo.GetAllAsync();
+            var images = await _productImageRepo.GetAllAsync();
 
             var latest = products
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(count)
                 .ToList();
 
-            return latest.Select(p => new ProductDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.Price,
-                CategoryId = p.CategoryId,
-                ImageUrls = images.Where(i => i.ProductId == p.Id).Select(i => i.Url).ToList()
-            }).ToList();
-        }
+            var categories = await _categoryRepo.GetAllAsync();
+            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
-        public async Task<List<ProductDto>> GetBestSellingProductsAsync(int count = 8)
-        {
-            var products = await _productRepository.GetAllAsync();
-            return new(); 
-        }
+            var userId = _userContextService.GetUserId();
+            var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
+            var productIdsInCart = cart.Items.Select(i => i.ProductId).ToHashSet();
 
-        public async Task<List<ProductDto>> GetFilteredProductsAsync(int? categoryId = null)
-        {
-            var products = await _productRepository.GetAllAsync();
-            var images = await _productImageRepository.GetAllAsync();
 
-            if (categoryId is not null)
-                products = products.Where(p => p.CategoryId == categoryId).ToList();
-
-            return products.Select(p => new ProductDto
+            return products.Select(p => new ProductCardDto
             {
                 Id = p.Id,
                 Name = p.Name,
                 Price = p.Price,
                 StockQuantity = p.StockQuantity,
                 CategoryId = p.CategoryId,
-                ImageUrls = images.Where(i => i.ProductId == p.Id).Select(i => i.Url).ToList()
+                CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
+                ImageUrl = images.Where(w => w.ProductId == p.Id).Select(s => s.Url)?.FirstOrDefault() ?? string.Empty,
+                IsInCart = productIdsInCart.Contains(p.Id)
             }).ToList();
         }
 
+        public async Task<List<ProductDto>> GetBestSellingProductsAsync(int count = 8)
+        {
+            var products = await _productRepo.GetAllAsync();
+            return new(); 
+        }
+
+        public async Task<List<ProductCardDto>> GetFilteredProductsAsync(int? categoryId = null)
+        {
+            var products = await _productRepo.GetAllAsync();
+            var images = await _productImageRepo.GetAllAsync();
+
+            if (categoryId is not null)
+                products = products.Where(p => p.CategoryId == categoryId).ToList();
+
+            var categories = await _categoryRepo.GetAllAsync();
+            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
+
+            var userId = _userContextService.GetUserId();
+            var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
+            var productIdsInCart = cart.Items.Select(i => i.ProductId).ToHashSet();
+
+
+            return products.Select(p => new ProductCardDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                StockQuantity = p.StockQuantity,
+                CategoryId = p.CategoryId,
+                CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
+                ImageUrl = images.Where(w => w.ProductId == p.Id).Select(s => s.Url)?.FirstOrDefault() ?? string.Empty,
+                IsInCart = productIdsInCart.Contains(p.Id)
+            }).ToList();
+        }
+
+        public async Task<IEnumerable<ProductCardDto>> GetProductCardAsync()
+        {
+            var products = await _productRepo.GetAllAsync();
+            var productImages = await _productImageRepo.GetAllAsync();
+
+            var categories = await _categoryRepo.GetAllAsync();
+            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
+
+            var userId = _userContextService.GetUserId();
+            var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
+            var productIdsInCart = cart.Items.Select(i => i.ProductId).ToHashSet();
+
+
+            return products.Select(p => new ProductCardDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                StockQuantity = p.StockQuantity,
+                CategoryId = p.CategoryId,
+                CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
+                ImageUrl = productImages.Where(w => w.ProductId == p.Id).Select(s => s.Url)?.FirstOrDefault() ?? string.Empty,
+                IsInCart = productIdsInCart.Contains(p.Id)
+            });
+        }
     }
 }

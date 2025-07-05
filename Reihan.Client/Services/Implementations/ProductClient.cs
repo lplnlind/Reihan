@@ -1,6 +1,5 @@
 ﻿using Reihan.Client.Models;
 using System.Net.Http.Json;
-using static Reihan.Client.Pages.Admin.ProductDialog;
 
 namespace Reihan.Client.Services
 {
@@ -52,19 +51,23 @@ namespace Reihan.Client.Services
             return null;
         }
 
-        public async Task<List<ProductDto>> GetLatestAsync()
+        public async Task<List<ProductCardDto>> GetLatestAsync()
         {
-            return await _http.GetFromJsonAsync<List<ProductDto>>("api/products/latest") ?? new();
+            return await _http.GetFromJsonAsync<List<ProductCardDto>>("api/products/latest") ?? new();
         }
 
-        public async Task<List<ProductDto>> FilterAsync(int? categoryId = null)
+        public async Task<List<ProductCardDto>> FilterAsync(int? categoryId = null)
         {
             var url = "api/products/filter";
             if (categoryId is not null)
                 url += $"?categoryId={categoryId}";
 
-            return await _http.GetFromJsonAsync<List<ProductDto>>(url) ?? new();
+            return await _http.GetFromJsonAsync<List<ProductCardDto>>(url) ?? new();
         }
 
+        public async Task<List<ProductCardDto>> GetCardAsync()
+        {
+            return await _http.GetFromJsonAsync<List<ProductCardDto>>("api/products/card") ?? new();
+        }
     }
 }

@@ -1,16 +1,32 @@
-﻿
+﻿@inject ISnackbar Snackbar
+@inject ICartClient CartClient
+@inject IFavoriteClient FavoriteClient
 
 <MudCard Class="rounded-xl pa-2" Outlined="true" Elevation="2">
-    <MudCardMedia Class="rounded-xl" Image="@Product.ImageUrls.FirstOrDefault()" Height="200" />
+    <MudCardMedia Class="rounded-xl" Image="@Product.ImageUrl" Height="200" />
     <MudCardContent>
         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
             <MudText Typo="Typo.h5">@Product.Name</MudText>
-            <MudIconButton Class="pa-1" Icon="@Icons.Material.Outlined.FavoriteBorder" Color="Color.Secondary" Size="Size.Small" aria-label="add to favorite" />
+            @if (IsFav)
+            {
+                <MudIconButton OnClick="ToggleFavorite" Class="pa-1" Icon="@Icons.Material.Rounded.Favorite" Color="Color.Primary" Size="Size.Small" aria-label="add to favorite" />
+            }
+            else
+            {
+                <MudIconButton OnClick="ToggleFavorite" Class="pa-1" Icon="@Icons.Material.Rounded.FavoriteBorder" Color="Color.Dark" Size="Size.Small" aria-label="add to favorite" />
+            }
         </MudStack>
         <MudText Typo="Typo.body2">سایز: متوسط | جنس: چرم مصنوعی</MudText>
     </MudCardContent>
     <MudCardActions Class="pt-0 justify-space-between">
-        <MudButton StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
+        @if (Product.IsInCart)
+        {
+            <MudIconButton OnClick="RemoveFromCart" Icon="@Icons.Material.TwoTone.ShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
+        }
+        else
+        {
+            <MudButton OnClick="AddToCart" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
+        }
         <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
             @* <MudText Inline="true">@(("500").En2Fa())</MudText> *@
             <MudText Inline="true" typo="Typo.h6">@Product.Price.ToNumeric().En2Fa()</MudText>
@@ -20,5 +36,58 @@
 </MudCard>
 
 @code {
-    [Parameter] public ProductDto Product { get; set; } = new();
+    [Parameter] public ProductCardDto Product { get; set; } = new();
+    private bool IsFav;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsFav = await FavoriteClient.IsFavoriteAsync(Product.Id);
+    }
+
+    private async Task ToggleFavorite()
+    {
+        if (IsFav)
+        {
+            await FavoriteClient.RemoveFromFavoriteAsync(Product.Id);
+            Snackbar.Add("محصول از علاقه مندی ها حذف شد", Severity.Warning);
+
+        }
+        else
+        {
+            await FavoriteClient.AddToFavoriteAsync(Product.Id);
+            Snackbar.Add("محصول به علاقه مندی ها اضافه شد", Severity.Success);
+        }
+
+        IsFav = !IsFav;
+    }
+
+
+    private async Task AddToCart()
+    {
+        if (Product is null) return;
+
+        var addToCart = new AddToCartRequest
+        {
+            ProductId = Product.Id,
+            ProductName = Product.Name,
+            Quantity = 1,
+            UnitPrice = Product.Price
+        };
+
+        await CartClient.AddItemAsync(addToCart);
+        Snackbar.Add("محصول به سبد خرید اضافه شد", Severity.Success);
+
+        Product.IsInCart = true;
+    }
+
+    private async Task RemoveFromCart()
+    {
+        if (Product is null) return;
+
+        await CartClient.RemoveItemAsync(Product.Id);
+        Snackbar.Add("محصول از سبد حذف شد", Severity.Warning);
+
+        Product.IsInCart = false;
+    }
 }

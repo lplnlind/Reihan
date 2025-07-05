@@ -94,5 +94,12 @@ namespace Reihan.Server.Controllers
             return Ok(result);
         }
 
+        [HttpGet("card")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCard()
+        {
+            var products = await _productService.GetProductCardAsync();
+            return Ok(products);
+        }
     }
 }

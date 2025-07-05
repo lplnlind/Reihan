@@ -14,6 +14,7 @@ namespace Domain.Entities
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
         public List<ProductImage> Images { get; set; } = new();
+        public List<Favorite> Favorites { get; set; } = new();
 
         public void ReduceStock(int quantity)
         {

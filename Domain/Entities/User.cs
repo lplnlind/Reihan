@@ -13,11 +13,10 @@ namespace Domain.Entities
         public string PasswordHash { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
-        // نقش کاربر (مشتری / مدیر)
         public UserRole Role { get; set; }
 
-        // ارتباط با سفارشات و آدرس
         public List<Order> Orders { get; set; } = new();
+        public List<Favorite> Favorites { get; set; } = new();
         public Address Address { get; set; } = null!;
 
         public void UpdateProfile(string fullName, string email, Address address)
