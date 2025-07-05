@@ -2,15 +2,33 @@
 @inject ICartClient CartClient
 @inject IOrderClient OrderClient
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
-<h3>نهایی‌سازی سفارش</h3>
+<PageTitle>تسویه حساب</PageTitle>
 
-<EditForm Model="OrderModel" OnValidSubmit="SubmitOrder">
-    <InputText @bind-Value="OrderModel.ShippingAddress.Street" />
-    <InputText @bind-Value="OrderModel.ShippingAddress.City" />
-    <InputText @bind-Value="OrderModel.ShippingAddress.ZipCode" />
-    <button type="submit">ثبت سفارش</button>
-</EditForm>
+<MudPaper Class="pa-6 ma-4">
+    <MudText Typo="Typo.h5">نهایی‌سازی سفارش</MudText>
+
+    <EditForm Model="OrderModel" OnValidSubmit="SubmitOrder">
+        <MudGrid>
+            <MudItem xs="12" md="4">
+                <MudTextField Label="خیابان" @bind-Value="OrderModel.ShippingAddress.Street" Required="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudTextField Label="شهر" @bind-Value="OrderModel.ShippingAddress.City" Required="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudTextField Label="کد پستی" @bind-Value="OrderModel.ShippingAddress.ZipCode" Required="true" />
+            </MudItem>
+        </MudGrid>
+
+        <MudDivider Class="my-4" />
+
+        <MudButton Type="Submit" Color="Color.Primary" Variant="Variant.Filled">
+            ثبت سفارش و پرداخت
+        </MudButton>
+    </EditForm>
+</MudPaper>
 
 @code {
     private CreateOrderRequest OrderModel = new();
@@ -18,12 +36,20 @@
     protected override async Task OnInitializedAsync()
     {
         var cart = await CartClient.GetCartAsync();
-        OrderModel.CartItems = cart?.Items ?? new();
+        if (cart == null || !cart.Items.Any())
+        {
+            Snackbar.Add("سبد خرید خالی است.", Severity.Warning);
+            Navigation.NavigateTo("/shop");
+            return;
+        }
+
+        OrderModel.CartItems = cart.Items;
     }
 
     private async Task SubmitOrder()
     {
         await OrderClient.CreateAsync(OrderModel);
-        Navigation.NavigateTo("/orders");
+        Snackbar.Add("سفارش با موفقیت ثبت شد.", Severity.Success);
+        Navigation.NavigateTo("/account/orders");
     }
 }
