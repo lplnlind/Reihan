@@ -367,3 +367,7 @@ FodyWeavers.xsd
 /Infrastructure/Migrations/20250702140322_UpdateProductImageRelation.cs
 /Infrastructure/Migrations/20250702140322_UpdateProductImageRelation.Designer.cs
 /Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs
+/Infrastructure/Migrations/20250705225926_AddFavoriteEntity.cs
+/Infrastructure/Migrations/20250705232209_AddFavoriteEntity2.cs
+/Infrastructure/Migrations/20250612223153_init.cs
+/Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs
