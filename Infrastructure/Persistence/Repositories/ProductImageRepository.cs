@@ -18,5 +18,21 @@ namespace Infrastructure.Persistence.Repositories
             await _dbSet.AddRangeAsync(images);
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteByProductIdAsync(int productId)
+        {
+            var images = await _dbSet.Where(w => w.ProductId == productId).ToListAsync();
+            if (images.Any())
+            {
+                _dbSet.RemoveRange(images);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeleteRangeAsync(IEnumerable<ProductImage> images)
+        {
+            _dbSet.RemoveRange(images);
+            await _context.SaveChangesAsync();
+        }
     }
 }

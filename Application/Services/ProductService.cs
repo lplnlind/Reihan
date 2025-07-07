@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Repositories;
+using System.Net.Sockets;
 
 namespace Application.Services
 {
@@ -12,9 +13,8 @@ namespace Application.Services
         private readonly IProductImageRepository _productImageRepo;
         private readonly ICategoryRepository _categoryRepo;
         private readonly ICartRepository _cartRepo;
-        private IUserContextService _userContextService;
 
-        public ProductService(IProductRepository productRepo, 
+        public ProductService(IProductRepository productRepo,
             IProductImageRepository productImageRepo,
             ICategoryRepository categoryRepo,
             ICartRepository cartRepo,
@@ -24,7 +24,6 @@ namespace Application.Services
             _productImageRepo = productImageRepo;
             _categoryRepo = categoryRepo;
             _cartRepo = cartRepo;
-            _userContextService = userContextService;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
@@ -39,6 +38,7 @@ namespace Application.Services
                 Id = p.Id,
                 Name = p.Name,
                 Price = p.Price,
+                Description = p.Description,
                 StockQuantity = p.StockQuantity,
                 CategoryId = p.CategoryId,
                 CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
@@ -59,7 +59,7 @@ namespace Application.Services
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
-                StockQuantity= product.StockQuantity,
+                StockQuantity = product.StockQuantity,
                 Description = product.Description,
                 CategoryId = product.CategoryId,
                 CategoryName = category?.Name,
@@ -84,7 +84,7 @@ namespace Application.Services
             {
                 var images = dto.ImageUrls.Select(url => new ProductImage
                 {
-                    ProductId = product.Id, 
+                    ProductId = product.Id,
                     Url = url
                 }).ToList();
 
@@ -105,16 +105,34 @@ namespace Application.Services
 
             await _productRepo.UpdateAsync(product);
 
-            if (dto.ImageUrls is not null && dto.ImageUrls.Any())
-            {
-                var images = dto.ImageUrls.Select(url => new ProductImage
-                {
-                    ProductId = product.Id,
-                    Url = url
-                }).ToList();
+            // مدیریت تصاویر
+            var existingImages = await _productImageRepo.GetByProductIdAsync(product.Id);
+            var existingUrls = existingImages.Select(i => i.Url).ToList();
+            var newUrls = dto.ImageUrls ?? new List<string>();
 
-                await _productImageRepo.AddRangeAsync(images);
+            // 🔴 حذف عکس‌هایی که در لیست جدید نیستند
+            var toRemove = existingImages.Where(i => !newUrls.Contains(i.Url)).ToList();
+            if (toRemove.Any())
+            {
+                foreach (var image in toRemove)
+                {
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
+
+                await _productImageRepo.DeleteRangeAsync(toRemove);
             }
+
+            // 🟢 افزودن عکس‌های جدید که قبلاً وجود نداشتند
+            var toAdd = newUrls.Except(existingUrls).Select(url => new ProductImage
+            {
+                ProductId = product.Id,
+                Url = url
+            }).ToList();
+
+            if (toAdd.Any())
+                await _productImageRepo.AddRangeAsync(toAdd);
         }
 
         public async Task DeleteProductAsync(int id)
@@ -135,7 +153,7 @@ namespace Application.Services
             await _productRepo.DeleteAsync(product.Id);
         }
 
-        public async Task<List<ProductCardDto>> GetLatestProductsAsync(int count = 8)
+        public async Task<List<ProductDto>> GetLatestProductsAsync(int count = 8)
         {
             var products = await _productRepo.GetAllAsync();
             var images = await _productImageRepo.GetAllAsync();
@@ -148,12 +166,8 @@ namespace Application.Services
             var categories = await _categoryRepo.GetAllAsync();
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
-            var userId = _userContextService.GetUserId();
-            var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
-            var productIdsInCart = cart.Items.Select(i => i.ProductId).ToHashSet();
 
-
-            return products.Select(p => new ProductCardDto
+            return products.Select(p => new ProductDto
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -162,17 +176,16 @@ namespace Application.Services
                 CategoryId = p.CategoryId,
                 CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
                 ImageUrl = images.Where(w => w.ProductId == p.Id).Select(s => s.Url)?.FirstOrDefault() ?? string.Empty,
-                IsInCart = productIdsInCart.Contains(p.Id)
             }).ToList();
         }
 
         public async Task<List<ProductDto>> GetBestSellingProductsAsync(int count = 8)
         {
             var products = await _productRepo.GetAllAsync();
-            return new(); 
+            return new();
         }
 
-        public async Task<List<ProductCardDto>> GetFilteredProductsAsync(int? categoryId = null)
+        public async Task<List<ProductDto>> GetFilteredProductsAsync(int? categoryId = null)
         {
             var products = await _productRepo.GetAllAsync();
             var images = await _productImageRepo.GetAllAsync();
@@ -183,12 +196,8 @@ namespace Application.Services
             var categories = await _categoryRepo.GetAllAsync();
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
-            var userId = _userContextService.GetUserId();
-            var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
-            var productIdsInCart = cart.Items.Select(i => i.ProductId).ToHashSet();
 
-
-            return products.Select(p => new ProductCardDto
+            return products.Select(p => new ProductDto
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -197,34 +206,13 @@ namespace Application.Services
                 CategoryId = p.CategoryId,
                 CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
                 ImageUrl = images.Where(w => w.ProductId == p.Id).Select(s => s.Url)?.FirstOrDefault() ?? string.Empty,
-                IsInCart = productIdsInCart.Contains(p.Id)
             }).ToList();
         }
 
-        public async Task<IEnumerable<ProductCardDto>> GetProductCardAsync()
+        public async Task<bool> IsInCartAsync(int userId, int productId)
         {
-            var products = await _productRepo.GetAllAsync();
-            var productImages = await _productImageRepo.GetAllAsync();
-
-            var categories = await _categoryRepo.GetAllAsync();
-            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
-
-            var userId = _userContextService.GetUserId();
             var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
-            var productIdsInCart = cart.Items.Select(i => i.ProductId).ToHashSet();
-
-
-            return products.Select(p => new ProductCardDto
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.Price,
-                StockQuantity = p.StockQuantity,
-                CategoryId = p.CategoryId,
-                CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
-                ImageUrl = productImages.Where(w => w.ProductId == p.Id).Select(s => s.Url)?.FirstOrDefault() ?? string.Empty,
-                IsInCart = productIdsInCart.Contains(p.Id)
-            });
+            return cart.Items.Select(i => i.ProductId).ToHashSet().Contains(productId);
         }
     }
 }

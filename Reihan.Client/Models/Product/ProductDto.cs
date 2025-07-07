@@ -22,5 +22,7 @@ namespace Reihan.Client.Models
 
         public string? CategoryName { get; set; }
         public List<string> ImageUrls { get; set; } = new();
+        public string ImageUrl { get; set; } = string.Empty;
+
     }
 }

@@ -31,7 +31,7 @@ else
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" sm="12">
-                        <MudTextField Label="توضیحات" @bind-Value="Product.Description" For="@(() => Product.Description)" Lines="3" Variant="Variant.Outlined" />
+                        <MudTextField Label="توضیحات" @bind-Value="Product.Description" Disabled="IsDisable" Lines="3" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="12">
                         <MudPaper Outlined="true" Class="rounded-gl pa-1">
@@ -48,9 +48,17 @@ else
                                 <MudStack Row="true" Justify="Justify.Center" Wrap="Wrap.Wrap">
                                     @foreach (var img in Product.ImageUrls)
                                     {
-                                        <MudImage Src="@img" Width="100" Height="100" ObjectFit="ObjectFit.Cover" Alt="product pic" Elevation="1" Class="rounded-lg" />
+                                        <MudItem Class="relative">
+                                            <MudImage Src="@img" Width="150" Height="150" ObjectFit="ObjectFit.Cover" Alt="product pic" Elevation="1" Class="rounded-lg" />
+                                            <MudIconButton 
+                                                OnClick="@(e => DeleteImage(img))" 
+                                                Icon="@Icons.Material.Rounded.Delete" 
+                                                Variant="Variant.Filled" Color="Color.Error" 
+                                                Size="Size.Small" Class="absolute rounded-lg" 
+                                                Style="left:4px; top:4px;"></MudIconButton>
+                                        </MudItem>
                                     }
-                                </MudStack>
+                                </MudStack> 
                             </MudStack>
                         </MudPaper>
                     </MudItem>
@@ -102,6 +110,7 @@ else
 
     private void Cancel() => MudDialog.Cancel();
 
+
     private async Task UploadFiles(IReadOnlyList<IBrowserFile> files)
     {
         if (files is null || !files.Any())
@@ -123,6 +132,11 @@ else
         }
 
         Snackbar.Add("همه فایل‌ها با موفقیت آپلود شدند", Severity.Success);
+    }
+
+    private void DeleteImage(string url)
+    {
+        Product.ImageUrls.Remove(url);
     }
 
     private void OnValidated()

@@ -10,8 +10,8 @@ namespace Reihan.Client.Services
         Task UpdateAsync(ProductDto dto);
         Task DeleteAsync(int id);
         Task<ImageUploadResult> Upload(MultipartFormDataContent content);
-        Task<List<ProductCardDto>> GetLatestAsync();
-        Task<List<ProductCardDto>> FilterAsync(int? categoryId = null);
-        Task<List<ProductCardDto>> GetCardAsync();
+        Task<List<ProductDto>> GetLatestAsync();
+        Task<List<ProductDto>> FilterAsync(int? categoryId = null);
+        Task<bool> IsInCartAsync(int productId);
     }
 }

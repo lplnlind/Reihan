@@ -9,11 +9,11 @@
     <MudSpacer />
     <AuthorizeView>
         <Authorized>
-            <MudIconButton Icon="@Icons.Material.TwoTone.AccountCircle" Color="Color.Primary" Target="@($"/admin/profile/{userId}")"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.TwoTone.AccountCircle" Color="Color.Primary" Href="@($"/admin/profile/{userId}")"></MudIconButton>
             <MudIconButton Icon="@Icons.Material.Rounded.Logout" Color="Color.Error" OnClick="Logout"></MudIconButton>
         </Authorized>
         <NotAuthorized>
-            <MudIconButton Icon="@Icons.Material.Rounded.Login" Color="Color.Primary" Target="/login"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Rounded.Login" Color="Color.Primary" Target="/login" Href="/login"></MudIconButton>
         </NotAuthorized>
     </AuthorizeView>
 </MudAppBar>

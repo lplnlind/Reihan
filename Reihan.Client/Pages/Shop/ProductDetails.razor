@@ -1,6 +1,7 @@
 ﻿@page "/shop/product/{id:int}"
 @inject IProductClient ProductClient
 @inject ICartClient CartClient
+@inject IFavoriteClient FavoriteClient
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
@@ -14,51 +15,106 @@ else if (Product is null)
 }
 else
 {
-    <MudGrid>
-        <MudItem xs="12" md="6">
-            @if (Product.ImageUrls.Count > 1)
-            {
-                <MudCarousel TData="object">
-                    @foreach (var img in Product.ImageUrls)
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudPaper Outlined="true" Class="rounded-xl pa-3 pl-5">
+            <MudGrid Justify="Justify.Center" Spacing="10">
+                <MudItem xs="12" md="6" Style="height:500px">
+                    @if (Product.ImageUrls.Count > 1)
                     {
-                        <MudCarouselItem>
-                            <MudImage Src="@img" Alt="تصویر محصول" Width="100" />
-                        </MudCarouselItem>
+                        <MudCarousel TData="object" Style="width:100%; height:100%" AutoCycle="false">
+                            <BulletTemplate Context="selected">
+                                <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon pa-0 pb-2">
+                                    <span class="mud-icon-button-label">
+                                        <MudIcon Icon="@(selected? Icons.Material.Filled.Circle : Icons.Material.TwoTone.Circle)" Color="@Color.Inherit" />
+                                    </span>
+                                </div>
+                            </BulletTemplate>
+                            <ChildContent>
+                                @foreach (var img in Product.ImageUrls)
+                                {
+                                    <MudCarouselItem>
+                                        <MudImage Src="@img" Alt="تصویر محصول" Style="width:100%; height:100%" Class="rounded-xl" ObjectFit="ObjectFit.Cover" ObjectPosition="ObjectPosition.Center" />
+                                    </MudCarouselItem>
+                                }
+                            </ChildContent>
+                        </MudCarousel>
                     }
-                </MudCarousel>
-            }
-            else if (Product.ImageUrls.Any())
-            {
-                <MudImage Src="@Product.ImageUrls.First()" Width="100" />
-            }
-        </MudItem>
+                    else if (Product.ImageUrls.Any())
+                    {
+                        <MudImage Src="@Product.ImageUrls.First()" Width="100" />
+                    }
+                </MudItem>
 
-        <MudItem xs="12" md="6">
-            <MudText Typo="Typo.h5">@Product.Name</MudText>
-            <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@($"{Product.Price:N0} تومان")</MudText>
-            <MudText Typo="Typo.body2" Class="mt-2 mb-2">@Product.Description</MudText>
-            <MudText Typo="Typo.caption">دسته‌بندی: @Product.CategoryName</MudText>
+                <MudItem xs="12" md="6">
 
-            <MudNumericField T="int"
-                             @bind-Value="Quantity"
-                             Label="تعداد"
-                             Min="1"
-                             Max="@Product.StockQuantity"
-                             Class="mt-4 mb-4" />
+                    <MudStack Justify="Justify.SpaceBetween" Style="height:100%">
+                        <MudItem>
+                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mt-7">
+                                <MudText Typo="Typo.h3" Class="mt-2 pl-2" Style="background-color: antiquewhite;">@Product.Name</MudText>
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">@Product.CategoryName</MudChip>
+                                    <MudIconButton Icon="@Icons.Material.Rounded.Share" Size="Size.Small"></MudIconButton>
+                                    <AuthorizeView>
+                                        <Authorized>
+                                            <MudToggleIconButton @bind-Toggled="IsFav"
+                                                                 @onclick="ToggleFavorite"
+                                                                 Icon="@Icons.Material.Rounded.FavoriteBorder"
+                                                                 ToggledIcon="@Icons.Material.Rounded.Favorite"
+                                                                 Color="Color.Dark"
+                                                                 ToggledColor="Color.Primary"
+                                                                 Size="Size.Small"
+                                                                 Class="pa-1"
+                                                                 aria-label="add to favorite" />
+                                        </Authorized>
+                                        <NotAuthorized>
+                                            <MudIconButton Target="/login" Class="pa-1" Icon="@Icons.Material.Rounded.FavoriteBorder" Color="Color.Dark" Size="Size.Small" aria-label="add to favorite" />
+                                        </NotAuthorized>
+                                    </AuthorizeView>
+                                </MudStack>
+                            </MudStack>
 
-            <MudButton OnClick="AddToCart"
-                       Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Disabled="Product.StockQuantity == 0">
-                افزودن به سبد خرید
-            </MudButton>
+                            <MudStack Row Spacing="0" AlignItems="AlignItems.End" Class="mt-5">
+                                <MudText Typo="Typo.h3" Style="background-color: antiquewhite;">@Product.Price.ToNumeric().En2Fa()</MudText>
+                                <MudText Inline="true" Typo="Typo.caption" Style="background-color: antiquewhite;">تومان</MudText>
+                            </MudStack>
+                            <MudText Typo="Typo.body2" Class="mt-1">سایز: متوسط | جنس: چرم مصنوعی</MudText>
+                            <MudText Typo="Typo.body1" Class="mt-1 mb-2">@((MarkupString)Product.Description)</MudText>
+                        </MudItem>
+                        <MudItem>
+                            <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
+                                <MudStack Row AlignItems="AlignItems.Center">
+                                    <MudNumericField T="int"
+                                        @bind-Value="Quantity"
+                                        Min="1"
+                                        Max="@Product.StockQuantity"
+                                        Variant="Variant.Outlined"
+                                        Margin="Margin.Dense"
+                                        Class="rounded-lg ma-0 pa-2"
+                                        Typo="Typo.caption"
+                                        Style="Width:60px" />
 
-            @if (Product.StockQuantity == 0)
-            {
-                <MudText Color="Color.Error" Class="mt-2">ناموجود</MudText>
-            }
-        </MudItem>
-    </MudGrid>
+
+                                    @if (IsInCart)
+                                    {
+                                        <MudIconButton OnClick="RemoveFromCart" Icon="@Icons.Material.TwoTone.ShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
+                                    }
+                                    else
+                                    {
+                                        <MudButton OnClick="AddToCart" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
+                                    }
+                                </MudStack>
+                            </MudStack>
+                        </MudItem>
+                    </MudStack>
+
+                    @if (Product.StockQuantity == 0)
+                    {
+                        <MudText Color="Color.Error" Class="mt-2">ناموجود</MudText>
+                    }
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </MudContainer>
 }
 
 
@@ -68,11 +124,19 @@ else
     private ProductDto? Product;
     private int Quantity = 1;
     private bool Loading = true;
+    private bool IsFav;
+    private bool IsInCart;
 
     protected override async Task OnInitializedAsync()
     {
         Product = await ProductClient.GetByIdAsync(id);
-        Loading = false;
+
+        if (Product is not null)
+        {
+            IsFav = await FavoriteClient.IsFavoriteAsync(Product.Id);
+            IsInCart = await ProductClient.IsInCartAsync(Product.Id);
+            Loading = false;
+        }
     }
 
     private async Task AddToCart()
@@ -83,11 +147,39 @@ else
         {
             ProductId = Product.Id,
             ProductName = Product.Name,
-            Quantity = Quantity,
+            Quantity = 1,
             UnitPrice = Product.Price
         };
 
         await CartClient.AddItemAsync(addToCart);
         Snackbar.Add("محصول به سبد خرید اضافه شد", Severity.Success);
+
+        IsInCart = true;
+    }
+
+    private async Task RemoveFromCart()
+    {
+        if (Product is null) return;
+
+        await CartClient.RemoveItemAsync(Product.Id);
+        Snackbar.Add("محصول از سبد حذف شد", Severity.Warning);
+
+        IsInCart = false;
+    }
+    private async Task ToggleFavorite()
+    {
+        if (IsFav)
+        {
+            await FavoriteClient.RemoveFromFavoriteAsync(Product.Id);
+            Snackbar.Add("محصول از علاقه مندی ها حذف شد", Severity.Warning);
+
+        }
+        else
+        {
+            await FavoriteClient.AddToFavoriteAsync(Product.Id);
+            Snackbar.Add("محصول به علاقه مندی ها اضافه شد", Severity.Success);
+        }
+
+        IsFav = !IsFav;
     }
 }

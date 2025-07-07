@@ -1,4 +1,5 @@
 ﻿using Reihan.Client.Models;
+using System.Net;
 using System.Net.Http.Json;
 
 namespace Reihan.Client.Services
@@ -51,23 +52,38 @@ namespace Reihan.Client.Services
             return null;
         }
 
-        public async Task<List<ProductCardDto>> GetLatestAsync()
+        public async Task<List<ProductDto>> GetLatestAsync()
         {
-            return await _http.GetFromJsonAsync<List<ProductCardDto>>("api/products/latest") ?? new();
+            return await _http.GetFromJsonAsync<List<ProductDto>>("api/products/latest") ?? new();
         }
 
-        public async Task<List<ProductCardDto>> FilterAsync(int? categoryId = null)
+        public async Task<List<ProductDto>> FilterAsync(int? categoryId = null)
         {
             var url = "api/products/filter";
             if (categoryId is not null)
                 url += $"?categoryId={categoryId}";
 
-            return await _http.GetFromJsonAsync<List<ProductCardDto>>(url) ?? new();
+            return await _http.GetFromJsonAsync<List<ProductDto>>(url) ?? new();
         }
 
-        public async Task<List<ProductCardDto>> GetCardAsync()
+        public async Task<bool> IsInCartAsync(int productId)
         {
-            return await _http.GetFromJsonAsync<List<ProductCardDto>>("api/products/card") ?? new();
+            try
+            {
+                var response = await _http.GetAsync($"api/products/{productId}/is");
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    return false;
+
+                response.EnsureSuccessStatusCode();
+                var isInCart = await response.Content.ReadFromJsonAsync<bool>();
+                return isInCart;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FavoriteClient] Error checking favorite: {ex.Message}");
+                return false;
+            }
         }
     }
 }

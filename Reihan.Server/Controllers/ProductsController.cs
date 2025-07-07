@@ -10,10 +10,12 @@ namespace Reihan.Server.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IUserContextService _userContext;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, IUserContextService userContext)
         {
             _productService = productService;
+            _userContext = userContext;
         }
 
         [HttpGet]
@@ -94,12 +96,12 @@ namespace Reihan.Server.Controllers
             return Ok(result);
         }
 
-        [HttpGet("card")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetCard()
+        [HttpGet("{productId}/is")]
+        public async Task<IActionResult> IsFavorite(int productId)
         {
-            var products = await _productService.GetProductCardAsync();
-            return Ok(products);
+            var userId = _userContext.GetUserId();
+            var result = await _productService.IsInCartAsync(userId, productId);
+            return Ok(result);
         }
     }
 }
