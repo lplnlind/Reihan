@@ -67,7 +67,7 @@ else
                                                                  aria-label="add to favorite" />
                                         </Authorized>
                                         <NotAuthorized>
-                                            <MudIconButton Target="/login" Class="pa-1" Icon="@Icons.Material.Rounded.FavoriteBorder" Color="Color.Dark" Size="Size.Small" aria-label="add to favorite" />
+                                            <MudIconButton Href="/login" Class="pa-1" Icon="@Icons.Material.Rounded.FavoriteBorder" Color="Color.Dark" Size="Size.Small" aria-label="add to favorite" />
                                         </NotAuthorized>
                                     </AuthorizeView>
                                 </MudStack>
@@ -94,14 +94,21 @@ else
                                         Style="Width:60px" />
 
 
-                                    @if (IsInCart)
-                                    {
-                                        <MudIconButton OnClick="RemoveFromCart" Icon="@Icons.Material.TwoTone.ShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
-                                    }
-                                    else
-                                    {
-                                        <MudButton OnClick="AddToCart" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
-                                    }
+                                    <AuthorizeView>
+                                        <Authorized>
+                                            @if (IsInCart)
+                                            {
+                                                <MudIconButton OnClick="RemoveFromCart" Icon="@Icons.Material.TwoTone.ShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
+                                            }
+                                            else
+                                            {
+                                                <MudButton OnClick="AddToCart" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
+                                            }
+                                        </Authorized>
+                                        <NotAuthorized>
+                                            <MudButton Href="/login" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
+                                        </NotAuthorized>
+                                    </AuthorizeView>
                                 </MudStack>
                             </MudStack>
                         </MudItem>

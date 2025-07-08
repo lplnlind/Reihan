@@ -8,23 +8,6 @@
     <MudText Typo="Typo.h5" Class="mb-4">فروشگاه</MudText>
 
     <MudGrid>
-        <MudItem xs="12" md="3">
-            <!-- فیلتر دسته‌بندی -->
-            <MudPaper Class="pa-4">
-                <MudText Typo="Typo.subtitle1" Class="mb-2">دسته‌بندی‌ها</MudText>
-                <MudList T="int" Dense="true">
-                    <MudListItem OnClick="@(() => SelectCategory(null))" Selected="@(_selectedCategory == null)">
-                        همه محصولات
-                    </MudListItem>
-                    @foreach (var cat in Categories)
-                    {
-                        <MudListItem OnClick="@(() => SelectCategory(cat.Id))" Selected="@(_selectedCategory == cat.Id)">
-                            @cat.Name (@cat.ProductsInThisCategory)
-                        </MudListItem>
-                    }
-                </MudList>
-            </MudPaper>
-        </MudItem>
 
         <MudItem xs="12" md="9">
             <!-- لیست محصولات -->
@@ -44,6 +27,21 @@
                 }
             </MudGrid>
         </MudItem>
+        <MudItem xs="12" md="3">
+            <!-- فیلتر دسته‌بندی -->
+            <MudPaper Outlined="true" Class="rounded-xl pa-4" Elevation="2" Style="@($"background:{Colors.Gray.Lighten4}")">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">دسته‌بندی‌ها</MudText>
+
+                <MudList T="string" @bind-SelectedValue="selectedCat" Dense="true" Color="Color.Primary" Class="rounded-xl">
+                    <MudListItem OnClick="@(() => SelectCategory(null))" Value="string.Empty" Text="همه محصولات" Class="rounded-lg" />
+                    @foreach (var cat in Categories)
+                    {
+                        <MudListItem OnClick="@(() => SelectCategory(cat.Id))" Value="cat.Id.ToString()" Text="@($"{cat.Name} ({cat.ProductsInThisCategory})")" />
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+
     </MudGrid>
 </MudContainer>
 
@@ -51,6 +49,7 @@
     private List<ProductDto> Products = new();
     private List<CategoryDto> Categories = new();
     private int? _selectedCategory;
+    private string selectedCat = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

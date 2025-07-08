@@ -10,10 +10,10 @@
     <AuthorizeView>
         <Authorized>
             <MudIconButton Icon="@Icons.Material.TwoTone.AccountCircle" Color="Color.Primary" Href="@($"/admin/profile/{userId}")"></MudIconButton>
-            <MudIconButton Icon="@Icons.Material.Rounded.Logout" Color="Color.Error" OnClick="Logout"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Rounded.Logout" Color="Color.Dark" OnClick="Logout"></MudIconButton>
         </Authorized>
         <NotAuthorized>
-            <MudIconButton Icon="@Icons.Material.Rounded.Login" Color="Color.Primary" Target="/login" Href="/login"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Rounded.Login" Color="Color.Dark" Href="/login"></MudIconButton>
         </NotAuthorized>
     </AuthorizeView>
 </MudAppBar>
@@ -25,13 +25,15 @@
 
     <MudNavMenu Color="Color.Primary" Rounded="true">
         <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.TwoTone.Home">صفحه اصلی</MudNavLink>
+        <MudNavLink Href="/shop" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.TwoTone.Backpack">محصولات</MudNavLink>
         <AuthorizeView Roles="Admin">
             <Authorized>
+                <MudDivider></MudDivider>
                 <MudNavLink Href="/admin/dashboard" Icon="@Icons.Material.TwoTone.Dashboard" Match="NavLinkMatch.All">داشبورد</MudNavLink>
-                <MudNavLink Href="/admin/products" Icon="@Icons.Material.TwoTone.Backpack" Match="NavLinkMatch.All">محصولات</MudNavLink>
-                <MudNavLink Href="/admin/categories" Icon="@Icons.Material.TwoTone.Category" Match="NavLinkMatch.All">دسته‌بندی‌ها</MudNavLink>
-                <MudNavLink Href="/admin/users" Icon="@Icons.Material.TwoTone.SupervisedUserCircle" Match="NavLinkMatch.All">کاربران</MudNavLink>
-                <MudNavLink Href="/admin/orders" Icon="@Icons.Material.TwoTone.ShoppingCart" Match="NavLinkMatch.All">سفارش ها</MudNavLink>
+                <MudNavLink Href="/admin/products" Icon="@Icons.Material.TwoTone.Backpack" Match="NavLinkMatch.Prefix">مدیریت محصولات</MudNavLink>
+                <MudNavLink Href="/admin/categories" Icon="@Icons.Material.TwoTone.Category" Match="NavLinkMatch.Prefix">مدیریت دسته‌بندی‌ها</MudNavLink>
+                <MudNavLink Href="/admin/users" Icon="@Icons.Material.TwoTone.SupervisedUserCircle" Match="NavLinkMatch.Prefix">مدیریت کاربران</MudNavLink>
+                <MudNavLink Href="/admin/orders" Icon="@Icons.Material.TwoTone.ShoppingCart" Match="NavLinkMatch.Prefix">مدیریت سفارش‌ها</MudNavLink>
                 <MudNavLink Href="/admin/setting" Icon="@Icons.Material.TwoTone.Settings" Match="NavLinkMatch.All">تنظیمات</MudNavLink>
             </Authorized>
         </AuthorizeView>

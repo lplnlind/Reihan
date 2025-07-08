@@ -36,7 +36,7 @@ else
                     <MudItem xs="12" sm="12">
                         <MudPaper Outlined="true" Class="rounded-gl pa-1">
                             <MudStack Justify="Justify.Center">
-                                <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
+                                <MudFileUpload T="IReadOnlyList<IBrowserFile>" Accept=".png, .jpg" FilesChanged="UploadFiles" MaximumFileCount="5" MaxFileSize="@(4 * 1024 * 1024)">
                                     <ActivatorContent>
                                         <MudButton Variant="Variant.Filled" FullWidth="true"
                                                    Color="Color.Primary"
