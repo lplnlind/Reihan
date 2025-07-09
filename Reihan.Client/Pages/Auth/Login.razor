@@ -5,15 +5,18 @@
 @inject ILocalStorageService LocalStorage
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
-<MudPaper Elevation="3" Class="mx-auto mt-12 p-6" MaxWidth="400px">
-    <MudText Typo="Typo.h5" Class="mb-4 text-center">ورود به حساب کاربری</MudText>
+<MudPaper Elevation="3" Outlined Class="mx-auto mt-12 pa-6 rounded-xl" MaxWidth="400px">
+    <MudText Typo="Typo.h5" Class="mb-4 text-center pa-2 rounded-lg primary-background">ورود به حساب کاربری</MudText>
 
-    <MudTextField Label="ایمیل" @bind-Value="_model.UserName" Required="true" />
-    <MudTextField Label="رمز عبور" @bind-Value="_model.Password" InputType="InputType.Password" Required="true" />
+    <EditForm Model="_model" OnValidSubmit="LoginUser">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <MudTextField Label="ایمیل" @bind-Value="_model.UserName" Required="true" />
+        <MudTextField Label="رمز عبور" @bind-Value="_model.Password" InputType="InputType.Password" Required="true" />
+        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Class="mt-8 rounded-lg" FullWidth="true" Variant="Variant.Outlined">ورود</MudButton>
+    </EditForm>
 
-    <MudButton OnClick="LoginUser" Color="Color.Primary" Class="mt-4" FullWidth="true" Variant="Variant.Filled">ورود</MudButton>
     <MudText Class="mt-4">
-        <MudLink Href="/forgot-password">رمز عبور را فراموش کرده‌اید؟</MudLink>
+        <MudLink Color="Color.Dark" Href="/forgot-password" Class="scondary-background">رمز عبور را فراموش کرده‌اید؟</MudLink>
     </MudText>
 
     <MudText>
@@ -39,7 +42,7 @@
         }
         else
         {
-            Snackbar.Add( "ورود ناموفق بود", Severity.Error);
+            Snackbar.Add("ورود ناموفق بود", Severity.Error);
         }
     }
 }

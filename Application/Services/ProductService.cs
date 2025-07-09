@@ -167,7 +167,7 @@ namespace Application.Services
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
 
-            return products.Select(p => new ProductDto
+            return latest.Select(p => new ProductDto
             {
                 Id = p.Id,
                 Name = p.Name,

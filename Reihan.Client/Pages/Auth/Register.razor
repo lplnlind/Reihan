@@ -2,15 +2,22 @@
 @inject IAuthClient AuthClient
 @inject NavigationManager NavigationManager
 
-<MudPaper Class="p-6 mx-auto mt-10" Style="max-width: 400px;">
-    <MudText Typo="Typo.h5" Class="mb-4">ثبت‌نام</MudText>
+<MudPaper Class="pa-6 mx-auto mt-10 rounded-xl" Outlined MaxWidth="400px">
+    <MudText Typo="Typo.h5" Class="mb-4 text-center pa-2 rounded-lg primary-background">ثبت‌نام</MudText>
 
-    <MudTextField Label="نام کامل" @bind-Value="_registerModel.FullName" Required="true" />
-    <MudTextField Label="ایمیل" @bind-Value="_registerModel.Email" Required="true" />
-    <MudTextField Label="رمز عبور" @bind-Value="_registerModel.Password" Required="true" InputType="InputType.Password" />
-    <MudTextField Label="تکرار رمز عبور" @bind-Value="_registerModel.ConfirmPassword" Required="true" InputType="InputType.Password" />
+    <EditForm Model="_registerModel" OnValidSubmit="RegisterUser">
+        <MudTextField Label="نام کامل" @bind-Value="_registerModel.FullName" Required="true" />
+        <MudTextField Label="ایمیل" @bind-Value="_registerModel.Email" Required="true" />
+        <MudTextField Label="رمز عبور" @bind-Value="_registerModel.Password" Required="true" InputType="InputType.Password" />
+        <MudTextField Label="تکرار رمز عبور" @bind-Value="_registerModel.ConfirmPassword" Required="true" InputType="InputType.Password" />
 
-    <MudButton OnClick="RegisterUser" Variant="Variant.Filled" Color="Color.Primary" Disabled="_isSubmitting" Class="mt-4">ثبت‌نام</MudButton>
+        <MudButton OnClick="RegisterUser" Variant="Variant.Outlined" Color="Color.Primary" Disabled="_isSubmitting" Class="mt-8 rounded-lg" FullWidth>ثبت‌نام</MudButton>
+    </EditForm>
+
+    <MudText Class="mt-4">
+        حساب کاربری دارید؟
+        <MudLink Href="/login">ورود</MudLink>
+    </MudText>
 
     @if (!string.IsNullOrEmpty(_error))
     {
