@@ -14,18 +14,21 @@ namespace Application.Services
         private readonly ICartRepository _cartRepo;
         private readonly IOrderRepository _orderRepo;
         private readonly IProductRepository _productRepo;
+        private readonly IProductImageRepository _productImageRepo;
         private readonly IOrderItemRepository _orderItemRepo;
         private readonly IUserRepository _userRepo;
 
         public OrderService(ICartRepository cartRepo,
             IOrderRepository orderRepo,
             IProductRepository productRepo,
+            IProductImageRepository productImageRepo,
             IOrderItemRepository orderItemRepo,
             IUserRepository userRepo)
         {
             _cartRepo = cartRepo;
             _orderRepo = orderRepo;
             _productRepo = productRepo;
+            _productImageRepo = productImageRepo;
             _orderItemRepo = orderItemRepo;
             _userRepo = userRepo;
         }
@@ -56,6 +59,33 @@ namespace Application.Services
             });
         }
 
+        public async Task<OrderDetailsDto?> GetOrderDetailsAsync(int orderId)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order is null) return null;
+
+            var items = await _orderItemRepo.GetByOrderIdAsync(orderId);
+
+            return new OrderDetailsDto
+            {
+                Id = order.Id,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                Status = order.Status.ToString(),
+                Items = items.Select(i =>
+                {
+                    return new OrderItemDto
+                    {
+                        ProductId = i.ProductId,
+                        Quantity = i.Quantity,
+                        UnitPrice = i.UnitPrice,
+                        ProductName = i.ProductName,
+                        ProductImage = i.ProductImage,
+                    };
+                }).ToList()
+            };
+        }
+
         public async Task UpdateOrderStatusAsync(int Id, string newStatus)
         {
             var order = await _orderRepo.GetByIdAsync(Id);
@@ -83,12 +113,21 @@ namespace Application.Services
                     throw new Exception($"موجودی محصول '{product?.Name}' کافی نیست.");
             }
 
+            // گرفتن عکس‌ها
+            var productImages = await _productImageRepo
+                .GetByProductIdsAsync(cart.Items.Select(s => s.ProductId).ToList());
+            var imageLookup = productImages
+                .GroupBy(i => i.ProductId)
+                .ToDictionary(g => g.Key, g => g.First().Url);
+
             // ساخت OrderItem
             var orderItems = cart.Items.Select(x => new OrderItem
             {
                 ProductId = x.ProductId,
+                ProductName = x.ProductName,
                 Quantity = x.Quantity,
-                UnitPrice = x.UnitPrice
+                UnitPrice = x.UnitPrice,
+                ProductImage = imageLookup.GetValueOrDefault(x.ProductId, string.Empty)
             }).ToList();
 
             var address = new Address(request.ShippingAddress.Street, request.ShippingAddress.City, request.ShippingAddress.ZipCode);
@@ -109,15 +148,33 @@ namespace Application.Services
             return order.Id;
         }
 
-        public async Task<List<OrderDto>> GetOrdersByUserAsync(int userId)
+        public async Task<List<OrderDetailsDto>> GetOrdersByUserAsync(int userId)
         {
             var orders = await _orderRepo.GetByUserIdAsync(userId);
-            return orders.Select(o => new OrderDto
+            if (orders == null || !orders.Any())
+                return new();
+
+            var orderIds = orders.Select(o => o.Id).ToList();
+
+            var orderItems = await _orderItemRepo.GetByOrderIdsAsync(orderIds);
+            var itemsGrouped = orderItems.GroupBy(i => i.OrderId).ToDictionary(g => g.Key, g => g.ToList());
+
+            return orders.Select(order => new OrderDetailsDto
             {
-                Id = o.Id,
-                OrderDate = o.OrderDate,
-                Status = o.Status.ToString(),
-                TotalAmount = o.TotalAmount
+                Id = order.Id,
+                OrderDate = order.OrderDate,
+                Status = order.Status.ToString(),
+                TotalAmount = order.TotalAmount,
+                Items = itemsGrouped.TryGetValue(order.Id, out var items)
+                    ? items.Select(i => new OrderItemDto
+                    {
+                        ProductId = i.ProductId,
+                        ProductName = i.ProductName,
+                        Quantity = i.Quantity,
+                        UnitPrice = i.UnitPrice,
+                        ProductImage = i.ProductImage,
+                    }).ToList()
+                    : new()
             }).ToList();
         }
     }

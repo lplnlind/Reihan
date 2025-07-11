@@ -6,7 +6,7 @@ namespace Application.Interfaces
     {
         public interface IFavoriteService
         {
-            Task<List<ProductDto>> GetFavoriteProductsAsync(int userId);
+            Task<List<ProductDto>> GetUserFavoritesAsync(int userId);
             Task<bool> IsFavoriteAsync(int userId, int productId);
             Task AddToFavoriteAsync(int userId, int productId);
             Task RemoveFromFavoriteAsync(int userId, int productId);

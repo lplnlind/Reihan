@@ -3,58 +3,121 @@
 @inject IProductClient ProductClient
 @inject IFavoriteClient FavoriteClient
 
-<MudCard Class="rounded-xl pa-2" Outlined="true" Elevation="2">
-    <MudLink Href="@($"/shop/product/{Product.Id}")"><MudCardMedia Class="rounded-xl" Image="@Product.ImageUrl" Height="200" /></MudLink>
-    <MudCardContent>
-        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-            <MudLink Href="@($"/shop/product/{Product.Id}")" Underline="Underline.None" Color="Color.Dark" Typo="Typo.h5">@Product.Name</MudLink>
+
+@if (IsList)
+{
+    <MudCard Class="rounded-xl pa-2 mb-2" Outlined="true" Elevation="2" Style="width: 100%">
+        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudStack Row AlignItems="AlignItems.Center">
+                <MudLink Href="@($"/shop/product/{Product.Id}")" Style="height: 100px">
+                    <MudImage Class="rounded-xl" Src="@Product.ImageUrl" Height="100"/>
+                </MudLink>
+                <MudCardContent>
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="5">
+                        <MudLink Href="@($"/shop/product/{Product.Id}")" Underline="Underline.None" Color="Color.Dark" Typo="Typo.h5">@Product.Name</MudLink>
+                        <AuthorizeView>
+                            <Authorized>
+                                <MudToggleIconButton @bind-Toggled="IsFav"
+                                                     @onclick="ToggleFavorite"
+                                                     Icon="@Icons.Material.Rounded.FavoriteBorder"
+                                                     ToggledIcon="@Icons.Material.Rounded.Favorite"
+                                                     Color="Color.Dark"
+                                                     ToggledColor="Color.Primary"
+                                                     Size="Size.Small"
+                                                     Class="pa-1"
+                                                     aria-label="add to favorite" />
+                            </Authorized>
+                            <NotAuthorized>
+                                <MudIconButton Href="/login" Class="pa-1" Icon="@Icons.Material.Rounded.FavoriteBorder" Color="Color.Dark" Size="Size.Small" aria-label="add to favorite" />
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </MudStack>
+                    <MudText Typo="Typo.body2">سایز: متوسط | جنس: چرم مصنوعی</MudText>
+                </MudCardContent>
+            </MudStack>
+
+            <MudCardActions>
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="ml-2">
+                    @* <MudText Inline="true">@(("500").En2Fa())</MudText> *@
+                    <MudText Inline="true" typo="Typo.h6">@Product.Price.ToNumeric().En2Fa()</MudText>
+                    <MudText Inline="true" Typo="Typo.caption">تومان</MudText>
+                </MudStack>
+                <AuthorizeView>
+                    <Authorized>
+                        @if (IsInCart)
+                        {
+                            <MudIconButton OnClick="RemoveFromCart" Icon="@Icons.Material.TwoTone.ShoppingCart" Class="rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
+                        }
+                        else
+                        {
+                            <MudButton OnClick="AddToCart" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
+                        }
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudButton Href="/login" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </MudCardActions>
+        </MudStack>
+
+    </MudCard>
+}
+else
+{
+    <MudCard Class="rounded-xl pa-2" Outlined="true" Elevation="2">
+        <MudLink Href="@($"/shop/product/{Product.Id}")"><MudCardMedia Class="rounded-xl" Image="@Product.ImageUrl" Height="200" /></MudLink>
+        <MudCardContent>
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudLink Href="@($"/shop/product/{Product.Id}")" Underline="Underline.None" Color="Color.Dark" Typo="Typo.h5">@Product.Name</MudLink>
+                <AuthorizeView>
+                    <Authorized>
+                        <MudToggleIconButton @bind-Toggled="IsFav"
+                                             @onclick="ToggleFavorite"
+                                             Icon="@Icons.Material.Rounded.FavoriteBorder"
+                                             ToggledIcon="@Icons.Material.Rounded.Favorite"
+                                             Color="Color.Dark"
+                                             ToggledColor="Color.Primary"
+                                             Size="Size.Small"
+                                             Class="pa-1"
+                                             aria-label="add to favorite" />
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudIconButton Href="/login" Class="pa-1" Icon="@Icons.Material.Rounded.FavoriteBorder" Color="Color.Dark" Size="Size.Small" aria-label="add to favorite" />
+                    </NotAuthorized>
+                </AuthorizeView>
+            </MudStack>
+            <MudText Typo="Typo.body2">سایز: متوسط | جنس: چرم مصنوعی</MudText>
+        </MudCardContent>
+        <MudCardActions Class="pt-0 justify-space-between">
             <AuthorizeView>
                 <Authorized>
-                        <MudToggleIconButton 
-                            @bind-Toggled="IsFav" 
-                            @onclick="ToggleFavorite" 
-                            Icon="@Icons.Material.Rounded.FavoriteBorder" 
-                            ToggledIcon="@Icons.Material.Rounded.Favorite" 
-                            Color="Color.Dark" 
-                            ToggledColor="Color.Primary"
-                            Size="Size.Small" 
-                            Class="pa-1" 
-                            aria-label="add to favorite" />
+                    @if (IsInCart)
+                    {
+                        <MudIconButton OnClick="RemoveFromCart" Icon="@Icons.Material.TwoTone.ShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
+                    }
+                    else
+                    {
+                        <MudButton OnClick="AddToCart" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
+                    }
                 </Authorized>
                 <NotAuthorized>
-                    <MudIconButton Href="/login" Class="pa-1" Icon="@Icons.Material.Rounded.FavoriteBorder" Color="Color.Dark" Size="Size.Small" aria-label="add to favorite" />
+                    <MudButton Href="/login" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
                 </NotAuthorized>
             </AuthorizeView>
-        </MudStack>
-        <MudText Typo="Typo.body2">سایز: متوسط | جنس: چرم مصنوعی</MudText>
-    </MudCardContent>
-    <MudCardActions Class="pt-0 justify-space-between">
-        <AuthorizeView>
-            <Authorized>
-                @if (IsInCart)
-                {
-                    <MudIconButton OnClick="RemoveFromCart" Icon="@Icons.Material.TwoTone.ShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
-                }
-                else
-                {
-                    <MudButton OnClick="AddToCart" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
-                }
-            </Authorized>
-            <NotAuthorized>
-                <MudButton Href="/login" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
-            </NotAuthorized>
-        </AuthorizeView>
 
-        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-            @* <MudText Inline="true">@(("500").En2Fa())</MudText> *@
-            <MudText Inline="true" typo="Typo.h6">@Product.Price.ToNumeric().En2Fa()</MudText>
-            <MudText Inline="true" Typo="Typo.caption">تومان</MudText>
-        </MudStack>
-    </MudCardActions>
-</MudCard>
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                @* <MudText Inline="true">@(("500").En2Fa())</MudText> *@
+                <MudText Inline="true" typo="Typo.h6">@Product.Price.ToNumeric().En2Fa()</MudText>
+                <MudText Inline="true" Typo="Typo.caption">تومان</MudText>
+            </MudStack>
+        </MudCardActions>
+    </MudCard>
+}
+
 
 @code {
     [Parameter] public ProductDto Product { get; set; } = new();
+    [Parameter] public bool IsList { get; set; } = false;
     private bool IsFav;
     private bool IsInCart;
 

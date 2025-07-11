@@ -1,70 +1,194 @@
-﻿@inject IAuthClient AuthClient
-@inject NavigationManager Nav
+﻿@page "/account/profile"
+@inject IAuthClient AuthClient
+@inject IFavoriteClient FavoriteClient
+@inject IOrderClient OrderClient
 @inject ISnackbar Snackbar
-
-<h3>پروفایل</h3>
-
-<EditForm Model="@profile" OnValidSubmit="UpdateProfile">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+@inject NavigationManager Nav
+@using Reihan.Client.Pages.Shop
 
 
-    <label>نام کامل:</label>
-    <InputText @bind-Value="profile.FullName" class="form-control" />
+<MudGrid Justify="Justify.Center">
 
-    <label>ایمیل:</label>
-    <InputText @bind-Value="profile.Email" class="form-control" />
+    <MudItem xs="12" sm="3">
+        <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
+            <MudStack AlignItems="AlignItems.Center">
+                <MudBadge Icon="@Icons.Material.Outlined.Close" Overlap Color="Color.Error" Bordered>
+                    <MudImage Width="150" Src="/images/profile/photo_2024-05-18_02-30-21.jpg" Class="rounded-circle"></MudImage>
+                </MudBadge>
+                <MudText Typo="Typo.h4" Class="scondary-background rounded-lg py-1 px-1">@profile.FullName</MudText>
+            </MudStack>
+        </MudPaper>
+        <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">مشخصات شما</MudText>
+                <MudIconButton Icon="@Icons.Material.TwoTone.Edit" Color="Color.Primary" Size="Size.Small" OnClick="IsUpdateProfile"></MudIconButton>
+            </MudStack>
 
-    <label>خیابان:</label>
-    <InputText @bind-Value="profile.Address.Street" class="form-control" />
+            <EditForm Model="@profile" OnValidSubmit="UpdateProfile">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-    <label>شهر:</label>
-    <InputText @bind-Value="profile.Address.City" class="form-control" />
+                <MudTextField Label="نام کامل" @bind-Value="profile.FullName" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
 
-    <label>کد پستی:</label>
-    <InputText @bind-Value="profile.Address.ZipCode" class="form-control" />
+                <MudTextField Label="ایمیل" @bind-Value="profile.Email" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
 
-    <button type="submit">ذخیره تغییرات</button>
-</EditForm>
+                <MudTextField Label="خیابان" @bind-Value="profile.Address.Street" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
 
-<hr />
-<h4>تغییر رمز عبور</h4>
+                <MudTextField Label="شهر" @bind-Value="profile.Address.City" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
 
-<EditForm Model="@changePassword" OnValidSubmit="ChangePassword">
-    <InputText @bind-Value="changePassword.CurrentPassword" type="password" />
-    <InputText @bind-Value="changePassword.NewPassword" type="password" />
-    <button type="submit">تغییر رمز</button>
-</EditForm>
+                <MudTextField Label="کدپستی" @bind-Value="profile.Address.ZipCode" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
+
+                <MudStack Justify="Justify.FlexEnd">
+                    @if (!isUpdateProfile)
+                    {
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Outlined.Edit" Class="rounded-lg">ویرایش</MudButton>
+                    }
+                </MudStack>
+            </EditForm>
+        </MudPaper>
+        <MudPaper Outlined Class="rounded-xl pa-6" Elevation="2">
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">تغییر رمز عبور</MudText>
+                <MudIconButton Icon="@Icons.Material.TwoTone.Edit" Color="Color.Primary" Size="Size.Small" OnClick="IsChangePassword"></MudIconButton>
+            </MudStack>
+
+            <EditForm Model="@changePassword" OnValidSubmit="ChangePassword">
+                <MudTextField Label="رمز فعلی" @bind-Value="changePassword.CurrentPassword" Margin="Margin.Dense" Disabled="isChangePassword" Variant="Variant.Outlined" Class="rounded-lg" />
+                <MudTextField Label="رمز جدید" @bind-Value="changePassword.NewPassword" Margin="Margin.Dense" Disabled="isChangePassword" Variant="Variant.Outlined" Class="rounded-lg" />
+                <MudStack Justify="Justify.FlexEnd">
+                    @if (!isChangePassword)
+                    {
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Outlined.Edit" Class="rounded-lg">ویرایش</MudButton>
+                    }
+                </MudStack>
+            </EditForm>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="9">
+        <MudPaper Outlined Class="rounded-xl pa-6" Elevation="2">
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">@title</MudText>
+
+                <MudStack Row Spacing="1">
+                    <MudButton OnClick="SwitchContent" Variant="orderVariant" Color="Color.Primary" DropShadow="false" StartIcon="@Icons.Material.Rounded.ShoppingCart" Size="Size.Small" Class="rounded-lg px-2 py-0 ma-0 botton-tag">سفارش‌ها</MudButton>
+                    <MudButton OnClick="SwitchContent" Variant="favoriteVariant" Color="Color.Primary" DropShadow="false" StartIcon="@Icons.Material.Rounded.Favorite" Size="Size.Small" Class="rounded-lg px-2 py-0 ma-0 botton-tag">علاقه‌مندی‌ها</MudButton>
+                </MudStack>
+
+            </MudStack>
+
+            @if (switchContent)
+            {
+                foreach (var order in orders)
+                {
+                    <MudPaper Outlined Class="rounded-xl" Elevation="2">
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="pa-6 rounded-t-xl" Style="@($"background:{Colors.Gray.Lighten4}")">
+                            <MudItem>
+                                <MudText Typo="Typo.caption">شماره سفارش:</MudText>
+                                <MudText Typo="Typo.h5">@order.Id</MudText>
+                            </MudItem>
+                            <MudItem>
+                                <MudText Typo="Typo.caption">تاریخ سفارش:</MudText>
+                                <MudText Typo="Typo.body1">@order.OrderDate</MudText>
+                            </MudItem>
+                            <MudStack Spacing="0" AlignItems="AlignItems.Start">
+                                <MudText Typo="Typo.caption">وضعیت سفارش:</MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="ma-0">@order.Status</MudChip>
+                            </MudStack>
+                            <MudItem>
+                                <MudText Typo="Typo.caption">جمع کل:</MudText>
+                                <MudText Typo="Typo.body1">@order.TotalAmount.ToNumeric().En2Fa()</MudText>
+                            </MudItem>
+                        </MudStack>
+                        <MudItem Class="pa-6">
+                            @foreach (var orderItem in order.Items)
+                            {
+                                <OrderItemCard OrderItem="orderItem" />
+                            }
+                        </MudItem>
+
+                    </MudPaper>
+                }
+            }
+            else
+                foreach (var product in products)
+                {
+                    <ProductCard IsList="true" Product="product"></ProductCard>
+                }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+
+
 
 @code {
     private UpdateProfileRequest profile = new();
     private ChangePasswordRequest changePassword = new();
+    private bool isUpdateProfile = true;
+    private bool isChangePassword = true;
+
+    private List<ProductDto> products = new();
+    private List<OrderDetailsDto> orders = new();
+    private bool switchContent = true;
+    private string title = "تاریخچه سفارش‌ها";
+    private Variant orderVariant = Variant.Filled;
+    private Variant favoriteVariant = Variant.Outlined;
 
     protected override async Task OnInitializedAsync()
     {
         var current = await AuthClient.GetProfileAsync();
         profile = new UpdateProfileRequest
+        {
+            FullName = current.FullName,
+            Email = current.Email,
+            Address = new AddressDto
             {
-                FullName = current.FullName,
-                Email = current.Email,
-                Address = new AddressDto
-                {
-                    Street = current.Street,
-                    City = current.City,
-                    ZipCode = current.ZipCode
-                }
-            };
+                Street = current.Street,
+                City = current.City,
+                ZipCode = current.ZipCode
+            }
+        };
+
+        products = await FavoriteClient.GetUserFavoritesAsync();
+        orders = await OrderClient.GetOrdersByUserAsync();
     }
+
 
     private async Task UpdateProfile()
     {
         await AuthClient.UpdateProfileAsync(profile);
         Snackbar.Add("تغییرات ذخیره شد", Severity.Success);
+
+        IsUpdateProfile();
     }
+
+    private void IsUpdateProfile()
+    {
+        isUpdateProfile = !isUpdateProfile;
+    }
+
 
     private async Task ChangePassword()
     {
         await AuthClient.ChangePasswordAsync(changePassword);
         Snackbar.Add("رمز عبور با موفقیت تغییر کرد", Severity.Success);
+
+        IsChangePassword();
+    }
+
+    private void IsChangePassword()
+    {
+        isChangePassword = !isChangePassword;
+    }
+
+
+    private void SwitchContent()
+    {
+        switchContent = !switchContent;
+        orderVariant = orderVariant == Variant.Outlined ? Variant.Filled : Variant.Outlined;
+        favoriteVariant = favoriteVariant == Variant.Outlined ? Variant.Filled : Variant.Outlined;
+        title = title == "تاریخچه سفارش‌ها" ? "علاقه‌مندی‌ها" : "تاریخچه سفارش‌ها";
     }
 }
+
+

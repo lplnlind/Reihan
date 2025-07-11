@@ -3,7 +3,6 @@ using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Repositories;
-using System.Net.Sockets;
 
 namespace Application.Services
 {
@@ -13,17 +12,20 @@ namespace Application.Services
         private readonly IProductImageRepository _productImageRepo;
         private readonly ICategoryRepository _categoryRepo;
         private readonly ICartRepository _cartRepo;
+        private readonly IOrderItemRepository _orderItemRepo;
 
         public ProductService(IProductRepository productRepo,
             IProductImageRepository productImageRepo,
             ICategoryRepository categoryRepo,
             ICartRepository cartRepo,
-            IUserContextService userContextService)
+            IUserContextService userContextService,
+            IOrderItemRepository orderItemRepo)
         {
             _productRepo = productRepo;
             _productImageRepo = productImageRepo;
             _categoryRepo = categoryRepo;
             _cartRepo = cartRepo;
+            _orderItemRepo = orderItemRepo;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
@@ -117,6 +119,10 @@ namespace Application.Services
                 foreach (var image in toRemove)
                 {
                     var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
+
+                    bool isUsedInOrder = await _orderItemRepo.IsImageUsedAsync(image.Url);
+                    if (isUsedInOrder) continue;
+
                     if (File.Exists(path))
                         File.Delete(path);
                 }
@@ -145,6 +151,9 @@ namespace Application.Services
             foreach (var image in images)
             {
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
+
+                bool isUsedInOrder = await _orderItemRepo.IsImageUsedAsync(image.Url);
+                if (isUsedInOrder) continue;
 
                 if (File.Exists(filePath))
                     File.Delete(filePath);

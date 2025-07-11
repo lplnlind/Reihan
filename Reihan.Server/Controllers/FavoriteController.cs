@@ -23,7 +23,7 @@ namespace Reihan.Server.Controllers
         public async Task<IActionResult> Get()
         {
             var userId = _userContext.GetUserId();
-            var result = await _favoriteService.GetFavoriteProductsAsync(userId);
+            var result = await _favoriteService.GetUserFavoritesAsync(userId);
             return Ok(result);
         }
 

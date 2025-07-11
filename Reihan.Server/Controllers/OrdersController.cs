@@ -23,11 +23,19 @@ namespace Reihan.Server.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
-            var products = await _orderService.GetAllOrdersAsync();
-            return Ok(products);
+            var orders = await _orderService.GetAllOrdersAsync();
+            return Ok(orders);
+        }
+
+        [HttpGet("{id}/details")]
+        public async Task<IActionResult> GetOrderDetails(int id)
+        {
+            var orders = await _orderService.GetOrderDetailsAsync(id);
+            return Ok(orders);
         }
 
         [HttpPut("{id}/status")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusRequest request)
         {
             await _orderService.UpdateOrderStatusAsync(id, request.NewStatus);

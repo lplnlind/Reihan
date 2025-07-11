@@ -10,7 +10,7 @@ namespace Reihan.Client.Services
         private readonly HttpClient _http;
         public FavoriteClient(HttpClient http) => _http = http;
 
-        public async Task<List<ProductDto>> GetFavoritesAsync()
+        public async Task<List<ProductDto>> GetUserFavoritesAsync()
         {
             return await _http.GetFromJsonAsync<List<ProductDto>>("api/favorite") ?? new();
         }

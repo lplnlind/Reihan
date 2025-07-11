@@ -25,7 +25,7 @@ namespace Application.Services
             _categoryRepo = categoryRepo;
         }
 
-        public async Task<List<ProductDto>> GetFavoriteProductsAsync(int userId)
+        public async Task<List<ProductDto>> GetUserFavoritesAsync(int userId)
         {
             var favorites = await _favoriteRepo.GetByUserIdAsync(userId);
             var productIds = favorites.Select(f => f.ProductId).ToHashSet();
@@ -45,7 +45,8 @@ namespace Application.Services
                     CategoryId = p.CategoryId,
                     CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
                     StockQuantity = p.StockQuantity,
-                    ImageUrls = images.Where(i => i.ProductId == p.Id).Select(i => i.Url).ToList()
+                    ImageUrls = images.Where(i => i.ProductId == p.Id).Select(i => i.Url).ToList(),
+                    ImageUrl = images.FirstOrDefault()?.Url ?? string.Empty,
                 }).ToList();
         }
 

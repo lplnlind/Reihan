@@ -13,6 +13,13 @@ namespace Infrastructure.Persistence.Repositories
             return await _dbSet.AsNoTracking().Where(w => w.ProductId == productId).ToListAsync();
         }
 
+        public async Task<IEnumerable<ProductImage>> GetByProductIdsAsync(List<int> ids)
+        {
+            return await _dbSet
+                .Where(w => ids.Contains(w.ProductId))
+                .ToListAsync();
+        }
+
         public async Task AddRangeAsync(IEnumerable<ProductImage> images)
         {
             await _dbSet.AddRangeAsync(images);
@@ -34,5 +41,6 @@ namespace Infrastructure.Persistence.Repositories
             _dbSet.RemoveRange(images);
             await _context.SaveChangesAsync();
         }
+
     }
 }

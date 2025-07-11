@@ -6,7 +6,8 @@ namespace Application.Interfaces
     {
         Task<IEnumerable<OrderDto>> GetAllOrdersAsync();
         Task UpdateOrderStatusAsync(int Id, string newStatus);
-        Task<List<OrderDto>> GetOrdersByUserAsync(int userId);
+        Task<List<OrderDetailsDto>> GetOrdersByUserAsync(int userId);
         Task<int> CreateOrderAsync(int userId, CreateOrderRequest request);
+        Task<OrderDetailsDto?> GetOrderDetailsAsync(int orderId);
     }
 }

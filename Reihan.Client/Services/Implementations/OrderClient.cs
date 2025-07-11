@@ -17,15 +17,20 @@ namespace Reihan.Client.Services
             return await _http.GetFromJsonAsync<List<OrderDto>>("api/orders");
         }
 
+        public async Task<List<OrderDetailsDto>> GetOrderDetailsAsync(int id)
+        {
+            return await _http.GetFromJsonAsync<List<OrderDetailsDto>>($"api/orders/{id}/details");
+        }
+
         public async Task UpdateOrderStatusAsync(int id, string newStatus)
         {
             var req = new { NewStatus = newStatus };
             await _http.PutAsJsonAsync($"api/orders/{id}/status", req);
         }
 
-        public async Task<List<OrderDto>> GetOrdersByUserAsync()
+        public async Task<List<OrderDetailsDto>> GetOrdersByUserAsync()
         {
-            return await _http.GetFromJsonAsync<List<OrderDto>>("api/orders/user");
+            return await _http.GetFromJsonAsync<List<OrderDetailsDto>>("api/orders/user");
         }
 
         public async Task<int> CreateAsync(CreateOrderRequest request)

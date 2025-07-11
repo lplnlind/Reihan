@@ -1,0 +1,28 @@
+﻿<MudCard Class="rounded-xl pa-2 mb-2" Outlined="true" Elevation="2" Style="@($"background:{Colors.Gray.Lighten5}; width: 100%;")">
+    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudLink Href="@($"/shop/product/{OrderItem.ProductId}")" Style="height: 100px">
+                <MudImage Class="rounded-xl" Src="@OrderItem.ProductImage" Height="100" />
+            </MudLink>
+            <MudCardContent>
+                <MudLink Href="@($"/shop/product/{OrderItem.ProductId}")" Underline="Underline.None" Color="Color.Dark" Typo="Typo.h5" Class="primary-background pl-2 rounded-lg">@OrderItem.ProductName</MudLink>
+                <MudText Typo="Typo.body2">سایز: متوسط | جنس: چرم مصنوعی</MudText>
+            </MudCardContent>
+        </MudStack>
+
+        <MudCardActions>
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="1" Class="ml-2">
+                @* <MudText Inline="true">@(("500").En2Fa())</MudText> *@
+                <MudText Inline="true" Typo="Typo.body1">@OrderItem.Quantity.ToString().En2Fa() *</MudText>
+                <MudText Inline="true" typo="Typo.h6">@OrderItem.UnitPrice.ToNumeric().En2Fa()</MudText>
+                <MudText Inline="true" Typo="Typo.caption">تومان</MudText>
+            </MudStack>
+        </MudCardActions>
+    </MudStack>
+</MudCard>
+
+@code {
+    [Parameter] public OrderItemDto OrderItem { get; set; } = new();
+
+
+}

@@ -9,7 +9,7 @@
     <MudSpacer />
     <AuthorizeView>
         <Authorized>
-            <MudIconButton Icon="@Icons.Material.TwoTone.AccountCircle" Color="Color.Primary" Href="@($"/admin/profile/{userId}")"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.TwoTone.AccountCircle" Color="Color.Primary" Href="/account/profile"></MudIconButton>
             <MudIconButton Icon="@Icons.Material.Rounded.Logout" Color="Color.Dark" OnClick="Logout"></MudIconButton>
         </Authorized>
         <NotAuthorized>

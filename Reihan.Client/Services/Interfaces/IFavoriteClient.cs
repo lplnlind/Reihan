@@ -4,7 +4,7 @@ namespace Reihan.Client.Services
 {
     public interface IFavoriteClient
     {
-        Task<List<ProductDto>> GetFavoritesAsync();
+        Task<List<ProductDto>> GetUserFavoritesAsync();
         Task<bool> IsFavoriteAsync(int productId);
         Task AddToFavoriteAsync(int productId);
         Task RemoveFromFavoriteAsync(int productId);
