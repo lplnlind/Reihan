@@ -21,11 +21,11 @@ else
                 <MudItem xs="12" md="6" Style="height:500px">
                     @if (Product.ImageUrls.Count > 1)
                     {
-                        <MudCarousel TData="object" Style="width:100%; height:100%" AutoCycle="false">
+                        <MudCarousel TData="object" Class="mud-height-full" AutoCycle="false">
                             <BulletTemplate Context="selected">
                                 <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon pa-0 pb-2">
                                     <span class="mud-icon-button-label">
-                                        <MudIcon Icon="@(selected? Icons.Material.Filled.Circle : Icons.Material.TwoTone.Circle)" Color="@Color.Inherit" />
+                                        <MudIcon Size="Size.Small" Icon="@(selected? Icons.Material.Filled.Circle : Icons.Material.TwoTone.Circle)" Color="@Color.Inherit" />
                                     </span>
                                 </div>
                             </BulletTemplate>
@@ -33,7 +33,7 @@ else
                                 @foreach (var img in Product.ImageUrls)
                                 {
                                     <MudCarouselItem>
-                                        <MudImage Src="@img" Alt="تصویر محصول" Style="width:100%; height:100%" Class="rounded-xl" ObjectFit="ObjectFit.Cover" ObjectPosition="ObjectPosition.Center" />
+                                        <MudImage Src="@img" Alt="تصویر محصول" Class="rounded-xl mud-height-full mud-width-full" ObjectFit="ObjectFit.Cover" ObjectPosition="ObjectPosition.Center" />
                                     </MudCarouselItem>
                                 }
                             </ChildContent>

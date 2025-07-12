@@ -3,33 +3,54 @@
 @inject ICategoryClient CategoryClient
 @inject NavigationManager NavigationManager
 
-<MudContainer MaxWidth="MaxWidth.Large">
-    <!-- معرفی -->
-    <MudPaper Class="pa-6 mb-6 d-flex justify-center align-center">
-        <MudText Typo="Typo.h5">به فروشگاه ریحان خوش آمدید</MudText>
-    </MudPaper>
+<MudItem xs="12" lg="9" Class="mx-auto mb-6">
+    <MudCarousel TData="object" Class="mud-width-full rounded-xl" Style="padding-top:56.25%;" ShowArrows="false">
+        <BulletTemplate Context="selected">
+            <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon pa-0 pb-2">
+                <span class="mud-icon-button-label">
+                    <MudIcon Size="Size.Small" Icon="@(selected? Icons.Material.Filled.Circle : Icons.Material.TwoTone.Circle)" Color="@Color.Inherit" />
+                </span>
+            </div>
+        </BulletTemplate>
+        <ChildContent>
+            <MudCarouselItem>
+                <div>
+                    <MudImage Src="/images/slider/1.png" Class="rounded-xl" ObjectFit="ObjectFit.Cover" ObjectPosition="ObjectPosition.Center" Fluid />
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem>
+                <div>
+                    <MudImage Src="/images/slider/2.jpg" Class="rounded-xl  " ObjectFit="ObjectFit.Cover" ObjectPosition="ObjectPosition.Center" Fluid />
+                </div>
+            </MudCarouselItem>
+        </ChildContent>
+    </MudCarousel>
+</MudItem>
 
-    <!-- محصولات جدید -->
-    <MudText Typo="Typo.h6" Class="mb-2">🆕 محصولات جدید</MudText>
+<MudContainer MaxWidth="MaxWidth.Large">
+    <div class="mb-2 mr-2">
+        <MudText Typo="Typo.h4" Class="py-0 pl-3 rounded-lg scondary-background" Inline>دسته‌بندی‌ها</MudText>
+    </div>
+    <MudGrid Justify="Justify.Center" Class="mb-6">
+        @foreach (var category in Categories.Where(w => w.ProductsInThisCategory > 0).ToList())
+        {
+            <MudItem xs="6" sm="4" md="3">
+                <MudPaper Class="pa-4 hover:shadow-lg cursor-pointer rounded-xl"  @onclick="@(() => GoToCategory(category.Id))">
+                    <div><MudText Typo="Typo.h5" Class="py-0 pl-4 rounded-lg primary-background" Inline>@category.Name</MudText></div>
+                    <MudText Typo="Typo.caption">@category.ProductsInThisCategory محصول</MudText>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+
+    <div class="mb-2 mr-2">
+        <MudText Typo="Typo.h4" Class="py-0 pl-3 rounded-lg scondary-background" Inline>محصولات جدید</MudText>
+    </div>
     <MudGrid>
         @foreach (var product in LatestProducts)
         {
             <MudItem xs="12" sm="6" md="3">
                 <ProductCard Product="product" />
-            </MudItem>
-        }
-    </MudGrid>
-
-    <!-- دسته‌بندی‌ها -->
-    <MudText Typo="Typo.h6" Class="mt-8 mb-2">🎯 دسته‌بندی‌ها</MudText>
-    <MudGrid>
-        @foreach (var category in Categories)
-        {
-            <MudItem xs="6" sm="4" md="3">
-                <MudPaper Class="pa-4 hover:shadow-lg cursor-pointer" @onclick="@(() => GoToCategory(category.Id))">
-                    <MudText Typo="Typo.subtitle1">@category.Name</MudText>
-                    <MudText Typo="Typo.caption">@category.ProductsInThisCategory محصول</MudText>
-                </MudPaper>
             </MudItem>
         }
     </MudGrid>

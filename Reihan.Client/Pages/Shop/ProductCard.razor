@@ -68,7 +68,7 @@ else
         <MudLink Href="@($"/shop/product/{Product.Id}")"><MudCardMedia Class="rounded-xl" Image="@Product.ImageUrl" Height="200" /></MudLink>
         <MudCardContent>
             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                <MudLink Href="@($"/shop/product/{Product.Id}")" Underline="Underline.None" Color="Color.Dark" Typo="Typo.h5">@Product.Name</MudLink>
+                <MudLink Href="@($"/shop/product/{Product.Id}")" Underline="Underline.None" Color="Color.Dark" Typo="Typo.h5" Class="py-0 pl-2 rounded-lg primary-background">@Product.Name</MudLink>
                 <AuthorizeView>
                     <Authorized>
                         <MudToggleIconButton @bind-Toggled="IsFav"
