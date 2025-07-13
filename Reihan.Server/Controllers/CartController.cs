@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ namespace Reihan.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
@@ -39,6 +41,14 @@ namespace Reihan.Server.Controllers
         {
             int userId = _userContextService.GetUserId();
             await _cartService.RemoveItemAsync(userId, productId);
+            return Ok();
+        }
+
+        [HttpPut("quantity/{productId}")]
+        public async Task<IActionResult> ChangeQuantity(int productId, [FromBody] int quantity)
+        {
+            int userId = _userContextService.GetUserId();
+            await _cartService.ChangeQuantityAsync(userId, productId, quantity);
             return Ok();
         }
 

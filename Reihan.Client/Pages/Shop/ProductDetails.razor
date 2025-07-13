@@ -5,6 +5,7 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
+
 @if (Loading)
 {
     <MudProgressCircular Indeterminate="true" />
@@ -50,7 +51,7 @@ else
                     <MudStack Justify="Justify.SpaceBetween" Style="height:100%">
                         <MudItem>
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mt-7">
-                                <MudText Typo="Typo.h3" Class="mt-2 pl-2" Style="background-color: antiquewhite;">@Product.Name</MudText>
+                                <MudText Typo="Typo.h3" Class="mt-2 pl-4 rounded-lg primary-background">@Product.Name</MudText>
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
                                     <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">@Product.CategoryName</MudChip>
                                     <MudIconButton Icon="@Icons.Material.Rounded.Share" Size="Size.Small"></MudIconButton>
@@ -74,8 +75,8 @@ else
                             </MudStack>
 
                             <MudStack Row Spacing="0" AlignItems="AlignItems.End" Class="mt-5">
-                                <MudText Typo="Typo.h3" Style="background-color: antiquewhite;">@Product.Price.ToNumeric().En2Fa()</MudText>
-                                <MudText Inline="true" Typo="Typo.caption" Style="background-color: antiquewhite;">تومان</MudText>
+                                <MudText Typo="Typo.h3" Class="scondary-background rounded-lg">@Product.Price.ToNumeric().En2Fa()</MudText>
+                                <MudText Inline="true" Typo="Typo.caption">تومان</MudText>
                             </MudStack>
                             <MudText Typo="Typo.body2" Class="mt-1">سایز: متوسط | جنس: چرم مصنوعی</MudText>
                             <MudText Typo="Typo.body1" Class="mt-1 mb-2">@((MarkupString)Product.Description)</MudText>
@@ -84,14 +85,13 @@ else
                             <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
                                 <MudStack Row AlignItems="AlignItems.Center">
                                     <MudNumericField T="int"
-                                        @bind-Value="Quantity"
-                                        Min="1"
-                                        Max="@Product.StockQuantity"
-                                        Variant="Variant.Outlined"
-                                        Margin="Margin.Dense"
-                                        Class="rounded-lg ma-0 pa-2"
-                                        Typo="Typo.caption"
-                                        Style="Width:60px" />
+                                                     @bind-Value="Quantity"
+                                                     Min="1"
+                                                     Max="@Product.StockQuantity"
+                                                     Variant="Variant.Outlined"
+                                                     Margin="Margin.Dense"
+                                                     Class="ma-0 product-quantity"
+                                                     HideSpinButtons />
 
 
                                     <AuthorizeView>
@@ -134,6 +134,7 @@ else
     private bool IsFav;
     private bool IsInCart;
 
+
     protected override async Task OnInitializedAsync()
     {
         Product = await ProductClient.GetByIdAsync(id);
@@ -146,6 +147,7 @@ else
         }
     }
 
+
     private async Task AddToCart()
     {
         if (Product is null) return;
@@ -154,6 +156,7 @@ else
         {
             ProductId = Product.Id,
             ProductName = Product.Name,
+            ProductImage = Product.ImageUrl,
             Quantity = 1,
             UnitPrice = Product.Price
         };
@@ -173,6 +176,8 @@ else
 
         IsInCart = false;
     }
+
+
     private async Task ToggleFavorite()
     {
         if (IsFav)

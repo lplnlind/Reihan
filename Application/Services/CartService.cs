@@ -26,7 +26,8 @@ namespace Application.Services
                     ProductId = i.ProductId,
                     Quantity = i.Quantity,
                     UnitPrice = i.UnitPrice,
-                    ProductName = i.ProductName
+                    ProductName = i.ProductName,
+                    ProductImage = i.ProductImage,
                 }).ToList()
             };
         }
@@ -34,7 +35,7 @@ namespace Application.Services
         public async Task AddItemAsync(int userId, AddToCartRequest request)
         {
             var cart = await _cartRepository.GetByUserIdAsync(userId) ?? new Cart(userId);
-            cart.AddItem(request.ProductId, request.Quantity, request.UnitPrice, request.ProductName);
+            cart.AddItem(request.ProductId, request.Quantity, request.UnitPrice, request.ProductName, request.ProductImage);
             if (cart.Id == 0)
                 await _cartRepository.AddAsync(cart);
             else
@@ -46,6 +47,21 @@ namespace Application.Services
             var cart = await _cartRepository.GetByUserIdAsync(userId);
             if (cart is null) return;
             cart.RemoveItem(productId);
+            await _cartRepository.UpdateAsync(cart);
+        }
+
+        public async Task ChangeQuantityAsync(int userId, int productId, int quantity)
+        {
+            var cart = await _cartRepository.GetByUserIdAsync(userId);
+            if (cart is null) return;
+
+            if (quantity == 0)
+            {
+                await RemoveItemAsync(userId, productId);
+                return;
+            }
+
+            cart.ChangeQuantity(productId, quantity);
             await _cartRepository.UpdateAsync(cart);
         }
 

@@ -17,18 +17,18 @@ namespace Domain.Entities
             UserId = userId;
         }
 
-        public void AddItem(int productId, int quantity, decimal unitPrice, string productName)
+        public void AddItem(int productId, int quantity, decimal unitPrice, string productName, string productImage)
         {
             var existingItem = _items.FirstOrDefault(i => i.ProductId == productId);
             if (existingItem is not null)
             {
                 _items.Remove(existingItem);
-                var updatedItem = new CartItem(productId, existingItem.Quantity + quantity, unitPrice, productName);
+                var updatedItem = new CartItem(productId, existingItem.Quantity + quantity, unitPrice, productName, productImage);
                 _items.Add(updatedItem);
             }
             else
             {
-                _items.Add(new CartItem(productId, quantity, unitPrice, productName));
+                _items.Add(new CartItem(productId, quantity, unitPrice, productName, productImage));
             }
         }
 
@@ -39,6 +39,13 @@ namespace Domain.Entities
             {
                 _items.Remove(item);
             }
+        }
+
+        public void ChangeQuantity(int productId,int quantity)
+        {
+            var item = _items.FirstOrDefault(i => i.ProductId == productId);
+            if (item is not null)
+                item.ChangeQuantity(quantity);
         }
 
         public void Clear()

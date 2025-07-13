@@ -26,7 +26,7 @@
         background: @Colors.Amber.Lighten4;
     }
 
-    .cursor-pointer{
+    .cursor-pointer {
         cursor: pointer;
     }
 
@@ -34,7 +34,32 @@
         font-size: 12px;
         font-weight: normal;
     }
+
+    .dialog-blur {
+        backdrop-filter: blur(10px);
+    }
+
+    .border-color-gray-Lighten2 {
+        border-color: @Colors.Gray.Lighten2;
+    }
+
+    .mud-input-outlined-border {
+        border-radius: 8px !important;
+    }
+
+    .product-quantity .mud-input-outlined-border {
+        border-color: @Colors.Gray.Lighten2 !important;
+    }
+
+    .product-quantity > .mud-input-control-input-container > .mud-input >
+    input.mud-input-root-outlined {
+        padding: 5px 8px;
+        width: 40px;
+        font-size: 14px;
+        background-color: white;
+    }
 </style>
+
 
 @code {
     MudTheme MyCustomTheme = new MudTheme()
@@ -56,7 +81,6 @@
             Warning = "#ff9800",
             Error = "#f44336"
         },
-
 
         Typography = new Typography()
         {
@@ -116,7 +140,7 @@
             },
             Button = new ButtonTypography()
             {
-                FontWeight = "500"
+                FontWeight = "400"
             }
         }
     };

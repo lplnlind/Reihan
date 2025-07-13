@@ -1,0 +1,42 @@
+﻿@inject ICartClient CartClient
+
+
+<MudDialog Class="rounded-xl">
+    <DialogContent>
+        @if (_cart is null)
+        {
+            <p>در حال بارگذاری...</p>
+        }
+        else if (!_cart.Items.Any())
+        {
+            <p>سبد خرید شما خالی است.</p>
+        }
+        else
+        {
+            <CartCard CartItems="_cart.Items"></CartCard>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudStack row Class="pa-6 mud-width-full " Style="@($"border-top: 1px solid {Colors.Gray.Lighten2}")">
+            <MudButton OnClick="Cancel" Variant="Variant.Outlined"
+                       Class="rounded-lg border-color-gray-Lighten2" Style="width: 140px">بستن سبد</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" Href="/cart"
+                       FullWidth Class="rounded-lg">مشاهده و ویرایش سبد</MudButton>
+        </MudStack>
+
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    private CartDto? _cart;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cart = await CartClient.GetCartAsync();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

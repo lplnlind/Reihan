@@ -1,72 +1,91 @@
 ﻿@page "/cart"
 @inject ICartClient CartClient
 
-<PageTitle>سبد خرید</PageTitle>
 
-<h3>🛒 سبد خرید شما</h3>
-
-@if (cart is null)
+@if (_cart is null)
 {
     <p>در حال بارگذاری...</p>
 }
-else if (!cart.Items.Any())
+else if (!_cart.Items.Any())
 {
-    <p>سبد خرید شما خالی است.</p>
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="my-7">سبد خرید شما خالی است.</MudText>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>محصول</th>
-                <th>قیمت واحد</th>
-                <th>تعداد</th>
-                <th>جمع</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in cart.Items)
-            {
-                <tr>
-                    <td>@item.ProductName</td>
-                    <td>@item.UnitPrice تومان</td>
-                    <td>@item.Quantity</td>
-                    <td>@(item.Quantity * item.UnitPrice) تومان</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveItem(item.ProductId)">❌ حذف</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mb-5">
+        <MudButton StartIcon="@Icons.Material.TwoTone.ShoppingCart" Class="rounded-lg"
+                   Variant="Variant.Filled" Color="Color.Primary">سبد خرید</MudButton>
+        <MudButton StartIcon="@Icons.Material.TwoTone.LocalShipping" Class="rounded-lg border-color-gray-Lighten2"
+                   Variant="Variant.Outlined">آدرس</MudButton>
+        <MudButton StartIcon="@Icons.Material.TwoTone.Payment" Class="rounded-lg border-color-gray-Lighten2"
+                   Variant="Variant.Outlined">پرداخت</MudButton>
+        <MudButton StartIcon="@Icons.Material.TwoTone.ShoppingBag" Class="rounded-lg border-color-gray-Lighten2"
+                   Variant="Variant.Outlined">سفارش</MudButton>
+    </MudStack>
 
-    <h5>جمع کل: <strong>@cart.TotalPrice تومان</strong></h5>
+    <MudItem sm="12" lg="9" Class="mx-auto">
 
-    <button class="btn btn-warning" @onclick="ClearCart">🗑️ پاک‌سازی سبد</button>
-    <button class="btn btn-primary ms-2" >
-    ادامه به تسویه‌حساب 🧾
-</button>
+        <MudGrid>
+            <MudItem xs="12" lg="8">
+                <CartCard IsDisable="false" CartItems="_cart.Items" OnCartChanged="ReloadCart"></CartCard>
 
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
+                    <MudButton OnClick="ClearCart" Variant="Variant.Outlined"
+                               Class="rounded-lg border-color-gray-Lighten2">حذف سبد</MudButton>
+
+                    <MudButton EndIcon="@Icons.Material.Rounded.ArrowBack" Class="rounded-lg"
+                               Variant="Variant.Outlined" Color="Color.Primary">آدرس</MudButton>
+                </MudStack>
+            </MudItem>
+            <MudItem xs="12" lg="4">
+                <MudPaper Outlined Class="rounded-xl pa-4">
+                    <div>
+                        <MudText Inline Typo="Typo.h5" Class="primary-background pl-3 rounded-lg">مشخصات سفارش</MudText>
+                    </div>
+                    <MudDivider Class="my-3" />
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">مجموعه کالاها:</MudText>
+                        <MudText Typo="Typo.body1">@_cart.TotalPrice.ToNumeric().En2Fa()</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">هزینه ارسال:</MudText>
+                        <MudText Typo="Typo.body1">۳۰,۰۰۰</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">تخفیف:</MudText>
+                        <MudText Typo="Typo.body1">۰</MudText>
+                    </MudStack>
+                    <MudDivider Class="my-3" />
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body1">مبلغ کل:</MudText>
+                        <MudText Typo="Typo.h5" Class="primary-background pr-3 rounded-lg">@_cart.TotalPrice.ToNumeric().En2Fa()</MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
 }
 
+
 @code {
-    private CartDto? cart;
+    private CartDto? _cart;
+
 
     protected override async Task OnInitializedAsync()
     {
-        cart = await CartClient.GetCartAsync();
+        await ReloadCart();
     }
 
-    private async Task RemoveItem(int productId)
+    private async Task ReloadCart()
     {
-        await CartClient.RemoveItemAsync(productId);
-        cart = await CartClient.GetCartAsync();
+        _cart = await CartClient.GetCartAsync();
+        StateHasChanged();
     }
 
     private async Task ClearCart()
     {
         await CartClient.ClearAsync();
-        cart = await CartClient.GetCartAsync();
+        _cart = await CartClient.GetCartAsync();
+        StateHasChanged();
     }
 }

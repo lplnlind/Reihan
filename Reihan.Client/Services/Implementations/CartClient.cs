@@ -29,9 +29,15 @@ namespace Reihan.Client.Services
             response.EnsureSuccessStatusCode();
         }
 
+        public async Task ChangeQuantity(int productId, int quantity)
+        {
+            var response = await _http.PutAsJsonAsync($"api/cart/quantity/{productId}", quantity);
+            response.EnsureSuccessStatusCode();
+        }
+
         public async Task ClearAsync()
         {
-            await _http.DeleteAsync("api/cart");
+            await _http.DeleteAsync("api/cart/clear");
         }
     }
 

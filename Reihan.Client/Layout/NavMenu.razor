@@ -1,7 +1,9 @@
-﻿@using System.Security.Claims
+﻿@using Pages.Shop
+@using System.Security.Claims
 @inject AuthenticationStateProvider AuthProvider
-@inject IAuthClient AuthClient
 @inject NavigationManager NavigationManager
+@inject IAuthClient AuthClient
+@inject IDialogService DialogService
 
 <MudAppBar Elevation="0">
     <MudIconButton Icon="@Icons.Material.Rounded.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
@@ -9,8 +11,9 @@
     <MudSpacer />
     <AuthorizeView>
         <Authorized>
-            <MudIconButton Icon="@Icons.Material.TwoTone.AccountCircle" Color="Color.Primary" Href="/account/profile"></MudIconButton>
-            <MudIconButton Icon="@Icons.Material.Rounded.Logout" Color="Color.Dark" OnClick="Logout"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.TwoTone.AccountCircle" Color="Color.Primary" Href="/account/profile" />
+            <MudIconButton Icon="@Icons.Material.Rounded.Logout" Color="Color.Dark" OnClick="Logout" />
+            <MudIconButton Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Dark" OnClick="OpenCartDialog" />
         </Authorized>
         <NotAuthorized>
             <MudIconButton Icon="@Icons.Material.Rounded.Login" Color="Color.Dark" Href="/login"></MudIconButton>
@@ -73,5 +76,20 @@
     {
         await AuthClient.LogoutAsync();
         NavigationManager.NavigateTo("/login", true);
+    }
+
+    private async Task OpenCartDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            CloseButton = true,
+            FullWidth = true,
+            BackdropClick = true,
+            Position = DialogPosition.TopRight,
+        };
+
+        var dialog = await DialogService.ShowAsync<CartDialog>("سبد خرید", options);
     }
 }

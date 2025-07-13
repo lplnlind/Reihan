@@ -9,7 +9,10 @@
         </DialogContent>
         <DialogActions>
             <MudButton OnClick="Cancel">لغو</MudButton>
-            <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit" ButtonType="ButtonType.Submit">@ButtonText</MudButton>
+            <MudButton Color="@Color"
+                       Variant="Variant.Filled"
+                       OnClick="Submit"
+                       ButtonType="ButtonType.Submit">@ButtonText</MudButton>
         </DialogActions>
     </MudDialog>
 }
@@ -19,11 +22,37 @@ else
         <MudDialog>
             <DialogContent>
                 <MudGrid>
-                    <MudItem xs="12" sm="6"><MudTextField Label="نام محصول" @bind-Value="Product.Name" For="@(() => Product.Name)" Required="true" Disabled="IsDisable" Variant="Variant.Outlined" /></MudItem>
-                    <MudItem xs="12" sm="6"><MudNumericField Label="قیمت" @bind-Value="Product.Price" For="@(() => Product.Price)" Required="true" Disabled="IsDisable" Variant="Variant.Outlined" /></MudItem>
-                    <MudItem xs="12" sm="6"><MudNumericField Label="تعداد" @bind-Value="Product.StockQuantity" For="@(() => Product.StockQuantity)" Required="true" Disabled="IsDisable" Variant="Variant.Outlined" /></MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudSelect T="int" Label="دسته‌بندی" @bind-Value="Product.CategoryId" For="@(() => Product.CategoryId)" Required="true" Variant="Variant.Outlined">
+                        <MudTextField Label="نام محصول"
+                                      @bind-Value="Product.Name"
+                                      For="@(() => Product.Name)"
+                                      Required="true"
+                                      Disabled="IsDisable"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField Label="قیمت" @bind-Value="Product.Price"
+                                         For="@(() => Product.Price)"
+                                         Required="true"
+                                         Disabled="IsDisable"
+                                         Format="N0"
+                                         HideSpinButtons
+                                         Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField Label="تعداد"
+                                         @bind-Value="Product.StockQuantity"
+                                         For="@(() => Product.StockQuantity)"
+                                         Required="true" Disabled="IsDisable"
+                                         HideSpinButtons
+                                         Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int" Label="دسته‌بندی"
+                                   @bind-Value="Product.CategoryId"
+                                   For="@(() => Product.CategoryId)"
+                                   Required="true"
+                                   Variant="Variant.Outlined">
                             @foreach (var category in categories)
                             {
                                 <MudSelectItem Value="@category.Id">@category.Name</MudSelectItem>
@@ -31,12 +60,20 @@ else
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" sm="12">
-                        <MudTextField Label="توضیحات" @bind-Value="Product.Description" Disabled="IsDisable" Lines="3" Variant="Variant.Outlined" />
+                        <MudTextField Label="توضیحات"
+                                      @bind-Value="Product.Description"
+                                      Disabled="IsDisable"
+                                      Lines="3"
+                                      Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="12">
                         <MudPaper Outlined="true" Class="rounded-gl pa-1">
                             <MudStack Justify="Justify.Center">
-                                <MudFileUpload T="IReadOnlyList<IBrowserFile>" Accept=".png, .jpg" FilesChanged="UploadFiles" MaximumFileCount="5" MaxFileSize="@(4 * 1024 * 1024)">
+                                <MudFileUpload T="IReadOnlyList<IBrowserFile>"
+                                               Accept=".png, .jpg"
+                                               FilesChanged="UploadFiles"
+                                               MaximumFileCount="5"
+                                               MaxFileSize="@(4 * 1024 * 1024)">
                                     <ActivatorContent>
                                         <MudButton Variant="Variant.Filled" FullWidth="true"
                                                    Color="Color.Primary"
@@ -49,16 +86,19 @@ else
                                     @foreach (var img in Product.ImageUrls)
                                     {
                                         <MudItem Class="relative">
-                                            <MudImage Src="@img" Width="150" Height="150" ObjectFit="ObjectFit.Cover" Alt="product pic" Elevation="1" Class="rounded-lg" />
-                                            <MudIconButton 
-                                                OnClick="@(e => DeleteImage(img))" 
-                                                Icon="@Icons.Material.Rounded.Delete" 
-                                                Variant="Variant.Filled" Color="Color.Error" 
-                                                Size="Size.Small" Class="absolute rounded-lg" 
-                                                Style="left:4px; top:4px;"></MudIconButton>
+                                            <MudImage Src="@img" Width="150" Height="150"
+                                                      ObjectFit="ObjectFit.Cover"
+                                                      Alt="product pic"
+                                                      Elevation="1"
+                                                      Class="rounded-lg" />
+                                            <MudIconButton OnClick="@(e => DeleteImage(img))"
+                                                           Icon="@Icons.Material.Rounded.Delete"
+                                                           Variant="Variant.Filled" Color="Color.Error"
+                                                           Size="Size.Small" Class="absolute rounded-lg"
+                                                           Style="left:4px; top:4px;"></MudIconButton>
                                         </MudItem>
                                     }
-                                </MudStack> 
+                                </MudStack>
                             </MudStack>
                         </MudPaper>
                     </MudItem>
@@ -66,7 +106,10 @@ else
             </DialogContent>
             <DialogActions>
                 <MudButton OnClick="Cancel">لغو</MudButton>
-                <MudButton OnClick="Submit" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="@Color">@ButtonText</MudButton>
+                <MudButton OnClick="Submit"
+                           ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="@Color">@ButtonText</MudButton>
             </DialogActions>
         </MudDialog>
     </MudForm>
