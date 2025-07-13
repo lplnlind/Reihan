@@ -6,13 +6,15 @@
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
 <MudPaper Elevation="3" Outlined Class="mx-auto mt-12 pa-6 rounded-xl" MaxWidth="400px">
-    <MudText Typo="Typo.h5" Class="mb-4 text-center pa-2 rounded-lg primary-background">ورود به حساب کاربری</MudText>
+    <MudText Typo="Typo.h5" Class="mb-12  text-center pa-2 rounded-lg primary-background">ورود به حساب کاربری</MudText>
 
     <EditForm Model="_model" OnValidSubmit="LoginUser">
         <DataAnnotationsValidator></DataAnnotationsValidator>
-        <MudTextField Label="ایمیل" @bind-Value="_model.UserName" Required="true" />
-        <MudTextField Label="رمز عبور" @bind-Value="_model.Password" InputType="InputType.Password" Required="true" />
-        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Class="mt-8 rounded-lg" FullWidth="true" Variant="Variant.Outlined">ورود</MudButton>
+        <MudTextField Label="ایمیل" @bind-Value="_model.UserName" Margin="Margin.Dense"
+                      Required Variant="Variant.Outlined" AutoFocus />
+        <MudTextField Label="رمز عبور" @bind-Value="_model.Password"
+                      InputType="InputType.Password" Required Variant="Variant.Outlined" Margin="Margin.Dense"/>
+        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Class="mt-2 rounded-lg" FullWidth="true" Variant="Variant.Outlined">ورود</MudButton>
     </EditForm>
 
     <MudText Class="mt-4">

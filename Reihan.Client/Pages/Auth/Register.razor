@@ -3,15 +3,23 @@
 @inject NavigationManager NavigationManager
 
 <MudPaper Class="pa-6 mx-auto mt-10 rounded-xl" Outlined MaxWidth="400px">
-    <MudText Typo="Typo.h5" Class="mb-4 text-center pa-2 rounded-lg primary-background">ثبت‌نام</MudText>
+    <MudText Typo="Typo.h5" Class="mb-12 text-center pa-2 rounded-lg primary-background">ثبت‌نام</MudText>
 
     <EditForm Model="_registerModel" OnValidSubmit="RegisterUser">
-        <MudTextField Label="نام کامل" @bind-Value="_registerModel.FullName" Required="true" />
-        <MudTextField Label="ایمیل" @bind-Value="_registerModel.Email" Required="true" />
-        <MudTextField Label="رمز عبور" @bind-Value="_registerModel.Password" Required="true" InputType="InputType.Password" />
-        <MudTextField Label="تکرار رمز عبور" @bind-Value="_registerModel.ConfirmPassword" Required="true" InputType="InputType.Password" />
+        <MudTextField Label="نام کامل" @bind-Value="_registerModel.FullName"
+                      Variant="Variant.Outlined" Required AutoFocus Margin="Margin.Dense" />
 
-        <MudButton OnClick="RegisterUser" Variant="Variant.Outlined" Color="Color.Primary" Disabled="_isSubmitting" Class="mt-8 rounded-lg" FullWidth>ثبت‌نام</MudButton>
+        <MudTextField Label="ایمیل" @bind-Value="_registerModel.Email"
+                      Variant="Variant.Outlined" Required Margin="Margin.Dense" />
+
+        <MudTextField Label="رمز عبور" @bind-Value="_registerModel.Password" InputType="InputType.Password"
+                      Variant="Variant.Outlined" Required Margin="Margin.Dense" />
+
+        <MudTextField Label="تکرار رمز عبور" @bind-Value="_registerModel.ConfirmPassword"
+                      Variant="Variant.Outlined" Required Margin="Margin.Dense" InputType="InputType.Password" />
+
+        <MudButton OnClick="RegisterUser" Variant="Variant.Outlined" Color="Color.Primary" Disabled="_isSubmitting"
+                   Class="mt-2 rounded-lg" FullWidth>ثبت‌نام</MudButton>
     </EditForm>
 
     <MudText Class="mt-4">
