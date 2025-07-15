@@ -2,6 +2,8 @@
 @inject IAuthClient AuthClient
 @inject IFavoriteClient FavoriteClient
 @inject IOrderClient OrderClient
+@inject IUserAddressClient UserAddressClient
+@inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
 @using Reihan.Client.Pages.Shop
@@ -18,9 +20,10 @@
                 <MudText Typo="Typo.h4" Class="scondary-background rounded-lg py-1 px-1">@profile.FullName</MudText>
             </MudStack>
         </MudPaper>
+
         <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
             <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-                <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">مشخصات شما</MudText>
+                <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">اطلاعات کاربری</MudText>
                 <MudIconButton Icon="@Icons.Material.TwoTone.Edit" Color="Color.Primary" Size="Size.Small" OnClick="IsUpdateProfile"></MudIconButton>
             </MudStack>
 
@@ -32,12 +35,6 @@
 
                 <MudTextField Label="ایمیل" @bind-Value="profile.Email" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
 
-                <MudTextField Label="خیابان" @bind-Value="profile.Address.Street" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
-
-                <MudTextField Label="شهر" @bind-Value="profile.Address.City" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
-
-                <MudTextField Label="کدپستی" @bind-Value="profile.Address.ZipCode" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
-
                 <MudStack Justify="Justify.FlexEnd">
                     @if (!isUpdateProfile)
                     {
@@ -46,6 +43,30 @@
                 </MudStack>
             </EditForm>
         </MudPaper>
+
+        <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">آدرس</MudText>
+                <MudIconButton Icon="@Icons.Material.TwoTone.AddCircle" Color="Color.Primary" Size="Size.Small" OnClick="OpenAddAddressDialog"></MudIconButton>
+            </MudStack>
+
+            @foreach (var address in _userAddresses)
+            {
+                <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center"
+                          Class="gray-background rounded-lg pa-1 mb-1 border border-color-gray-Lighten2">
+
+                    <MudText Typo="Typo.body1" Class="mr-2">@address.Title</MudText>
+
+                    <MudIconButton Icon="@Icons.Material.TwoTone.Delete"
+                                   OnClick="e => DeleteAddress(address.Id)"
+                                   Variant="Variant.Outlined"
+                                   Size="Size.Small"
+                                   Class="rounded-lg border-color-gray-Lighten2" />
+                </MudStack>
+            }
+
+        </MudPaper>
+
         <MudPaper Outlined Class="rounded-xl pa-6" Elevation="2">
             <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
                 <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">تغییر رمز عبور</MudText>
@@ -119,8 +140,6 @@
 </MudGrid>
 
 
-
-
 @code {
     private UpdateProfileRequest profile = new();
     private ChangePasswordRequest changePassword = new();
@@ -134,6 +153,9 @@
     private Variant orderVariant = Variant.Filled;
     private Variant favoriteVariant = Variant.Outlined;
 
+    private List<UserAddressDto> _userAddresses = new();
+
+
     protected override async Task OnInitializedAsync()
     {
         var current = await AuthClient.GetProfileAsync();
@@ -141,16 +163,45 @@
         {
             FullName = current.FullName,
             Email = current.Email,
-            Address = new AddressDto
-            {
-                Street = current.Street,
-                City = current.City,
-                ZipCode = current.ZipCode
-            }
         };
 
         products = await FavoriteClient.GetUserFavoritesAsync();
         orders = await OrderClient.GetOrdersByUserAsync();
+        await LoadUserAddress();
+    }
+
+
+    private async Task DeleteAddress(int id)
+    {
+        await UserAddressClient.DeleteAsync(id);
+        Snackbar.Add("آدرس حذف شد", Severity.Warning);
+
+        await LoadUserAddress();
+    }
+
+    private async Task OpenAddAddressDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, CloseButton = true, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<AddressDialog>("ثبت آدرس", options);
+        var result = await dialog.Result;
+
+        if (result is not null)
+            if (!result.Canceled)
+            {
+                if (result.Data is not null)
+                {
+                    UserAddressDto address = (UserAddressDto)result.Data;
+                    await UserAddressClient.CreateAsync(address);
+                    await LoadUserAddress();
+                }
+            }
+    }
+
+    private async Task LoadUserAddress()
+    {
+        _userAddresses = await UserAddressClient.GetAllAsync();
+        StateHasChanged();
     }
 
 

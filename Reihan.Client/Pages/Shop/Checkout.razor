@@ -1,55 +1,178 @@
 ﻿@page "/checkout"
 @inject ICartClient CartClient
 @inject IOrderClient OrderClient
-@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject IUserAddressClient UserAddressClient
 @inject ISnackbar Snackbar
+
 
 <PageTitle>تسویه حساب</PageTitle>
 
-<MudPaper Class="pa-6 ma-4">
-    <MudText Typo="Typo.h5">نهایی‌سازی سفارش</MudText>
+@if (_cart is null)
+{
+    <p>در حال بارگذاری...</p>
+}
+else if (!_cart.Items.Any())
+{
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="my-7">سبد خرید شما خالی است.</MudText>
+}
+else
+{
+    <MudItem sm="12" lg="9" Class="mx-auto">
 
-    <EditForm Model="OrderModel" OnValidSubmit="SubmitOrder">
+        <div class="mb-4">
+            <MudText Typo="Typo.h5" Inline Class="pl-3 scondary-background rounded-lg">سبد خرید</MudText>
+        </div>
+
         <MudGrid>
-            <MudItem xs="12" md="4">
-                <MudTextField Label="خیابان" @bind-Value="OrderModel.ShippingAddress.Street" Required="true" />
+            <MudItem xs="12" lg="8">
+                <CartCard CartItems="_cart.Items" OnCartChanged="LoadCart"></CartCard>
+
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
+                    <MudButton Target="/cart" Variant="Variant.Outlined" StartIcon="@Icons.Material.Rounded.ArrowForward"
+                               Class="rounded-lg border-color-gray-Lighten2">سبد خرید</MudButton>
+
+                    <MudButton EndIcon="@Icons.Material.Rounded.ArrowBack" Class="rounded-lg"
+                               Variant="Variant.Outlined" Color="Color.Primary">پرداخت</MudButton>
+                </MudStack>
             </MudItem>
-            <MudItem xs="12" md="4">
-                <MudTextField Label="شهر" @bind-Value="OrderModel.ShippingAddress.City" Required="true" />
-            </MudItem>
-            <MudItem xs="12" md="4">
-                <MudTextField Label="کد پستی" @bind-Value="OrderModel.ShippingAddress.ZipCode" Required="true" />
+            <MudItem xs="12" lg="4">
+
+                <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudText Typo="Typo.h5" Class="pl-4 rounded-lg primary-background">آدرس</MudText>
+
+                        <MudButton OnClick="OpenChoiceAddressDialog" 
+                            Variant="Variant.Filled" Color="Color.Primary" 
+                            DropShadow="false" 
+                            Size="Size.Small" 
+                            Class="rounded-lg px-1 py-0 ma-0 botton-tag">تغییر</MudButton>
+                       
+                    </MudStack>
+
+                    <MudDivider Class="mb-3" />
+
+                    @if (_userAddress is not null)
+                    {
+                        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.body2">عنوان:</MudText>
+                            <MudText Typo="Typo.body1">@_userAddress.Title</MudText>
+                        </MudStack>
+                        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.body2">کدپستی:</MudText>
+                            <MudText Typo="Typo.body1">@_userAddress.ZipCode</MudText>
+                        </MudStack>
+                        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.body2">استان:</MudText>
+                            <MudText Typo="Typo.body1">@_userAddress.State</MudText>
+                        </MudStack>
+                        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.body2">شهر:</MudText>
+                            <MudText Typo="Typo.body1">@_userAddress.City</MudText>
+                        </MudStack>
+                        <MudStack Justify="Justify.FlexEnd">
+                            <MudText Typo="Typo.body1">@_userAddress.Street</MudText>
+                        </MudStack>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.h6">شما هنوز هیچ آدرسی ثبت نکرده اید</MudText>
+                    }
+
+
+                </MudPaper>
+
+                <MudPaper Outlined Class="rounded-xl pa-4">
+                    <div>
+                        <MudText Inline Typo="Typo.h5" Class="primary-background pl-3 rounded-lg">مشخصات سفارش</MudText>
+                    </div>
+                    <MudDivider Class="my-3" />
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">مجموعه کالاها:</MudText>
+                        <MudText Typo="Typo.body1">@_cart.TotalPrice.ToNumeric().En2Fa()</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">هزینه ارسال:</MudText>
+                        <MudText Typo="Typo.body1">۳۰,۰۰۰</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">تخفیف:</MudText>
+                        <MudText Typo="Typo.body1">۰</MudText>
+                    </MudStack>
+                    <MudDivider Class="my-3" />
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body1">مبلغ کل:</MudText>
+                        <MudText Typo="Typo.h5" Class="primary-background pr-3 rounded-lg">@_cart.TotalPrice.ToNumeric().En2Fa()</MudText>
+                    </MudStack>
+                </MudPaper>
+
             </MudItem>
         </MudGrid>
+    </MudItem>
+}
 
-        <MudDivider Class="my-4" />
-
-        <MudButton Type="Submit" Color="Color.Primary" Variant="Variant.Filled">
-            ثبت سفارش و پرداخت
-        </MudButton>
-    </EditForm>
-</MudPaper>
 
 @code {
-    private CreateOrderRequest OrderModel = new();
+    private UserAddressDto? _userAddress;
+    private CreateOrderRequest _order = new();
+    private CartDto? _cart;
+
 
     protected override async Task OnInitializedAsync()
     {
-        var cart = await CartClient.GetCartAsync();
-        if (cart == null || !cart.Items.Any())
-        {
-            Snackbar.Add("سبد خرید خالی است.", Severity.Warning);
-            Navigation.NavigateTo("/shop");
-            return;
-        }
-
-        OrderModel.CartItems = cart.Items;
+        await LoadCart();
+        await LoadUserAddress();
     }
+
+
+    private async Task OpenChoiceAddressDialog()
+    {
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.ExtraSmall,
+            CloseButton = true,
+            FullWidth = true
+        };
+        var parameters = new DialogParameters<ChoiceAddress>
+        {
+            { x => x.SelectedAddressId, _userAddress.Id}
+        };
+
+        var dialog = await DialogService.ShowAsync<ChoiceAddress>("انتخاب آدرس", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null)
+            if (!result.Canceled)
+            {
+                if (result.Data is not null)
+                {
+                    _userAddress = (UserAddressDto)result.Data;
+                }
+            }
+    }
+
+    private async Task LoadUserAddress()
+    {
+        _userAddress = await UserAddressClient.GetDefault();
+    }
+
+    private async Task LoadCart()
+    {
+        _cart = await CartClient.GetCartAsync();
+        StateHasChanged();
+    }
+
 
     private async Task SubmitOrder()
     {
-        await OrderClient.CreateAsync(OrderModel);
+        _order.ShippingAddress.State = _userAddress.State;
+        _order.ShippingAddress.City = _userAddress.City;
+        _order.ShippingAddress.ZipCode = _userAddress.ZipCode;
+        _order.ShippingAddress.Street = _userAddress.Street;
+
+        await OrderClient.CreateAsync(_order);
         Snackbar.Add("سفارش با موفقیت ثبت شد.", Severity.Success);
-        Navigation.NavigateTo("/account/orders");
+
     }
 }

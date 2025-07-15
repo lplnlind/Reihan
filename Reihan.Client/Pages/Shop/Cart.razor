@@ -1,6 +1,10 @@
 ﻿@page "/cart"
 @inject ICartClient CartClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
+
+<PageTitle>سبد خرید</PageTitle>
 
 @if (_cart is null)
 {
@@ -12,32 +16,26 @@ else if (!_cart.Items.Any())
 }
 else
 {
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mb-5">
-        <MudButton StartIcon="@Icons.Material.TwoTone.ShoppingCart" Class="rounded-lg"
-                   Variant="Variant.Filled" Color="Color.Primary">سبد خرید</MudButton>
-        <MudButton StartIcon="@Icons.Material.TwoTone.LocalShipping" Class="rounded-lg border-color-gray-Lighten2"
-                   Variant="Variant.Outlined">آدرس</MudButton>
-        <MudButton StartIcon="@Icons.Material.TwoTone.Payment" Class="rounded-lg border-color-gray-Lighten2"
-                   Variant="Variant.Outlined">پرداخت</MudButton>
-        <MudButton StartIcon="@Icons.Material.TwoTone.ShoppingBag" Class="rounded-lg border-color-gray-Lighten2"
-                   Variant="Variant.Outlined">سفارش</MudButton>
-    </MudStack>
-
     <MudItem sm="12" lg="9" Class="mx-auto">
+        <div class="mb-4">
+            <MudText Typo="Typo.h5" Inline Class="pl-3 scondary-background rounded-lg">پرداخت</MudText>
+        </div>
 
         <MudGrid>
             <MudItem xs="12" lg="8">
-                <CartCard IsDisable="false" CartItems="_cart.Items" OnCartChanged="ReloadCart"></CartCard>
+                <CartCard IsDisable="false" CartItems="_cart.Items" OnCartChanged="LoadCart"></CartCard>
 
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexEnd">
-                    <MudButton OnClick="ClearCart" Variant="Variant.Outlined"
+
+                    <MudButton OnClick="ClearCart" Variant="Variant.Outlined" StartIcon="@Icons.Material.TwoTone.Delete"
                                Class="rounded-lg border-color-gray-Lighten2">حذف سبد</MudButton>
 
                     <MudButton EndIcon="@Icons.Material.Rounded.ArrowBack" Class="rounded-lg"
-                               Variant="Variant.Outlined" Color="Color.Primary">آدرس</MudButton>
+                               Href="/checkout" Variant="Variant.Outlined" Color="Color.Primary">پرداخت</MudButton>
                 </MudStack>
             </MudItem>
             <MudItem xs="12" lg="4">
+
                 <MudPaper Outlined Class="rounded-xl pa-4">
                     <div>
                         <MudText Inline Typo="Typo.h5" Class="primary-background pl-3 rounded-lg">مشخصات سفارش</MudText>
@@ -61,10 +59,12 @@ else
                         <MudText Typo="Typo.h5" Class="primary-background pr-3 rounded-lg">@_cart.TotalPrice.ToNumeric().En2Fa()</MudText>
                     </MudStack>
                 </MudPaper>
+
             </MudItem>
         </MudGrid>
     </MudItem>
 }
+
 
 
 @code {
@@ -73,10 +73,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await ReloadCart();
+        await LoadCart();
     }
 
-    private async Task ReloadCart()
+
+    private async Task LoadCart()
     {
         _cart = await CartClient.GetCartAsync();
         StateHasChanged();

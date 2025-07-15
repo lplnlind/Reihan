@@ -130,7 +130,7 @@ namespace Application.Services
                 ProductImage = imageLookup.GetValueOrDefault(x.ProductId, string.Empty)
             }).ToList();
 
-            var address = new Address(request.ShippingAddress.Street, request.ShippingAddress.City, request.ShippingAddress.ZipCode);
+            var address = new Address(request.ShippingAddress.State, request.ShippingAddress.Street, request.ShippingAddress.City, request.ShippingAddress.ZipCode);
             var order = new Order(userId, address, orderItems, OrderStatus.Pending);
             await _orderRepo.AddAsync(order);
 

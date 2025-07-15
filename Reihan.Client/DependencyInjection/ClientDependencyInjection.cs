@@ -15,6 +15,7 @@ namespace Reihan.Client.DependencyInjection
             services.AddScoped<IOrderClient, OrderClient>();
             services.AddScoped<IDashboardClient, DashboardClient>();
             services.AddScoped<IFavoriteClient, FavoriteClient>();
+            services.AddScoped<IUserAddressClient, UserAddressClient>();
 
             return services;
         }

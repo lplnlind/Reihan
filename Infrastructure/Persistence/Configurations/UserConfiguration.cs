@@ -39,22 +39,6 @@ namespace Infrastructure.Persistence.Configurations
                     .IsUnique();
             });
 
-            // Address به‌عنوان Owned Type
-            builder.OwnsOne(u => u.Address, address =>
-            {
-                address.Property(a => a.Street)
-                    .HasMaxLength(200)
-                    .IsRequired();
-
-                address.Property(a => a.City)
-                    .HasMaxLength(100)
-                    .IsRequired();
-
-                address.Property(a => a.ZipCode)
-                    .HasMaxLength(20)
-                    .IsRequired();
-            });
-
             // ارتباط با Orders از طریق Navigation Property خودش در User تعریف شده
             builder.HasMany(u => u.Orders)
                 .WithOne(o => o.User)

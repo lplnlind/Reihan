@@ -1,0 +1,73 @@
+﻿@inject IUserAddressClient UserAddressClient
+
+<MudDialog Class="rounded-xl">
+    <DialogContent>
+        @if (_userAddresses is not null)
+            @foreach (var address in _userAddresses)
+            {
+                <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center"
+                          Class="gray-background rounded-lg pa-1 mb-1 border border-color-gray-Lighten2">
+
+                    <MudText Typo="Typo.body1" Class="mr-2">@address.Title</MudText>
+
+                    <MudCheckBox @bind-Value="address.IsDefault"
+                                 @onclick="e => SelectedAddress(address.Id)"
+                                 Size="Size.Small"
+                                 Class="rounded-lg border-color-gray-Lighten2" />
+                </MudStack>
+            }
+    </DialogContent>
+    <DialogActions>
+        <MudStack row Class="pa-6 mud-width-full" Justify="Justify.FlexEnd" Style="@($"border-top: 1px solid {Colors.Gray.Lighten2}")">
+            <MudButton OnClick="Cancel" Variant="Variant.Outlined"
+                       Class="rounded-lg border-color-gray-Lighten2">انصراف</MudButton>
+
+            <MudButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled"
+                       Class="rounded-lg">انتخاب</MudButton>
+        </MudStack>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [Parameter]
+    public int? SelectedAddressId { get; set; }
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+
+    private List<UserAddressDto> _userAddresses = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserAddress();
+
+        if (SelectedAddressId is not null)
+            SelectedAddress(SelectedAddressId);
+    }
+
+    private async Task LoadUserAddress()
+    {
+        _userAddresses = await UserAddressClient.GetAllAsync();
+        StateHasChanged();
+    }
+
+    private void SelectedAddress(int? id)
+    {
+        if (id is null)
+            return;
+
+        foreach (var address in _userAddresses)
+            address.IsDefault = address.Id == id;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void Submit()
+    {
+        var address = _userAddresses.FirstOrDefault(a => a.IsDefault == true);
+        MudDialog.Close(DialogResult.Ok(address));
+    }
+}

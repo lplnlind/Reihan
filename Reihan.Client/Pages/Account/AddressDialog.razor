@@ -1,0 +1,60 @@
+﻿@inject ISnackbar Snackbar
+
+<EditForm Model="_userAddress" OnValidSubmit="Submit">
+    <MudDialog Class="rounded-xl">
+        <DialogContent>
+            <DataAnnotationsValidator />
+            <MudStack Row>
+                <MudTextField Label="عنوان" @bind-Value="_userAddress.Title" For="@(() => _userAddress.Title)"
+                              Margin="Margin.Dense" Required Variant="Variant.Outlined" />
+
+                <MudTextField Label="کد پستی" @bind-Value="_userAddress.ZipCode" For="@(() => _userAddress.ZipCode)"
+                              Margin="Margin.Dense" Required Variant="Variant.Outlined" />
+            </MudStack>
+
+            <MudStack Row>
+                <MudTextField Label="استان" @bind-Value="_userAddress.State" For="@(() => _userAddress.State)"
+                              Margin="Margin.Dense" Required Variant="Variant.Outlined" />
+
+                <MudTextField Label="شهر" @bind-Value="_userAddress.City" For="@(() => _userAddress.City)"
+                              Margin="Margin.Dense" Required Variant="Variant.Outlined" />
+            </MudStack>
+
+            <MudTextField Label="خیابان" @bind-Value="_userAddress.Street" For="@(() => _userAddress.Street)"
+                          Margin="Margin.Dense" Required Variant="Variant.Outlined" />
+
+        </DialogContent>
+        <DialogActions>
+
+            <MudStack row Class="pa-6 mud-width-full" Justify="Justify.FlexEnd" Style="@($"border-top: 1px solid {Colors.Gray.Lighten2}")">
+
+                <MudButton OnClick="Cancel" Variant="Variant.Outlined"
+                           Class="rounded-lg border-color-gray-Lighten2">انصراف</MudButton>
+
+                <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                           Class="rounded-lg" ButtonType="ButtonType.Submit">ثبت آدرس</MudButton>
+            </MudStack>
+
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    private UserAddressDto _userAddress = new();
+
+
+    private void Submit()
+    {
+        if (_userAddress == null)
+        {
+            Snackbar.Add("آدرس معتبر نیست", Severity.Error);
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(_userAddress));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

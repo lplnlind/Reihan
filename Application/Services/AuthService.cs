@@ -44,7 +44,6 @@ namespace Application.Services
                 Email = new Email(request.Email),
                 PasswordHash = hashedPassword,
                 Role = UserRole.Customer, // پیش‌فرض
-                Address = new Address("نامشخص", "نامشخص", "0000")
             };
 
             await _userRepository.AddAsync(user);
@@ -111,9 +110,6 @@ namespace Application.Services
                 UserName = dbUser.UserName,
                 Email = dbUser.Email.Value,
                 Role = dbUser.Role.ToString(),
-                Street = dbUser.Address?.Street ?? "",
-                City = dbUser.Address?.City ?? "",
-                ZipCode = dbUser.Address?.ZipCode ?? ""
             };
         }
 
@@ -139,8 +135,7 @@ namespace Application.Services
             if (user is null)
                 throw new Exception("کاربر یافت نشد");
 
-            var address = new Address(request.Address.Street, request.Address.City, request.Address.ZipCode);
-            user.UpdateProfile(request.FullName, request.Email, address); // متد دامین
+            user.UpdateProfile(request.FullName, request.Email); // متد دامین
             await _userRepository.UpdateAsync(user);
         }
 

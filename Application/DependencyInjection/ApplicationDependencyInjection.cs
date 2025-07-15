@@ -23,6 +23,7 @@ namespace Application.DependencyInjection
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
+            services.AddScoped<IUserAddressService, UserAddressService>();
 
             return services;
         }

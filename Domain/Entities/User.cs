@@ -17,13 +17,12 @@ namespace Domain.Entities
 
         public List<Order> Orders { get; set; } = new();
         public List<Favorite> Favorites { get; set; } = new();
-        public Address Address { get; set; } = null!;
+        public List<UserAddress> Addresses { get; set; } = null!;
 
-        public void UpdateProfile(string fullName, string email, Address address)
+        public void UpdateProfile(string fullName, string email)
         {
             FullName = fullName;
             Email = new Email(email);
-            Address = address;
             SetUpdated();
         }
 
