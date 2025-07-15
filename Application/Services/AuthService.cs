@@ -1,13 +1,11 @@
 ﻿using Application.DTOs.Auth;
 using Application.Interfaces;
-using Application.Setting;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueObjects;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using System.Text;
 
 namespace Application.Services
 {
@@ -66,7 +64,16 @@ namespace Application.Services
 
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
-            var user = await _userRepository.GetByUsernameAsync(request.UserName);
+            // بررسی اینکه کاربر چی وارد کرده: ایمیل یا نام کاربری
+            User? user;
+            if (request.UserNameOrEmail.Contains("@"))
+            {
+                user = await _userRepository.GetByEmailAsync(request.UserNameOrEmail);
+            }
+            else
+            {
+                user = await _userRepository.GetByUsernameAsync(request.UserNameOrEmail);
+            }
 
             if (user == null)
                 throw new Exception("نام کاربری یا رمز عبور اشتباه است.");
@@ -91,6 +98,7 @@ namespace Application.Services
                 Role = user.Role.ToString()
             };
         }
+
 
         public async Task<UserProfileDto?> GetProfileAsync(ClaimsPrincipal user)
         {
@@ -135,7 +143,7 @@ namespace Application.Services
             if (user is null)
                 throw new Exception("کاربر یافت نشد");
 
-            user.UpdateProfile(request.FullName, request.Email); // متد دامین
+            user.UpdateProfile(request.FullName, request.Email, request.UserName); // متد دامین
             await _userRepository.UpdateAsync(user);
         }
 

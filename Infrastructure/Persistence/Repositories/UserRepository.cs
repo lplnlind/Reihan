@@ -11,5 +11,10 @@ namespace Infrastructure.Persistence.Repositories
         {
             return await _dbSet.Where(w => w.UserName == username).FirstOrDefaultAsync();
         }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _dbSet.FirstOrDefaultAsync(u => u.Email.Value == email);
+        }
     }
 }

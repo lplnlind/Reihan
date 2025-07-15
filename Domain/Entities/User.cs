@@ -9,7 +9,7 @@ namespace Domain.Entities
     {
         public string UserName { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
-        public Email Email { get; set; } 
+        public Email Email { get; set; }
         public string PasswordHash { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
@@ -19,10 +19,11 @@ namespace Domain.Entities
         public List<Favorite> Favorites { get; set; } = new();
         public List<UserAddress> Addresses { get; set; } = null!;
 
-        public void UpdateProfile(string fullName, string email)
+        public void UpdateProfile(string fullName, string email, string userName)
         {
             FullName = fullName;
             Email = new Email(email);
+            UserName = userName;
             SetUpdated();
         }
 

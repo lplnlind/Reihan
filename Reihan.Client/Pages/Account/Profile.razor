@@ -29,11 +29,30 @@
 
             <EditForm Model="@profile" OnValidSubmit="UpdateProfile">
                 <DataAnnotationsValidator />
-                <ValidationSummary />
 
-                <MudTextField Label="نام کامل" @bind-Value="profile.FullName" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
+                <MudTextField Label="نام کامل"
+                              @bind-Value="profile.FullName"
+                              For="@(() => profile.FullName)"
+                              Margin="Margin.Dense"
+                              Disabled="isUpdateProfile"
+                              Variant="Variant.Outlined"
+                              Class="rounded-lg" />
 
-                <MudTextField Label="ایمیل" @bind-Value="profile.Email" Margin="Margin.Dense" Disabled="isUpdateProfile" Variant="Variant.Outlined" Class="rounded-lg" />
+                <MudTextField Label="ایمیل"
+                              @bind-Value="profile.Email"
+                              For="@(() => profile.Email)"
+                              Margin="Margin.Dense"
+                              Disabled="isUpdateProfile"
+                              Variant="Variant.Outlined"
+                              Class="rounded-lg" />
+
+                <MudTextField Label="نام کاربری"
+                              @bind-Value="profile.UserName"
+                              For="@(() => profile.UserName)"
+                              Margin="Margin.Dense"
+                              Disabled="isUpdateProfile"
+                              Variant="Variant.Outlined"
+                              Class="rounded-lg" />
 
                 <MudStack Justify="Justify.FlexEnd">
                     @if (!isUpdateProfile)
@@ -163,6 +182,7 @@
         {
             FullName = current.FullName,
             Email = current.Email,
+            UserName = current.UserName
         };
 
         products = await FavoriteClient.GetUserFavoritesAsync();
