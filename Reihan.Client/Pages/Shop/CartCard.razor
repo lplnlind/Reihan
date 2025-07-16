@@ -7,8 +7,11 @@
     <MudCard Class="rounded-xl pa-2 mb-2 mud-width-full" Outlined="true" Style="@($"background:{Colors.Gray.Lighten5};")">
         <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
             <MudStack Row AlignItems="AlignItems.Center">
-                <MudLink Href="@($"/shop/product/{item.ProductId}")" Style="height: 100px">
-                    <MudImage Class="rounded-xl" Src="@item.ProductImage" Height="100" />
+                <MudLink Href="@($"/shop/product/{item.ProductId}")" Style="height: 100px; width: 100px;">
+                    <MudImage Class="rounded-xl mud-height-full mud-width-full"
+                              Src="@item.ProductImage"
+                              ObjectFit="ObjectFit.Cover"
+                              ObjectPosition="ObjectPosition.Center" />
                 </MudLink>
                 <MudCardContent>
                     <MudLink Href="@($"/shop/product/{item.ProductId}")"
@@ -31,14 +34,14 @@
                                          Variant="Variant.Outlined"
                                          Margin="Margin.Dense"
                                          Class="ma-0 product-quantity"
-                                         Disabled ="IsDisable"
+                                         Disabled="IsDisable"
                                          HideSpinButtons />
 
                         <MudIconButton Icon="@Icons.Material.TwoTone.Delete"
                                        OnClick="e => RemoveItem(item)"
                                        Variant="Variant.Outlined"
                                        Size="Size.Small"
-                                       Disabled ="IsDisable"
+                                       Disabled="IsDisable"
                                        Class="rounded-lg border-color-gray-Lighten2" />
                     </MudStack>
 
@@ -65,7 +68,7 @@
         await CartClient.RemoveItemAsync(cart.ProductId);
         CartItems.Remove(cart);
         Snackbar.Add("محصول از سبد حذف شد", Severity.Warning);
-        
+
         await OnCartChanged.InvokeAsync();
     }
 
@@ -73,7 +76,7 @@
     {
         await CartClient.ChangeQuantity(productId, quantity);
         Snackbar.Add("تعداد محصول با موفقیت تغییر پیدا کرد", Severity.Success);
-        
+
         await OnCartChanged.InvokeAsync();
     }
 }

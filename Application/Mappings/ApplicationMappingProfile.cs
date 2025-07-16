@@ -1,0 +1,70 @@
+﻿using Application.DTOs;
+using Application.DTOs.Auth;
+using Application.Extensions;
+using AutoMapper;
+using Domain.Entities;
+using Domain.ValueObjects;
+
+namespace Application.Mappings
+{
+    public class ApplicationMappingProfile : Profile
+    {
+        public ApplicationMappingProfile()
+        {
+            // Address
+            CreateMap<UserAddress, UserAddressDto>().ReverseMap();
+
+
+            // User
+            CreateMap<User, JwtUserDto>()
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))  
+                .ReverseMap();
+
+            CreateMap<User, UserDto>()
+                  .ForMember(d => d.PhoneNumber, o => o.MapFrom(s => s.PhoneNumber))
+                  .ReverseMap()
+                  .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber));
+
+            CreateMap<User, UserProfileDto>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToDisplay(DisplayProperty.Name)))
+                .ReverseMap()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => new Email(src.Email)));
+
+            CreateMap<User, RegisterRequest>().ReverseMap();
+            CreateMap<User, UpdateProfileRequest>().ReverseMap();
+
+            CreateMap<User, UserProfileDto>()
+                .ForMember(d => d.Role, o => o.MapFrom(s => s.Role))
+                .ReverseMap();
+
+
+            // Cart
+            CreateMap<Cart, CartDto>().ReverseMap();
+            CreateMap<CartItem, CartItemDto>().ReverseMap();
+            CreateMap<CartItem, AddToCartRequest>().ReverseMap();
+
+
+            // Order
+            CreateMap<Order, OrderDto>()
+                .ForMember(d => d.City, o => o.MapFrom(s => s.ShippingAddress.City))
+                .ForMember(d => d.ZipCode, o => o.MapFrom(s => s.ShippingAddress.ZipCode))
+                .ForMember(d => d.UserFullName, o => o.MapFrom(s => s.User.FullName))
+                .ReverseMap();
+
+
+            // Product
+            CreateMap<Product, ProductDto>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.ImageUrls, opt => opt.Ignore())
+                .ForMember(dest => dest.CategoryName, opt => opt.Ignore())
+                .ReverseMap()
+                .ForMember(dest => dest.Images, opt => opt.Ignore());
+
+
+
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(d => d.ProductImage, o => o.MapFrom(s => s.ProductImage)); // مستقیم
+        }
+    }
+}

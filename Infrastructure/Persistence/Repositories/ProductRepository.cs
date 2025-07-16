@@ -1,10 +1,5 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -16,6 +11,13 @@ namespace Infrastructure.Persistence.Repositories
         {
             return await _dbSet
                 .Where(p => p.CategoryId == categoryId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetByIdsAsync(List<int> ids)
+        {
+            return await _dbSet
+                .Where(w => ids.Contains(w.Id))
                 .ToListAsync();
         }
     }

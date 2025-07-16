@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Enums
 {
     public enum PaymentStatus
     {
-        Pending,    // در انتظار پرداخت
-        Completed,  // پرداخت شده
-        Failed      // ناموفق
+        [Display(Name = "در انتظار پرداخت")] 
+        Pending,
+
+        [Display(Name = "پرداخت شده")] 
+        Completed,
+
+        [Display(Name = "ناموفق")] 
+        Failed
     }
 }

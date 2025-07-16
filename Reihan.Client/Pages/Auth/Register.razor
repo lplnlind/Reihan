@@ -6,19 +6,27 @@
     <MudText Typo="Typo.h5" Class="mb-12 text-center pa-2 rounded-lg primary-background">ثبت‌نام</MudText>
 
     <EditForm Model="_registerModel" OnValidSubmit="RegisterUser">
-        <MudTextField Label="نام کامل" @bind-Value="_registerModel.FullName"
+        <DataAnnotationsValidator />
+
+        <MudTextField Label="نام کاربری" @bind-Value="_registerModel.UserName" For="@(() => _registerModel.UserName)"
                       Variant="Variant.Outlined" Required AutoFocus Margin="Margin.Dense" />
 
-        <MudTextField Label="ایمیل" @bind-Value="_registerModel.Email"
+        <MudTextField Label="نام کامل" @bind-Value="_registerModel.FullName" For="@(() => _registerModel.FullName)"
                       Variant="Variant.Outlined" Required Margin="Margin.Dense" />
 
-        <MudTextField Label="رمز عبور" @bind-Value="_registerModel.Password" InputType="InputType.Password"
+        <MudTextField Label="شماره تماس" @bind-Value="_registerModel.PhoneNumber" For="@(() => _registerModel.PhoneNumber)"
+                      Variant="Variant.Outlined" Margin="Margin.Dense" />
+
+        <MudTextField Label="ایمیل" @bind-Value="_registerModel.Email" For="@(() => _registerModel.Email)"
                       Variant="Variant.Outlined" Required Margin="Margin.Dense" />
 
-        <MudTextField Label="تکرار رمز عبور" @bind-Value="_registerModel.ConfirmPassword"
+        <MudTextField Label="رمز عبور" @bind-Value="_registerModel.Password" InputType="InputType.Password" For="@(() => _registerModel.Password)"
+                      Variant="Variant.Outlined" Required Margin="Margin.Dense" />
+
+        <MudTextField Label="تکرار رمز عبور" @bind-Value="_registerModel.ConfirmPassword" For="@(() => _registerModel.ConfirmPassword)"
                       Variant="Variant.Outlined" Required Margin="Margin.Dense" InputType="InputType.Password" />
 
-        <MudButton OnClick="RegisterUser" Variant="Variant.Outlined" Color="Color.Primary" Disabled="_isSubmitting"
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Color="Color.Primary" Disabled="_isSubmitting"
                    Class="mt-2 rounded-lg" FullWidth>ثبت‌نام</MudButton>
     </EditForm>
 

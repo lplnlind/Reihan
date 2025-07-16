@@ -12,5 +12,7 @@ namespace Reihan.Client.Models
         
         [Required(ErrorMessage ="ایمیل خود را بنویسید")]
         public string Email { get; set; } = default!;
+
+        public string? PhoneNumber { get; set; }
     }
 }

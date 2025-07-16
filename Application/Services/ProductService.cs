@@ -1,8 +1,10 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
+using AutoMapper;
 using Domain.Entities;
 using Infrastructure.Persistence.Repositories;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Application.Services
 {
@@ -13,39 +15,42 @@ namespace Application.Services
         private readonly ICategoryRepository _categoryRepo;
         private readonly ICartRepository _cartRepo;
         private readonly IOrderItemRepository _orderItemRepo;
+        private readonly IMapper _mapper;
 
         public ProductService(IProductRepository productRepo,
             IProductImageRepository productImageRepo,
             ICategoryRepository categoryRepo,
             ICartRepository cartRepo,
             IUserContextService userContextService,
-            IOrderItemRepository orderItemRepo)
+            IOrderItemRepository orderItemRepo,
+            IMapper mapper)
         {
             _productRepo = productRepo;
             _productImageRepo = productImageRepo;
             _categoryRepo = categoryRepo;
             _cartRepo = cartRepo;
             _orderItemRepo = orderItemRepo;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
             var products = await _productRepo.GetAllAsync();
             var productImages = await _productImageRepo.GetAllAsync();
+
             var categories = await _categoryRepo.GetAllAsync();
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
-            return products.Select(p => new ProductDto
+            var productsDto = _mapper.Map<List<ProductDto>>(products);
+
+            foreach (var p in productsDto)
             {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.Price,
-                Description = p.Description,
-                StockQuantity = p.StockQuantity,
-                CategoryId = p.CategoryId,
-                CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
-                ImageUrls = productImages.Where(w => w.ProductId == p.Id).Select(s => s.Url).ToList()
-            });
+                p.CategoryName = categoryDict.GetValueOrDefault(p.CategoryId);
+                p.ImageUrl = productImages.FirstOrDefault(w => w.ProductId == p.Id)?.Url ?? string.Empty;
+                p.ImageUrls = productImages.Where(w => w.ProductId == p.Id).Select(i => i.Url).ToList();
+            }
+
+            return productsDto;
         }
 
         public async Task<ProductDto?> GetProductByIdAsync(int id)
@@ -56,17 +61,11 @@ namespace Application.Services
             var productImages = await _productImageRepo.GetByProductIdAsync(product.Id);
             var category = await _categoryRepo.GetByIdAsync(product.CategoryId);
 
-            return new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity,
-                Description = product.Description,
-                CategoryId = product.CategoryId,
-                CategoryName = category?.Name,
-                ImageUrls = productImages.Select(url => url.Url).ToList()
-            };
+            var productDto = _mapper.Map<ProductDto>(product);
+            productDto.CategoryName = category?.Name;
+            productDto.ImageUrls = productImages.Where(w => w.ProductId == productDto.Id).Select(s => s.Url).ToList() ?? new List<string>();
+
+            return productDto;
         }
 
         public async Task AddProductAsync(ProductDto dto)

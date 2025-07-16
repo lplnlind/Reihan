@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Application.Interfaces.Application.Interfaces.Services;
+using Application.Mappings;
 using Application.Services;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -24,6 +25,7 @@ namespace Application.DependencyInjection
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IUserAddressService, UserAddressService>();
+            services.AddAutoMapper(typeof(ApplicationMappingProfile).Assembly);
 
             return services;
         }

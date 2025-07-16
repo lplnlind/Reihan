@@ -1,5 +1,7 @@
 ﻿using Application.DTOs.Auth;
+using Application.Extensions;
 using Application.Interfaces;
+using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.ValueObjects;
@@ -15,16 +17,19 @@ namespace Application.Services
         private readonly IUserContextService _userContextService;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly IMapper _mapper;
 
         public AuthService(IUserRepository userRepository,
             IPasswordHasher<User> passwordHasher,
             IUserContextService userContextService,
-            IJwtTokenGenerator jwtTokenGenerator)
+            IJwtTokenGenerator jwtTokenGenerator,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _userContextService = userContextService;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _mapper = mapper;
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
@@ -35,30 +40,19 @@ namespace Application.Services
 
             var hashedPassword = _passwordHasher.HashPassword(new User(), request.Password);
 
-            var user = new User
-            {
-                UserName = request.UserName,
-                FullName = request.FullName,
-                Email = new Email(request.Email),
-                PasswordHash = hashedPassword,
-                Role = UserRole.Customer, // پیش‌فرض
-            };
+            var user = _mapper.Map<User>(request);
+            user.PasswordHash = hashedPassword;
+            user.Role = UserRole.Customer;
 
             await _userRepository.AddAsync(user);
 
-            var token = _jwtTokenGenerator.GenerateToken(new JwtUserDto
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email.Value,
-                Role = user.Role.ToString()
-            });
+            var token = _jwtTokenGenerator.GenerateToken(_mapper.Map<JwtUserDto>(user));
 
             return new AuthResponse
             {
                 Token = token,
                 UserName = user.UserName,
-                Role = user.Role.ToString()
+                Role = user.Role.ToDisplay()
             };
         }
 
@@ -99,7 +93,6 @@ namespace Application.Services
             };
         }
 
-
         public async Task<UserProfileDto?> GetProfileAsync(ClaimsPrincipal user)
         {
             var username = user.Identity?.Name;
@@ -112,13 +105,7 @@ namespace Application.Services
             if (dbUser == null)
                 return null;
 
-            return new UserProfileDto
-            {
-                FullName = dbUser.FullName,
-                UserName = dbUser.UserName,
-                Email = dbUser.Email.Value,
-                Role = dbUser.Role.ToString(),
-            };
+            return _mapper.Map<UserProfileDto>(dbUser);
         }
 
         public async Task<User?> GetUserByUsernameAsync(string username)

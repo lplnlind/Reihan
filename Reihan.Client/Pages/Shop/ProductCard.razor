@@ -9,8 +9,11 @@
     <MudCard Class="rounded-xl pa-2 mb-2" Outlined="true" Elevation="2" Style="width: 100%">
         <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
             <MudStack Row AlignItems="AlignItems.Center">
-                <MudLink Href="@($"/shop/product/{Product.Id}")" Style="height: 100px">
-                    <MudImage Class="rounded-xl" Src="@Product.ImageUrl" Height="100"/>
+                <MudLink Href="@($"/shop/product/{Product.Id}")" Style="height: 100px; width: 100px;">
+                    <MudImage Class="rounded-xl mud-height-full mud-width-full"
+                              Src="@Product.ImageUrl"
+                              ObjectFit="ObjectFit.Cover"
+                              ObjectPosition="ObjectPosition.Center" />
                 </MudLink>
                 <MudCardContent>
                     <MudStack Row AlignItems="AlignItems.Center" Spacing="5">

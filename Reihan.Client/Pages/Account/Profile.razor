@@ -54,6 +54,14 @@
                               Variant="Variant.Outlined"
                               Class="rounded-lg" />
 
+                <MudTextField Label="موبایل"
+                              @bind-Value="profile.PhoneNumber"
+                              For="@(() => profile.PhoneNumber)"
+                              Margin="Margin.Dense"
+                              Disabled="isUpdateProfile"
+                              Variant="Variant.Outlined"
+                              Class="rounded-lg" />
+
                 <MudStack Justify="Justify.FlexEnd">
                     @if (!isUpdateProfile)
                     {
@@ -182,7 +190,8 @@
         {
             FullName = current.FullName,
             Email = current.Email,
-            UserName = current.UserName
+            UserName = current.UserName,
+            PhoneNumber = current.PhoneNumber
         };
 
         products = await FavoriteClient.GetUserFavoritesAsync();
