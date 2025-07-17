@@ -1,59 +1,88 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.DTOs;
+using Application.Exceptions;
 using Application.Interfaces;
+using Application.Interfaces.Repositories;
+using AutoMapper;
 using Domain.Entities;
-using Application.DTOs;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Services
 {
     public class CartService : ICartService
     {
-        private readonly ICartRepository _cartRepository;
+        private readonly ICartRepository _cartRepo;
+        private readonly IMapper _mapper;
 
-        public CartService(ICartRepository cartRepository)
+        public CartService(ICartRepository cartRepos, IMapper mapper)
         {
-            _cartRepository = cartRepository;
+            _cartRepo = cartRepos;
+            _mapper = mapper;
         }
 
         public async Task<CartDto> GetCartAsync(int userId)
         {
-            var cart = await _cartRepository.GetByUserIdAsync(userId) ?? new Cart(userId);
+            var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
+
             return new CartDto
             {
                 UserId = userId,
                 TotalPrice = cart.GetTotalPrice(),
-                Items = cart.Items.Select(i => new CartItemDto
-                {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice,
-                    ProductName = i.ProductName,
-                    ProductImage = i.ProductImage,
-                }).ToList()
+                Items = _mapper.Map<List<CartItemDto>>(cart.Items),
             };
         }
 
         public async Task AddItemAsync(int userId, AddToCartRequest request)
         {
-            var cart = await _cartRepository.GetByUserIdAsync(userId) ?? new Cart(userId);
-            cart.AddItem(request.ProductId, request.Quantity, request.UnitPrice, request.ProductName, request.ProductImage);
+            if (request.Quantity <= 0)
+                throw new AppException("تعداد محصول معتبر نیست.", 
+                    StatusCodes.Status400BadRequest, 
+                    ErrorCode.InvalidProductQuantity);
+
+            var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
+            cart = _mapper.Map<Cart>(request);
+
             if (cart.Id == 0)
-                await _cartRepository.AddAsync(cart);
+                await _cartRepo.AddAsync(cart);
             else
-                await _cartRepository.UpdateAsync(cart);
+                await _cartRepo.UpdateAsync(cart);
         }
 
         public async Task RemoveItemAsync(int userId, int productId)
         {
-            var cart = await _cartRepository.GetByUserIdAsync(userId);
-            if (cart is null) return;
+            var cart = await _cartRepo.GetByUserIdAsync(userId);
+            if (cart is null)
+                throw new AppException("سبد خرید یافت نشد.", 
+                    StatusCodes.Status404NotFound, 
+                    ErrorCode.CartNotFound);
+
+            var item = cart.Items.FirstOrDefault(x => x.ProductId == productId);
+            if (item is null)
+                throw new AppException("محصول مورد نظر در سبد خرید وجود ندارد.", 
+                    StatusCodes.Status404NotFound, 
+                    ErrorCode.CartItemNotFound);
+
             cart.RemoveItem(productId);
-            await _cartRepository.UpdateAsync(cart);
+            await _cartRepo.UpdateAsync(cart);
         }
 
         public async Task ChangeQuantityAsync(int userId, int productId, int quantity)
         {
-            var cart = await _cartRepository.GetByUserIdAsync(userId);
-            if (cart is null) return;
+            if (quantity < 0)
+                throw new AppException("تعداد محصول معتبر نیست.", 
+                    StatusCodes.Status400BadRequest, 
+                    ErrorCode.InvalidProductQuantity);
+
+            var cart = await _cartRepo.GetByUserIdAsync(userId);
+            if (cart is null)
+                throw new AppException("سبد خرید یافت نشد.", 
+                    StatusCodes.Status404NotFound, 
+                    ErrorCode.CartNotFound);
+
+            var item = cart.Items.FirstOrDefault(x => x.ProductId == productId);
+            if (item is null)
+                throw new AppException("محصول مورد نظر در سبد خرید وجود ندارد.", 
+                    StatusCodes.Status404NotFound, 
+                    ErrorCode.CartItemNotFound);
 
             if (quantity == 0)
             {
@@ -62,16 +91,17 @@ namespace Application.Services
             }
 
             cart.ChangeQuantity(productId, quantity);
-            await _cartRepository.UpdateAsync(cart);
+            await _cartRepo.UpdateAsync(cart);
         }
 
         public async Task ClearCartAsync(int userId)
         {
-            var cart = await _cartRepository.GetByUserIdAsync(userId);
-            if (cart is null) return;
+            var cart = await _cartRepo.GetByUserIdAsync(userId);
+            if (cart is null)
+                throw new AppException("سبد خرید یافت نشد.", StatusCodes.Status404NotFound, ErrorCode.CartNotFound);
+
             cart.Clear();
-            await _cartRepository.UpdateAsync(cart);
+            await _cartRepo.UpdateAsync(cart);
         }
     }
-
 }

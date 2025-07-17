@@ -1,5 +1,4 @@
-﻿@inject ISnackbar Snackbar
-@inject ICartClient CartClient
+﻿@inject ICartClient CartClient
 @inject IProductClient ProductClient
 @inject IFavoriteClient FavoriteClient
 
@@ -134,16 +133,9 @@ else
     private async Task ToggleFavorite()
     {
         if (IsFav)
-        {
             await FavoriteClient.RemoveFromFavoriteAsync(Product.Id);
-            Snackbar.Add("محصول از علاقه مندی ها حذف شد", Severity.Warning);
-
-        }
         else
-        {
             await FavoriteClient.AddToFavoriteAsync(Product.Id);
-            Snackbar.Add("محصول به علاقه مندی ها اضافه شد", Severity.Success);
-        }
 
         IsFav = !IsFav;
     }
@@ -163,7 +155,6 @@ else
         };
 
         await CartClient.AddItemAsync(addToCart);
-        Snackbar.Add("محصول به سبد خرید اضافه شد", Severity.Success);
 
         IsInCart = true;
     }
@@ -173,7 +164,6 @@ else
         if (Product is null) return;
 
         await CartClient.RemoveItemAsync(Product.Id);
-        Snackbar.Add("محصول از سبد حذف شد", Severity.Warning);
 
         IsInCart = false;
     }

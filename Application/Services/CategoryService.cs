@@ -1,25 +1,32 @@
 ﻿using Application.DTOs;
+using Application.Exceptions;
 using Application.Interfaces;
 using Domain.Entities;
 using Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepo;
+        private readonly IProductRepository _productRepo;
+        private readonly ILogger<CategoryService> _logger;
 
-        public CategoryService(ICategoryRepository categoryRepository, IProductRepository productRepository)
+        public CategoryService(ICategoryRepository categoryRepo, 
+            IProductRepository productRepo, 
+            ILogger<CategoryService> logger)
         {
-            _categoryRepository = categoryRepository;
-            _productRepository = productRepository;
+            _categoryRepo = categoryRepo;
+            _productRepo = productRepo;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
         {
-            var categories = await _categoryRepository.GetAllAsync();
-            var products = await _productRepository.GetAllAsync();
+            var categories = await _categoryRepo.GetAllAsync();
+            var products = await _productRepo.GetAllAsync();
 
             var productCountByCategory = products
                 .GroupBy(p => p.CategoryId)
@@ -35,8 +42,12 @@ namespace Application.Services
 
         public async Task<CategoryDto?> GetCategoryByIdAsync(int id)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
-            if (category is null) return null;
+            var category = await _categoryRepo.GetByIdAsync(id);
+
+            if (category is null)
+                throw new AppException("دسته بندی مورد نظر یافت نشد.", 
+                    StatusCodes.Status404NotFound, 
+                    ErrorCode.CategoryNotFound);
 
             return new CategoryDto
             {
@@ -45,32 +56,45 @@ namespace Application.Services
             };
         }
 
-        public async Task AddCategoryAsync(CategoryDto Category)
+        public async Task AddCategoryAsync(CategoryDto categoryDto)
         {
+            var existing = await _categoryRepo.GetByNameAsync(categoryDto.Name);
+            if (existing is not null)
+                throw new AppException("دسته بندی وارد شده موجود است.", 
+                    StatusCodes.Status409Conflict, 
+                    ErrorCode.CategoryAlreadyExists);
+
             var category = new Category
             {
-                Name = Category.Name
+                Name = categoryDto.Name
             };
 
-            await _categoryRepository.AddAsync(category);
+            await _categoryRepo.AddAsync(category);
         }
 
-        public async Task UpdateCategoryAsync(CategoryDto Category)
+        public async Task UpdateCategoryAsync(CategoryDto categoryDto)
         {
-            var category = await _categoryRepository.GetByIdAsync(Category.Id);
-            if (category is null) return;
+            var category = await _categoryRepo.GetByIdAsync(categoryDto.Id);
 
-            category.Name = Category.Name;
-            await _categoryRepository.UpdateAsync(category);
+            if (category is null)
+                throw new AppException("دسته بندی مورد نظر یافت نشد.", 
+                    StatusCodes.Status404NotFound, 
+                    ErrorCode.CategoryNotFound);
+
+            category.Name = categoryDto.Name;
+            await _categoryRepo.UpdateAsync(category);
         }
 
         public async Task DeleteCategoryAsync(int id)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
-            if (category is not null)
-            {
-                await _categoryRepository.DeleteAsync(category.Id);
-            }
+            var category = await _categoryRepo.GetByIdAsync(id);
+
+            if (category is null)
+                throw new AppException("دسته بندی مورد نظر یافت نشد", 
+                    StatusCodes.Status404NotFound, 
+                    ErrorCode.CategoryNotFound);
+
+            await _categoryRepo.DeleteAsync(category.Id);
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using Application.DTOs;
+using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using AutoMapper;
 using Domain.Entities;
 using Infrastructure.Persistence.Repositories;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services
 {
@@ -16,14 +18,16 @@ namespace Application.Services
         private readonly ICartRepository _cartRepo;
         private readonly IOrderItemRepository _orderItemRepo;
         private readonly IMapper _mapper;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IProductRepository productRepo,
+        public ProductService(
+            IProductRepository productRepo,
             IProductImageRepository productImageRepo,
             ICategoryRepository categoryRepo,
             ICartRepository cartRepo,
-            IUserContextService userContextService,
             IOrderItemRepository orderItemRepo,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger<ProductService> logger)
         {
             _productRepo = productRepo;
             _productImageRepo = productImageRepo;
@@ -31,23 +35,23 @@ namespace Application.Services
             _cartRepo = cartRepo;
             _orderItemRepo = orderItemRepo;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
             var products = await _productRepo.GetAllAsync();
-            var productImages = await _productImageRepo.GetAllAsync();
-
+            var images = await _productImageRepo.GetAllAsync();
             var categories = await _categoryRepo.GetAllAsync();
-            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
+            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
             var productsDto = _mapper.Map<List<ProductDto>>(products);
 
             foreach (var p in productsDto)
             {
                 p.CategoryName = categoryDict.GetValueOrDefault(p.CategoryId);
-                p.ImageUrl = productImages.FirstOrDefault(w => w.ProductId == p.Id)?.Url ?? string.Empty;
-                p.ImageUrls = productImages.Where(w => w.ProductId == p.Id).Select(i => i.Url).ToList();
+                p.ImageUrl = images.FirstOrDefault(w => w.ProductId == p.Id)?.Url ?? string.Empty;
+                p.ImageUrls = images.Where(w => w.ProductId == p.Id).Select(i => i.Url).ToList();
             }
 
             return productsDto;
@@ -56,30 +60,30 @@ namespace Application.Services
         public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
             var product = await _productRepo.GetByIdAsync(id);
-            if (product is null) return null;
+            if (product is null)
+            {
+                _logger.LogWarning("محصول با شناسه {Id} یافت نشد", id);
+                throw new AppException("محصول یافت نشد",
+                    StatusCodes.Status404NotFound,
+                    ErrorCode.ProductNotFound);
+            }
 
             var productImages = await _productImageRepo.GetByProductIdAsync(product.Id);
             var category = await _categoryRepo.GetByIdAsync(product.CategoryId);
 
-            var productDto = _mapper.Map<ProductDto>(product);
-            productDto.CategoryName = category?.Name;
-            productDto.ImageUrls = productImages.Where(w => w.ProductId == productDto.Id).Select(s => s.Url).ToList() ?? new List<string>();
+            var dto = _mapper.Map<ProductDto>(product);
+            dto.CategoryName = category?.Name;
+            dto.ImageUrls = productImages.Select(s => s.Url).ToList();
 
-            return productDto;
+            return dto;
         }
 
         public async Task AddProductAsync(ProductDto dto)
         {
-            var product = new Product
-            {
-                Name = dto.Name,
-                Price = dto.Price,
-                CategoryId = dto.CategoryId,
-                StockQuantity = dto.StockQuantity,
-                Description = dto.Description,
-            };
-
+            var product = _mapper.Map<Product>(dto);
             await _productRepo.AddAsync(product);
+
+            _logger.LogInformation("محصول جدید اضافه شد: {Name}", product.Name);
 
             if (dto.ImageUrls is not null && dto.ImageUrls.Any())
             {
@@ -90,46 +94,42 @@ namespace Application.Services
                 }).ToList();
 
                 await _productImageRepo.AddRangeAsync(images);
+                _logger.LogInformation("تصاویر محصول {Name} اضافه شدند.", product.Name);
             }
         }
 
         public async Task UpdateProductAsync(ProductDto dto)
         {
             var product = await _productRepo.GetByIdAsync(dto.Id);
-            if (product is null) return;
-
-            product.Name = dto.Name;
-            product.Price = dto.Price;
-            product.CategoryId = dto.CategoryId;
-            product.StockQuantity = dto.StockQuantity;
-            product.Description = dto.Description;
-
-            await _productRepo.UpdateAsync(product);
-
-            // مدیریت تصاویر
-            var existingImages = await _productImageRepo.GetByProductIdAsync(product.Id);
-            var existingUrls = existingImages.Select(i => i.Url).ToList();
-            var newUrls = dto.ImageUrls ?? new List<string>();
-
-            // 🔴 حذف عکس‌هایی که در لیست جدید نیستند
-            var toRemove = existingImages.Where(i => !newUrls.Contains(i.Url)).ToList();
-            if (toRemove.Any())
+            if (product is null)
             {
-                foreach (var image in toRemove)
-                {
-                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
-
-                    bool isUsedInOrder = await _orderItemRepo.IsImageUsedAsync(image.Url);
-                    if (isUsedInOrder) continue;
-
-                    if (File.Exists(path))
-                        File.Delete(path);
-                }
-
-                await _productImageRepo.DeleteRangeAsync(toRemove);
+                _logger.LogWarning("محصول برای بروزرسانی یافت نشد: {Id}", dto.Id);
+                throw new AppException("محصول یافت نشد", 
+                    StatusCodes.Status404NotFound, 
+                    ErrorCode.ProductNotFound);
             }
 
-            // 🟢 افزودن عکس‌های جدید که قبلاً وجود نداشتند
+            product = _mapper.Map<Product>(dto);
+            await _productRepo.UpdateAsync(product);
+
+            // Update Product Images
+            var existingImages = await _productImageRepo.GetByProductIdAsync(product.Id);
+            var existingUrls = existingImages.Select(i => i.Url).ToList();
+            var newUrls = dto.ImageUrls ?? new();
+
+            var toRemove = existingImages.Where(i => !newUrls.Contains(i.Url)).ToList();
+            foreach (var image in toRemove)
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
+                if (await _orderItemRepo.IsImageUsedAsync(image.Url)) continue;
+
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+
+            if (toRemove.Any())
+                await _productImageRepo.DeleteRangeAsync(toRemove);
+
             var toAdd = newUrls.Except(existingUrls).Select(url => new ProductImage
             {
                 ProductId = product.Id,
@@ -138,58 +138,56 @@ namespace Application.Services
 
             if (toAdd.Any())
                 await _productImageRepo.AddRangeAsync(toAdd);
+
+            _logger.LogInformation("محصول با موفقیت بروزرسانی شد: {Id}", product.Id);
         }
 
         public async Task DeleteProductAsync(int id)
         {
             var product = await _productRepo.GetByIdAsync(id);
-            if (product is null) return;
+            if (product is null)
+            {
+                _logger.LogWarning("محصول برای حذف یافت نشد: {Id}", id);
+                throw new AppException("محصول یافت نشد",
+                    StatusCodes.Status404NotFound,
+                    ErrorCode.ProductNotFound);
+            }
 
             var images = await _productImageRepo.GetByProductIdAsync(id);
-
             foreach (var image in images)
             {
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
+                if (await _orderItemRepo.IsImageUsedAsync(image.Url)) continue;
 
-                bool isUsedInOrder = await _orderItemRepo.IsImageUsedAsync(image.Url);
-                if (isUsedInOrder) continue;
-
-                if (File.Exists(filePath))
-                    File.Delete(filePath);
+                if (File.Exists(path))
+                    File.Delete(path);
             }
 
             await _productRepo.DeleteAsync(product.Id);
+            _logger.LogInformation("محصول با موفقیت حذف شد: {Id}", id);
         }
 
         public async Task<List<ProductDto>> GetLatestProductsAsync(int count = 8)
         {
             var products = await _productRepo.GetAllAsync();
             var images = await _productImageRepo.GetAllAsync();
-
-            var latest = products
-                .OrderByDescending(p => p.CreatedAt)
-                .Take(count)
-                .ToList();
-
             var categories = await _categoryRepo.GetAllAsync();
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
+            var latest = products.OrderByDescending(p => p.CreatedAt).Take(count).ToList();
 
-            return latest.Select(p => new ProductDto
+            var productsDto = _mapper.Map<List<ProductDto>>(products);
+            foreach (var product in productsDto)
             {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.Price,
-                StockQuantity = p.StockQuantity,
-                CategoryId = p.CategoryId,
-                CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
-                ImageUrl = images.Where(w => w.ProductId == p.Id).Select(s => s.Url)?.FirstOrDefault() ?? string.Empty,
-            }).ToList();
+                product.CategoryName = categoryDict.GetValueOrDefault(product.CategoryId);
+                product.ImageUrl = images.FirstOrDefault(w => w.ProductId == product.Id)?.Url ?? string.Empty;
+            }
+            return productsDto;
         }
 
         public async Task<List<ProductDto>> GetBestSellingProductsAsync(int count = 8)
         {
-            var products = await _productRepo.GetAllAsync();
+            // در آینده پیاده‌سازی شود
             return new();
         }
 
@@ -197,30 +195,25 @@ namespace Application.Services
         {
             var products = await _productRepo.GetAllAsync();
             var images = await _productImageRepo.GetAllAsync();
+            var categories = await _categoryRepo.GetAllAsync();
+            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
             if (categoryId is not null)
                 products = products.Where(p => p.CategoryId == categoryId).ToList();
 
-            var categories = await _categoryRepo.GetAllAsync();
-            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
-
-
-            return products.Select(p => new ProductDto
+            var productsDto = _mapper.Map<List<ProductDto>>(products);
+            foreach (var product in productsDto)
             {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.Price,
-                StockQuantity = p.StockQuantity,
-                CategoryId = p.CategoryId,
-                CategoryName = categoryDict.GetValueOrDefault(p.CategoryId),
-                ImageUrl = images.Where(w => w.ProductId == p.Id).Select(s => s.Url)?.FirstOrDefault() ?? string.Empty,
-            }).ToList();
+                product.CategoryName = categoryDict.GetValueOrDefault(product.CategoryId);
+                product.ImageUrl = images.FirstOrDefault(w => w.ProductId == product.Id)?.Url ?? string.Empty;
+            }
+            return productsDto;
         }
 
         public async Task<bool> IsInCartAsync(int userId, int productId)
         {
             var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
-            return cart.Items.Select(i => i.ProductId).ToHashSet().Contains(productId);
+            return cart.Items.Any(i => i.ProductId == productId);
         }
     }
 }

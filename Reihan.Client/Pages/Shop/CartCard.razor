@@ -1,5 +1,4 @@
 ﻿@inject ICartClient CartClient
-@inject ISnackbar Snackbar
 
 
 @foreach (var item in CartItems)
@@ -67,7 +66,6 @@
     {
         await CartClient.RemoveItemAsync(cart.ProductId);
         CartItems.Remove(cart);
-        Snackbar.Add("محصول از سبد حذف شد", Severity.Warning);
 
         await OnCartChanged.InvokeAsync();
     }
@@ -75,8 +73,6 @@
     private async Task ChangeQuantity(int productId, int quantity)
     {
         await CartClient.ChangeQuantity(productId, quantity);
-        Snackbar.Add("تعداد محصول با موفقیت تغییر پیدا کرد", Severity.Success);
-
         await OnCartChanged.InvokeAsync();
     }
 }

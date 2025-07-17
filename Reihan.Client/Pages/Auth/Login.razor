@@ -1,7 +1,6 @@
 ﻿@page "/login"
 @inject IAuthClient AuthClient
 @inject NavigationManager NavigationManager
-@inject ISnackbar Snackbar
 @inject ILocalStorageService LocalStorage
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
@@ -38,13 +37,6 @@
         var result = await AuthClient.LoginAsync(_model);
 
         if (result)
-        {
-            Snackbar.Add("ورود موفقیت‌آمیز بود", Severity.Success);
             NavigationManager.NavigateTo("/");
-        }
-        else
-        {
-            Snackbar.Add("ورود ناموفق بود", Severity.Error);
-        }
     }
 }

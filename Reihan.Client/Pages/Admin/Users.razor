@@ -1,7 +1,6 @@
 ﻿@page "/admin/users"
 @attribute [Authorize(Roles = "Admin")]
 @inject IUserClient UserClient
-@inject ISnackbar Snackbar
 
 <PageTitle>مدیریت کاربران</PageTitle>
 
@@ -68,7 +67,6 @@
         if (role is null) return;
         _users.FirstOrDefault(u => u.Id == userId)!.Role = role;
         await UserClient.UpdateUserRoleAsync(userId, role);
-        Snackbar.Add("نقش کاربر بروزرسانی شد", Severity.Success);
     }
 
     private async Task ToggleStatus(int userId, bool newStatus)
@@ -76,7 +74,6 @@
         await UserClient.ToggleUserStatusAsync(userId, newStatus);
         var user = _users!.FirstOrDefault(u => u.Id == userId);
         if (user is not null) user.IsActive = newStatus;
-        Snackbar.Add("وضعیت کاربر تغییر کرد", Severity.Info);
     }
 
 

@@ -3,7 +3,6 @@
 @inject IOrderClient OrderClient
 @inject IDialogService DialogService
 @inject IUserAddressClient UserAddressClient
-@inject ISnackbar Snackbar
 
 
 <PageTitle>تسویه حساب</PageTitle>
@@ -172,7 +171,5 @@ else
         _order.ShippingAddress.Street = _userAddress.Street;
 
         await OrderClient.CreateAsync(_order);
-        Snackbar.Add("سفارش با موفقیت ثبت شد.", Severity.Success);
-
     }
 }

@@ -4,7 +4,6 @@
 @inject IOrderClient OrderClient
 @inject IUserAddressClient UserAddressClient
 @inject IDialogService DialogService
-@inject ISnackbar Snackbar
 @inject NavigationManager Nav
 @using Reihan.Client.Pages.Shop
 
@@ -203,8 +202,6 @@
     private async Task DeleteAddress(int id)
     {
         await UserAddressClient.DeleteAsync(id);
-        Snackbar.Add("آدرس حذف شد", Severity.Warning);
-
         await LoadUserAddress();
     }
 
@@ -237,8 +234,6 @@
     private async Task UpdateProfile()
     {
         await AuthClient.UpdateProfileAsync(profile);
-        Snackbar.Add("تغییرات ذخیره شد", Severity.Success);
-
         IsUpdateProfile();
     }
 
@@ -251,8 +246,6 @@
     private async Task ChangePassword()
     {
         await AuthClient.ChangePasswordAsync(changePassword);
-        Snackbar.Add("رمز عبور با موفقیت تغییر کرد", Severity.Success);
-
         IsChangePassword();
     }
 

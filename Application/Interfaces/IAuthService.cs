@@ -9,7 +9,6 @@ namespace Application.Interfaces
         Task<AuthResponse> RegisterAsync(RegisterRequest request);
         Task<AuthResponse> LoginAsync(LoginRequest request);
         Task<UserProfileDto?> GetProfileAsync(ClaimsPrincipal user);
-        Task<User?> GetUserByUsernameAsync(string username);
         Task<bool> ValidatePasswordAsync(string password, string userName);
         Task UpdateProfileAsync(UpdateProfileRequest request);
         Task ChangePasswordAsync(ChangePasswordRequest request);

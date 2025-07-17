@@ -16,5 +16,8 @@ namespace Infrastructure.Persistence.Repositories
         {
             return await _dbSet.FirstOrDefaultAsync(u => u.Email.Value == email);
         }
+
+        public async Task<IEnumerable<User>> GetByIdsAsync(List<int> ids)
+            => await _dbSet.Where(w => ids.Contains(w.Id)).ToListAsync();
     }
 }

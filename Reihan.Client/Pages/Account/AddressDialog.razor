@@ -1,6 +1,4 @@
-﻿@inject ISnackbar Snackbar
-
-<EditForm Model="_userAddress" OnValidSubmit="Submit">
+﻿<EditForm Model="_userAddress" OnValidSubmit="Submit">
     <MudDialog Class="rounded-xl">
         <DialogContent>
             <DataAnnotationsValidator />
@@ -45,16 +43,7 @@
     private UserAddressDto _userAddress = new();
 
 
-    private void Submit()
-    {
-        if (_userAddress == null)
-        {
-            Snackbar.Add("آدرس معتبر نیست", Severity.Error);
-            return;
-        }
-
-        MudDialog.Close(DialogResult.Ok(_userAddress));
-    }
+    private void Submit() => MudDialog.Close(DialogResult.Ok(_userAddress));
 
     private void Cancel() => MudDialog.Cancel();
 }

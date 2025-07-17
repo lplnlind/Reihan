@@ -2,7 +2,6 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject IOrderClient OrderClient
 @inject IDialogService DialogService
-@inject ISnackbar Snackbar
 
 <PageTitle>مدیریت سفارش ها</PageTitle>
 
@@ -69,7 +68,6 @@
         if (status is null) return;
         _orders.FirstOrDefault(u => u.Id == id)!.Status = status;
         await OrderClient.UpdateOrderStatusAsync(id, status);
-        Snackbar.Add("نقش کاربر بروزرسانی شد", Severity.Success);
     }
 
 
