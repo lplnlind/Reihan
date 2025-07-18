@@ -52,7 +52,7 @@ else
                             <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mt-7">
                                 <MudText Typo="Typo.h3" Class="mt-2 pl-4 rounded-lg primary-background">@Product.Name</MudText>
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">@Product.CategoryName</MudChip>
+                                    <MudChip Href="@($"/shop/{@Product.CategoryId}")" T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">@Product.CategoryName</MudChip>
                                     <MudIconButton Icon="@Icons.Material.Rounded.Share" Size="Size.Small"></MudIconButton>
                                     <AuthorizeView>
                                         <Authorized>

@@ -176,7 +176,7 @@ namespace Application.Services
 
             var latest = products.OrderByDescending(p => p.CreatedAt).Take(count).ToList();
 
-            var productsDto = _mapper.Map<List<ProductDto>>(products);
+            var productsDto = _mapper.Map<List<ProductDto>>(latest);
             foreach (var product in productsDto)
             {
                 product.CategoryName = categoryDict.GetValueOrDefault(product.CategoryId);

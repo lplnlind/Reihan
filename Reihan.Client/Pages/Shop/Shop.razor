@@ -1,4 +1,5 @@
 ﻿@page "/shop"
+@page "/shop/{categoryId:int}"
 @using Microsoft.AspNetCore.WebUtilities
 @inject IProductClient ProductClient
 @inject ICategoryClient CategoryClient
@@ -46,21 +47,21 @@
 </MudContainer>
 
 @code {
+    [Parameter]
+    public int categoryId { get; set; }
+
     private List<ProductDto> Products = new();
     private List<CategoryDto> Categories = new();
     private int? _selectedCategory;
     private string selectedCat = string.Empty;
 
+
     protected override async Task OnInitializedAsync()
     {
         Categories = await CategoryClient.GetAllAsync();
 
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("category", out var category))
-        {
-            if (int.TryParse(category, out var catId))
-                _selectedCategory = catId;
-        }
+        if (categoryId > 0)
+            _selectedCategory = categoryId;
 
         await LoadProductsAsync();
     }
