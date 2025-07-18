@@ -1,7 +1,10 @@
 ﻿using Application.DTOs;
+using Application.Exceptions;
 using Application.Interfaces;
+using AutoMapper;
 using Domain.Enums;
 using Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Http;
 using System.Data;
 
 namespace Application.Services
@@ -9,33 +12,32 @@ namespace Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepo;
+        private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepo)
+        public UserService(IUserRepository userRepo, IMapper mapper)
         {
             _userRepo = userRepo;
+            _mapper = mapper;
         }
 
         public async Task<List<UserDto>> GetAllUsersAsync()
         {
             var users = await _userRepo.GetAllAsync();
-            return users.Select(u => new UserDto
-            {
-                Id = u.Id,
-                FullName = u.FullName,
-                Email = u.Email.Value,
-                Role = u.Role.ToString(),
-                IsActive = u.IsActive
-            }).ToList();
+            return _mapper.Map<List<UserDto>>(users);
         }
 
-        public async Task UpdateUserRoleAsync(int userId, string newRole)
+        public async Task UpdateUserRoleAsync(int userId, UserRole newRole)
         {
             var user = await _userRepo.GetByIdAsync(userId);
             if (user == null)
-                throw new Exception("کاربر یافت نشد.");
+                throw new AppException("کاربر یافت نشد.",
+                    StatusCodes.Status404NotFound,
+                    ErrorCode.UserNotFound);
 
-            if (!Enum.TryParse<UserRole>(newRole, out var role))
-                throw new Exception("نقش نامعتبر است.");
+            if (!Enum.TryParse<UserRole>(newRole.ToString(), out var role))
+                throw new AppException("نقش نامعتبر است.", 
+                    StatusCodes.Status400BadRequest,
+                    ErrorCode.InvalidUserRole);
 
             user.SetRole(role);
             await _userRepo.UpdateAsync(user);
@@ -45,7 +47,9 @@ namespace Application.Services
         {
             var user = await _userRepo.GetByIdAsync(userId);
             if (user == null)
-                throw new Exception("کاربر یافت نشد.");
+                throw new AppException("کاربر یافت نشد.",
+                    StatusCodes.Status404NotFound,
+                    ErrorCode.UserNotFound);
 
             user.SetStatus(isActive);
             await _userRepo.UpdateAsync(user);

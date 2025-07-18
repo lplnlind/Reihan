@@ -1,4 +1,5 @@
 ﻿using MudBlazor;
+using Reihan.Client.Enums;
 using Reihan.Client.Extensions;
 using Reihan.Client.Models;
 using System.ComponentModel.DataAnnotations;
@@ -32,13 +33,13 @@ namespace Reihan.Client.Services
             }
         }
 
-        public async Task UpdateUserRoleAsync(int userId, string newRole)
+        public async Task UpdateUserRoleAsync(int userId, UserRole newRole)
         {
             try
             {
                 var req = new { NewRole = newRole };
                 var response = await _http.PutAsJsonAsync($"api/users/{userId}/role", req);
-                await response.HandleResponseAsync(_snackbar, "نقش کاربر بروزرسانی شد");
+                await response.HandleResponseAsync(_snackbar, "نقش کاربر به روزرسانی شد");
             }
             catch (Exception)
             {

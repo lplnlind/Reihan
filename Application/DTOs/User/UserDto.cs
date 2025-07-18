@@ -1,4 +1,6 @@
-﻿namespace Application.DTOs
+﻿using Domain.Enums;
+
+namespace Application.DTOs
 {
     public class UserDto
     {
@@ -7,13 +9,13 @@
         public string FullName { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
         public string Email { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
+        public UserRole Role { get; set; }
         public bool IsActive { get; set; }
     }
 
     public class UpdateUserRoleRequest
     {
-        public string NewRole { get; set; } = string.Empty;
+        public UserRole NewRole { get; set; }
     }
 
     public class ToggleUserStatusRequest

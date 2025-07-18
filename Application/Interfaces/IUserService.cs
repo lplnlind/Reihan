@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Application.Interfaces
     public interface IUserService
     {
         Task<List<UserDto>> GetAllUsersAsync();
-        Task UpdateUserRoleAsync(int userId, string newRole);
+        Task UpdateUserRoleAsync(int userId, UserRole newRole);
         Task ToggleUserStatusAsync(int userId, bool isActive);
     }
 }

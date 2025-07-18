@@ -1,4 +1,5 @@
 ﻿using MudBlazor;
+using Reihan.Client.Enums;
 using Reihan.Client.Extensions;
 using Reihan.Client.Models;
 using System.Net.Http.Json;
@@ -46,7 +47,7 @@ namespace Reihan.Client.Services
             }
         }
 
-        public async Task UpdateOrderStatusAsync(int id, string newStatus)
+        public async Task UpdateOrderStatusAsync(int id, OrderStatus newStatus)
         {
             try
             {

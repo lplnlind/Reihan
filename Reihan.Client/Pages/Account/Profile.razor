@@ -139,7 +139,7 @@
                             </MudItem>
                             <MudStack Spacing="0" AlignItems="AlignItems.Start">
                                 <MudText Typo="Typo.caption">وضعیت سفارش:</MudText>
-                                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="ma-0">@order.Status</MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="ma-0">@order.Status.GetDisplayName()</MudChip>
                             </MudStack>
                             <MudItem>
                                 <MudText Typo="Typo.caption">جمع کل:</MudText>

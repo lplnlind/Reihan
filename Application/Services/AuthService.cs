@@ -1,6 +1,5 @@
 ﻿using Application.DTOs.Auth;
 using Application.Exceptions;
-using Application.Extensions;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
@@ -63,7 +62,7 @@ namespace Application.Services
             {
                 Token = token,
                 UserName = user.UserName,
-                Role = user.Role.ToDisplay()
+                Role = user.Role.ToString()
             };
         }
 

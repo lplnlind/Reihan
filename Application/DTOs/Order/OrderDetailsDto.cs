@@ -1,4 +1,6 @@
-﻿namespace Application.DTOs
+﻿using Domain.Enums;
+
+namespace Application.DTOs
 {
     public class OrderDetailsDto
     {
@@ -14,7 +16,7 @@
         public int UserId { get; set; }
         public string UserFullName { get; set; } = string.Empty;
 
-        public string Status { get; set; } = string.Empty;
+        public OrderStatus Status { get; set; }
         public List<OrderItemDto> Items { get; set; } = new();
     }
 }

@@ -55,7 +55,7 @@ public class OrderService : IOrderService
         var itemCount = orderItems.GroupBy(i => i.OrderId)
                                   .ToDictionary(g => g.Key, g => g.Count());
 
-        var ordersDto = _mapper.Map<List<OrderDto>>(orderItems);
+        var ordersDto = _mapper.Map<List<OrderDto>>(orders);
 
         foreach (var item in ordersDto)
         {
@@ -88,7 +88,7 @@ public class OrderService : IOrderService
         return orderDto;
     }
 
-    public async Task UpdateOrderStatusAsync(int id, string newStatus)
+    public async Task UpdateOrderStatusAsync(int id, OrderStatus newStatus)
     {
         _logger.LogInformation("در حال بروزرسانی وضعیت سفارش {OrderId} به {NewStatus}", id, newStatus);
 
@@ -100,10 +100,10 @@ public class OrderService : IOrderService
                 ErrorCode.OrderNotFound);
         }
 
-        if (!Enum.TryParse<OrderStatus>(newStatus, true, out var parsedStatus))
+        if (!Enum.TryParse<OrderStatus>(newStatus.ToString(), true, out var parsedStatus))
         {
             _logger.LogWarning("وضعیت نامعتبر: {Status}", newStatus);
-            throw new AppException("وضعیت سفارش نامعتبر است.", StatusCodes.Status400BadRequest,
+            throw new AppException("وضعیت ارسالی نامعتبر است.", StatusCodes.Status400BadRequest,
                 ErrorCode.InvalidOrderStatus);
         }
 

@@ -1,4 +1,6 @@
-﻿namespace Reihan.Client.Models
+﻿using Reihan.Client.Enums;
+
+namespace Reihan.Client.Models
 {
     public class UserProfileDto
     {
@@ -6,6 +8,6 @@
         public string UserName { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
         public string Email { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
+        public UserRole Role { get; set; }
     }
 }

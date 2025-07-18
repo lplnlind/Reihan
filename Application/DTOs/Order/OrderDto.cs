@@ -1,4 +1,5 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Enums;
+using Domain.ValueObjects;
 
 namespace Application.DTOs
 {
@@ -7,7 +8,7 @@ namespace Application.DTOs
         public int Id { get; set; }
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public OrderStatus Status { get; set; }
 
         public string City { get; set; } = string.Empty;
         public string ZipCode { get; set; } = string.Empty;
@@ -20,6 +21,6 @@ namespace Application.DTOs
 
     public class UpdateOrderStatusRequest
     {
-        public string NewStatus { get; set; } = string.Empty;
+        public OrderStatus NewStatus { get; set; }
     }
 }

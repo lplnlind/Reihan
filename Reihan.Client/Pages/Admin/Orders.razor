@@ -17,20 +17,20 @@
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.Id)">تاریخ</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.UserFullName)">نام کابر</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.City)">شهر</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.ZipCode)">کدپستی</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.ZipCode.ToString().En2Fa())">کدپستی</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.OrderItemCount)">چند نوع</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.TotalAmount)">جمع</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.Status)">وضعیت</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.TotalAmount.ToNumeric().En2Fa())">جمع</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.Status.GetDisplayName())">وضعیت</MudTableSortLabel></MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="شناسه">@context.Id</MudTd>
                 <MudTd DataLabel="نام کابر">@context.UserFullName</MudTd>
                 <MudTd DataLabel="شهر">@context.City</MudTd>
-                <MudTd DataLabel="کدپستی">@context.ZipCode</MudTd>
-                <MudTd DataLabel="چند نوع">@context.OrderItemCount</MudTd>
-                <MudTd DataLabel="جمع">@context.TotalAmount</MudTd>
+                <MudTd DataLabel="کدپستی">@context.ZipCode.ToString().En2Fa()</MudTd>
+                <MudTd DataLabel="چند نوع">@context.OrderItemCount.ToString().En2Fa()</MudTd>
+                <MudTd DataLabel="جمع">@context.TotalAmount.ToNumeric().En2Fa()</MudTd>
                 <MudTd DataLabel="وضعیت">
-                    <MudSelect T="string" ValueChanged="@(v => UpdateStatus(context.Id, v))" Value="context.Status" Variant="Variant.Outlined" Dense="true" Margin="Margin.Dense" Typo="Typo.caption">
+                    <MudSelect T="string" ValueChanged="@(v => UpdateStatus(context.Id, v))" Value="context.Status.GetDisplayName()" Variant="Variant.Outlined" Dense="true" Margin="Margin.Dense" Typo="Typo.caption">
                         @foreach (var status in statuses)
                         {
                             <MudSelectItem Value="status">@status</MudSelectItem>
@@ -48,11 +48,10 @@
 
 @code {
     private List<OrderDto> _orders = new();
-    private List<string> statuses = new() { "Pending", "Processing", "Shipped", "Delivered", "Canceled" };
     private OrderDialog? orderDialog;
     private string searchString1 = "";
     private bool _loading = true;
-
+    private List<string> statuses = EnumExtensions.GetDisplayNames<OrderStatus>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,8 +65,10 @@
     private async Task UpdateStatus(int id, string? status)
     {
         if (status is null) return;
-        _orders.FirstOrDefault(u => u.Id == id)!.Status = status;
-        await OrderClient.UpdateOrderStatusAsync(id, status);
+        var orderStatus = EnumExtensions.GetEnumFromDisplayName<OrderStatus>(status) ?? OrderStatus.Pending;
+        await OrderClient.UpdateOrderStatusAsync(id, orderStatus);
+
+        _orders.FirstOrDefault(o => o.Id == id)!.Status = orderStatus;
     }
 
 

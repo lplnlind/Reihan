@@ -17,7 +17,7 @@
                 <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.FullName)">نام</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.UserName)">نام کاربری</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Email)">ایمیل</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Role)">نقش</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Role.GetDisplayName())">نقش</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.IsActive)">وضعیت</MudTableSortLabel></MudTh>
                 <MudTh></MudTh>
             </HeaderContent>
@@ -27,7 +27,7 @@
                 <MudTd DataLabel="نام کاربری">@context.UserName</MudTd>
                 <MudTd DataLabel="ایمیل">@context.Email</MudTd>
                 <MudTd DataLabel="نقش">
-                    <MudSelect T="string" ValueChanged="@(v => UpdateRole(context.Id, v))" Value="context.Role" Variant="Variant.Outlined" Dense="true" Margin="Margin.Dense" Typo="Typo.caption">
+                    <MudSelect T="string" ValueChanged="@(v => UpdateRole(context.Id, v))" Value="context.Role.GetDisplayName()" Variant="Variant.Outlined" Dense="true" Margin="Margin.Dense" Typo="Typo.caption">
                         @foreach (var role in roles)
                         {
                             <MudSelectItem Value="role">@role</MudSelectItem>
@@ -48,7 +48,7 @@
 
 @code {
     private List<UserDto> _users = new();
-    private List<string> roles = new() { "Customer", "Admin" };
+    private List<string> roles = Extensions.EnumExtensions.GetDisplayNames<UserRole>();
     private string searchString1 = "";
     private bool _loading = true;
 
@@ -65,8 +65,10 @@
     private async Task UpdateRole(int userId, string? role)
     {
         if (role is null) return;
-        _users.FirstOrDefault(u => u.Id == userId)!.Role = role;
-        await UserClient.UpdateUserRoleAsync(userId, role);
+        var userRole = EnumExtensions.GetEnumFromDisplayName<UserRole>(role) ?? UserRole.Customer;
+        await UserClient.UpdateUserRoleAsync(userId, userRole);
+        
+        _users.FirstOrDefault(u => u.Id == userId)!.Role = userRole;
     }
 
     private async Task ToggleStatus(int userId, bool newStatus)

@@ -17,6 +17,7 @@
         InvalidLoginCredentials = 1003,
         UserNotFound = 1004,
         InvalidCurrentPassword = 1005,
+        InvalidUserRole = 1006,
 
         // ----------------------------
         // Product (2000-2099)

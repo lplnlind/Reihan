@@ -1,6 +1,5 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Auth;
-using Application.Extensions;
 using AutoMapper;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -14,28 +13,21 @@ namespace Application.Mappings
             // Address
             CreateMap<Address, AddressDto>().ReverseMap();
 
+
             // User
             CreateMap<User, JwtUserDto>()
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))
                 .ReverseMap();
 
-            CreateMap<User, UserDto>()
-                  .ForMember(d => d.PhoneNumber, o => o.MapFrom(s => s.PhoneNumber))
-                  .ReverseMap()
-                  .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber));
+            CreateMap<User, UserDto>().ReverseMap();
 
             CreateMap<User, UserProfileDto>()
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToDisplay(DisplayProperty.Name)))
                 .ReverseMap()
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => new Email(src.Email)));
 
             CreateMap<User, RegisterRequest>().ReverseMap();
             CreateMap<User, UpdateProfileRequest>().ReverseMap();
-
-            CreateMap<User, UserProfileDto>()
-                .ForMember(d => d.Role, o => o.MapFrom(s => s.Role))
-                .ReverseMap();
 
 
             // Cart
@@ -48,7 +40,6 @@ namespace Application.Mappings
             CreateMap<Order, OrderDto>()
                 .ForMember(d => d.City, o => o.MapFrom(s => s.ShippingAddress.City))
                 .ForMember(d => d.ZipCode, o => o.MapFrom(s => s.ShippingAddress.ZipCode))
-                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToDisplay(DisplayProperty.Name)))
                 .ReverseMap();
 
             CreateMap<Order, OrderDetailsDto>()
@@ -56,9 +47,7 @@ namespace Application.Mappings
                 .ForMember(d => d.City, o => o.MapFrom(s => s.ShippingAddress.City))
                 .ForMember(d => d.Street, o => o.MapFrom(s => s.ShippingAddress.Street))
                 .ForMember(d => d.ZipCode, o => o.MapFrom(s => s.ShippingAddress.ZipCode))
-                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status.ToDisplay(DisplayProperty.Name)))
                 .ReverseMap();
-
 
             CreateMap<OrderItem, OrderItemDto>()
                 .ForMember(d => d.ProductImage, o => o.MapFrom(s => s.ProductImage)); // مستقیم
@@ -77,7 +66,6 @@ namespace Application.Mappings
 
             // UserAddress
             CreateMap<UserAddress, UserAddressDto>().ReverseMap();
-
         }
     }
 }

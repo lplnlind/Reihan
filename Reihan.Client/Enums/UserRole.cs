@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Domain.Enums
+namespace Reihan.Client.Enums
 {
     public enum UserRole
     {
