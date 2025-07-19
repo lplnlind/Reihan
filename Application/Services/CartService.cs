@@ -4,6 +4,7 @@ using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using AutoMapper;
 using Domain.Entities;
+using Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Services
@@ -39,7 +40,7 @@ namespace Application.Services
                     ErrorCode.InvalidProductQuantity);
 
             var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
-            cart = _mapper.Map<Cart>(request);
+            cart.AddItem(_mapper.Map<CartItem>(request));
 
             if (cart.Id == 0)
                 await _cartRepo.AddAsync(cart);

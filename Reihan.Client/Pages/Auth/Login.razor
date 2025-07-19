@@ -8,12 +8,25 @@
     <MudText Typo="Typo.h5" Class="mb-12  text-center pa-2 rounded-lg primary-background">ورود به حساب کاربری</MudText>
 
     <EditForm Model="_model" OnValidSubmit="LoginUser">
-        <DataAnnotationsValidator></DataAnnotationsValidator>
-        <MudTextField Label="نام کاربری" @bind-Value="_model.UserNameOrEmail" Margin="Margin.Dense"
-                      Placeholder="نام کاربری یا ایمیل" Required Variant="Variant.Outlined" AutoFocus />
+        <DataAnnotationsValidator />
+        <MudTextField Label="نام کاربری" @bind-Value="_model.UserNameOrEmail"
+                      Margin="Margin.Dense"
+                      Placeholder="نام کاربری یا ایمیل"
+                      Required
+                      Variant="Variant.Outlined"
+                      AutoFocus />
+
         <MudTextField Label="رمز عبور" @bind-Value="_model.Password"
-                      InputType="InputType.Password" Required Variant="Variant.Outlined" Margin="Margin.Dense"/>
-        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Class="mt-2 rounded-lg" FullWidth="true" Variant="Variant.Outlined">ورود</MudButton>
+                      InputType="InputType.Password"
+                      Required
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense" />
+
+        <MudButton ButtonType="ButtonType.Submit"
+                   Color="Color.Primary"
+                   Class="mt-2 rounded-lg"
+                   FullWidth="true"
+                   Variant="Variant.Outlined">ورود</MudButton>
     </EditForm>
 
     <MudText Class="mt-4">

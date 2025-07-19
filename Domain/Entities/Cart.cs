@@ -17,18 +17,19 @@ namespace Domain.Entities
             UserId = userId;
         }
 
-        public void AddItem(int productId, int quantity, decimal unitPrice, string productName, string productImage)
+        public void AddItem(CartItem cart)
         {
-            var existingItem = _items.FirstOrDefault(i => i.ProductId == productId);
+            var existingItem = _items.FirstOrDefault(i => i.ProductId == cart.ProductId);
             if (existingItem is not null)
             {
                 _items.Remove(existingItem);
-                var updatedItem = new CartItem(productId, existingItem.Quantity + quantity, unitPrice, productName, productImage);
+
+                var updatedItem = new CartItem(cart);
                 _items.Add(updatedItem);
             }
             else
             {
-                _items.Add(new CartItem(productId, quantity, unitPrice, productName, productImage));
+                _items.Add(new CartItem(cart));
             }
         }
 

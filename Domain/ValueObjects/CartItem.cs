@@ -11,13 +11,13 @@
 
         private CartItem() { }
 
-        public CartItem(int productId, int quantity, decimal unitPrice, string productName, string productImage)
+        public CartItem(CartItem cart)
         {
-            ProductId = productId;
-            Quantity = quantity;
-            UnitPrice = unitPrice;
-            ProductName = productName;
-            ProductImage = productImage;
+            ProductId = cart.ProductId;
+            Quantity = cart.Quantity;
+            UnitPrice = cart.UnitPrice;
+            ProductName = cart.ProductName;
+            ProductImage = cart.ProductImage;
         }
 
         public void ChangeQuantity(int quantity) =>

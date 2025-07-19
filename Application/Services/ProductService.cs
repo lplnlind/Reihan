@@ -74,6 +74,7 @@ namespace Application.Services
             var dto = _mapper.Map<ProductDto>(product);
             dto.CategoryName = category?.Name;
             dto.ImageUrls = productImages.Select(s => s.Url).ToList();
+            dto.ImageUrl = productImages.FirstOrDefault()?.Url ?? string.Empty;
 
             return dto;
         }
@@ -170,11 +171,12 @@ namespace Application.Services
         public async Task<List<ProductDto>> GetLatestProductsAsync(int count = 8)
         {
             var products = await _productRepo.GetAllAsync();
-            var images = await _productImageRepo.GetAllAsync();
             var categories = await _categoryRepo.GetAllAsync();
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
             var latest = products.OrderByDescending(p => p.CreatedAt).Take(count).ToList();
+            var latestIds = latest.Select(s => s.Id).ToList();
+            var images = await _productImageRepo.GetByProductIdsAsync(latestIds);
 
             var productsDto = _mapper.Map<List<ProductDto>>(latest);
             foreach (var product in productsDto)

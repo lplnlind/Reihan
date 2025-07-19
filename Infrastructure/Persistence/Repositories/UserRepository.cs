@@ -19,5 +19,11 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<User>> GetByIdsAsync(List<int> ids)
             => await _dbSet.Where(w => ids.Contains(w.Id)).ToListAsync();
+
+        public async Task<bool> IsUserActiveAsync(int userId)
+        {
+            var user = await _dbSet.FirstOrDefaultAsync(u => u.Id == userId);
+            return user?.IsActive ?? false;
+        }
     }
 }

@@ -24,7 +24,19 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             if (string.IsNullOrWhiteSpace(token) || !IsTokenValidFormat(token))
                 return new AuthenticationState(_anonymous);
 
-            var claims = ParseClaimsFromJwt(token);
+            var claims = ParseClaimsFromJwt(token).ToList();
+
+            var expClaim = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+            if (expClaim != null && long.TryParse(expClaim, out var exp))
+            {
+                var expiryDate = DateTimeOffset.FromUnixTimeSeconds(exp);
+                if (expiryDate < DateTimeOffset.UtcNow)
+                {
+                    await _localStorage.RemoveItemAsync("authToken");
+                    return new AuthenticationState(_anonymous);
+                }
+            }
+
             var identity = new ClaimsIdentity(claims, "jwt");
 
             var user = new ClaimsPrincipal(identity);

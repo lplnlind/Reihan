@@ -13,7 +13,7 @@ namespace Domain.Entities
         public string PasswordHash { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
-        public string? PhoneNumber { get; private set; }
+        public string PhoneNumber { get; private set; } = string.Empty;
 
         public UserRole Role { get; set; }
 

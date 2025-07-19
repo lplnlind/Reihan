@@ -7,5 +7,6 @@ namespace Infrastructure.Persistence.Repositories
         Task<User?> GetByUsernameAsync(string username);
         Task<User?> GetByEmailAsync(string email);
         Task<IEnumerable<User>> GetByIdsAsync(List<int> ids);
+        Task<bool> IsUserActiveAsync(int userId);
     }
 }

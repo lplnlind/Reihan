@@ -15,112 +15,7 @@ else if (Product is null)
 }
 else
 {
-    <MudContainer MaxWidth="MaxWidth.Large">
-        <MudPaper Outlined="true" Class="rounded-xl pa-3 pl-5">
-            <MudGrid Justify="Justify.Center" Spacing="10">
-                <MudItem xs="12" md="6" Style="height:500px">
-                    @if (Product.ImageUrls.Count > 1)
-                    {
-                        <MudCarousel TData="object" Class="mud-height-full" AutoCycle="false">
-                            <BulletTemplate Context="selected">
-                                <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon pa-0 pb-2">
-                                    <span class="mud-icon-button-label">
-                                        <MudIcon Size="Size.Small" Icon="@(selected? Icons.Material.Filled.Circle : Icons.Material.TwoTone.Circle)" Color="@Color.Inherit" />
-                                    </span>
-                                </div>
-                            </BulletTemplate>
-                            <ChildContent>
-                                @foreach (var img in Product.ImageUrls)
-                                {
-                                    <MudCarouselItem>
-                                        <MudImage Src="@img" Alt="تصویر محصول" Class="rounded-xl mud-height-full mud-width-full" ObjectFit="ObjectFit.Cover" ObjectPosition="ObjectPosition.Center" />
-                                    </MudCarouselItem>
-                                }
-                            </ChildContent>
-                        </MudCarousel>
-                    }
-                    else if (Product.ImageUrls.Any())
-                    {
-                        <MudImage Src="@Product.ImageUrls.First()" Width="100" />
-                    }
-                </MudItem>
-
-                <MudItem xs="12" md="6">
-
-                    <MudStack Justify="Justify.SpaceBetween" Style="height:100%">
-                        <MudItem>
-                            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mt-7">
-                                <MudText Typo="Typo.h3" Class="mt-2 pl-4 rounded-lg primary-background">@Product.Name</MudText>
-                                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                                    <MudChip Href="@($"/shop/{@Product.CategoryId}")" T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary">@Product.CategoryName</MudChip>
-                                    <MudIconButton Icon="@Icons.Material.Rounded.Share" Size="Size.Small"></MudIconButton>
-                                    <AuthorizeView>
-                                        <Authorized>
-                                            <MudToggleIconButton @bind-Toggled="IsFav"
-                                                                 @onclick="ToggleFavorite"
-                                                                 Icon="@Icons.Material.Rounded.FavoriteBorder"
-                                                                 ToggledIcon="@Icons.Material.Rounded.Favorite"
-                                                                 Color="Color.Dark"
-                                                                 ToggledColor="Color.Primary"
-                                                                 Size="Size.Small"
-                                                                 Class="pa-1"
-                                                                 aria-label="add to favorite" />
-                                        </Authorized>
-                                        <NotAuthorized>
-                                            <MudIconButton Href="/login" Class="pa-1" Icon="@Icons.Material.Rounded.FavoriteBorder" Color="Color.Dark" Size="Size.Small" aria-label="add to favorite" />
-                                        </NotAuthorized>
-                                    </AuthorizeView>
-                                </MudStack>
-                            </MudStack>
-
-                            <MudStack Row Spacing="0" AlignItems="AlignItems.End" Class="mt-5">
-                                <MudText Typo="Typo.h3" Class="scondary-background rounded-lg">@Product.Price.ToNumeric().En2Fa()</MudText>
-                                <MudText Inline="true" Typo="Typo.caption">تومان</MudText>
-                            </MudStack>
-                            <MudText Typo="Typo.body2" Class="mt-1">سایز: متوسط | جنس: چرم مصنوعی</MudText>
-                            <MudText Typo="Typo.body1" Class="mt-1 mb-2">@((MarkupString)Product.Description)</MudText>
-                        </MudItem>
-                        <MudItem>
-                            <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
-                                <MudStack Row AlignItems="AlignItems.Center">
-                                    <MudNumericField T="int"
-                                                     @bind-Value="Quantity"
-                                                     Min="1"
-                                                     Max="@Product.StockQuantity"
-                                                     Variant="Variant.Outlined"
-                                                     Margin="Margin.Dense"
-                                                     Class="ma-0 product-quantity"
-                                                     HideSpinButtons />
-
-
-                                    <AuthorizeView>
-                                        <Authorized>
-                                            @if (IsInCart)
-                                            {
-                                                <MudIconButton OnClick="RemoveFromCart" Icon="@Icons.Material.TwoTone.ShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" />
-                                            }
-                                            else
-                                            {
-                                                <MudButton OnClick="AddToCart" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
-                                            }
-                                        </Authorized>
-                                        <NotAuthorized>
-                                            <MudButton Href="/login" StartIcon="@Icons.Material.Rounded.AddShoppingCart" Class="ro rounded-lg" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Dark">افزودن</MudButton>
-                                        </NotAuthorized>
-                                    </AuthorizeView>
-                                </MudStack>
-                            </MudStack>
-                        </MudItem>
-                    </MudStack>
-
-                    @if (Product.StockQuantity == 0)
-                    {
-                        <MudText Color="Color.Error" Class="mt-2">ناموجود</MudText>
-                    }
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
-    </MudContainer>
+    <ProductCard Product="Product" CardMode="CardMode.DetailsCard"></ProductCard>
 }
 
 
@@ -128,10 +23,7 @@ else
     [Parameter] public int id { get; set; }
 
     private ProductDto? Product;
-    private int Quantity = 1;
     private bool Loading = true;
-    private bool IsFav;
-    private bool IsInCart;
 
 
     protected override async Task OnInitializedAsync()
@@ -139,49 +31,6 @@ else
         Product = await ProductClient.GetByIdAsync(id);
 
         if (Product is not null)
-        {
-            IsFav = await FavoriteClient.IsFavoriteAsync(Product.Id);
-            IsInCart = await ProductClient.IsInCartAsync(Product.Id);
             Loading = false;
-        }
-    }
-
-
-    private async Task AddToCart()
-    {
-        if (Product is null) return;
-
-        var addToCart = new AddToCartRequest
-        {
-            ProductId = Product.Id,
-            ProductName = Product.Name,
-            ProductImage = Product.ImageUrl,
-            Quantity = 1,
-            UnitPrice = Product.Price
-        };
-
-        await CartClient.AddItemAsync(addToCart);
-
-        IsInCart = true;
-    }
-
-    private async Task RemoveFromCart()
-    {
-        if (Product is null) return;
-
-        await CartClient.RemoveItemAsync(Product.Id);
-
-        IsInCart = false;
-    }
-
-
-    private async Task ToggleFavorite()
-    {
-        if (IsFav)
-            await FavoriteClient.RemoveFromFavoriteAsync(Product.Id);
-        else
-            await FavoriteClient.AddToFavoriteAsync(Product.Id);
-
-        IsFav = !IsFav;
     }
 }

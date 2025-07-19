@@ -121,7 +121,17 @@ public class OrderService : IOrderService
         if (cart == null || !cart.Items.Any())
         {
             _logger.LogWarning("سبد خرید کاربر {UserId} خالی است", userId);
-            throw new AppException("سبد خرید شما خالی است.", StatusCodes.Status400BadRequest,
+            throw new AppException("سبد خرید شما خالی است.",
+                StatusCodes.Status400BadRequest,
+                ErrorCode.CartIsEmpty);
+        }
+
+        var userIsActive = await _userRepo.IsUserActiveAsync(userId);
+        if (!userIsActive)
+        {
+            _logger.LogWarning("ثبت درخواست خرید توسط کاربر محدود شده: {userId}", userId);
+            throw new AppException("حساب شما توسط ادمین محدود شده است.",
+                StatusCodes.Status400BadRequest,
                 ErrorCode.CartIsEmpty);
         }
 
