@@ -45,7 +45,7 @@ namespace Application.Services
             var categories = await _categoryRepo.GetAllAsync();
 
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
-            var productsDto = _mapper.Map<List<ProductDto>>(products);
+            var productsDto = _mapper.Map<List<ProductDto>>(products.OrderByDescending(p => p.CreatedAt));
 
             foreach (var p in productsDto)
             {
@@ -110,7 +110,7 @@ namespace Application.Services
                     ErrorCode.ProductNotFound);
             }
 
-            product = _mapper.Map<Product>(dto);
+            _mapper.Map(dto, product);
             await _productRepo.UpdateAsync(product);
 
             // Update Product Images

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using System.Text.Json;
+using static System.Net.WebRequestMethods;
 
 namespace Reihan.Client.Authentication;
 
@@ -9,6 +10,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 {
     private readonly ILocalStorageService _localStorage;
     private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+    private const string TokenKey = "authToken";
 
     public CustomAuthStateProvider(ILocalStorageService localStorage)
     {
@@ -19,7 +21,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     {
         try
         {
-            var token = await _localStorage.GetItemAsStringAsync("authToken");
+            var token = await _localStorage.GetItemAsStringAsync(TokenKey);
 
             if (string.IsNullOrWhiteSpace(token) || !IsTokenValidFormat(token))
                 return new AuthenticationState(_anonymous);
@@ -32,7 +34,8 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
                 var expiryDate = DateTimeOffset.FromUnixTimeSeconds(exp);
                 if (expiryDate < DateTimeOffset.UtcNow)
                 {
-                    await _localStorage.RemoveItemAsync("authToken");
+                    await _localStorage.RemoveItemAsync(TokenKey);
+                    NotifyUserLogout();
                     return new AuthenticationState(_anonymous);
                 }
             }

@@ -59,11 +59,7 @@ else
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" sm="12">
-                        <MudTextField Label="توضیحات"
-                                      @bind-Value="Product.Description"
-                                      Disabled="IsDisable"
-                                      Lines="3"
-                                      Variant="Variant.Outlined" />
+                        <Editor ScriptSrc="/lib/tinymce/tinymce.min.js" @bind-value="Product.Description" />
                     </MudItem>
                     <MudItem xs="12" sm="12">
                         <MudPaper Outlined="true" Class="rounded-gl pa-1">

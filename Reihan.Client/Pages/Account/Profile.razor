@@ -100,12 +100,31 @@
             </MudStack>
 
             <EditForm Model="@changePassword" OnValidSubmit="ChangePassword">
-                <MudTextField Label="رمز فعلی" @bind-Value="changePassword.CurrentPassword" Margin="Margin.Dense" Disabled="isChangePassword" Variant="Variant.Outlined" Class="rounded-lg" />
-                <MudTextField Label="رمز جدید" @bind-Value="changePassword.NewPassword" Margin="Margin.Dense" Disabled="isChangePassword" Variant="Variant.Outlined" Class="rounded-lg" />
+                <MudTextField Label="رمز فعلی"
+                              @bind-Value="changePassword.CurrentPassword"
+                              Margin="Margin.Dense"
+                              Disabled="isChangePassword"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Password"
+                              Class="rounded-lg" />
+
+                <MudTextField Label="رمز جدید"
+                              @bind-Value="changePassword.NewPassword"
+                              Margin="Margin.Dense"
+                              Disabled="isChangePassword"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Password"
+                              Class="rounded-lg" />
+
                 <MudStack Justify="Justify.FlexEnd">
                     @if (!isChangePassword)
                     {
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Outlined.Edit" Class="rounded-lg">ویرایش</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   StartIcon="@Icons.Material.Outlined.Edit"
+                                   Class="rounded-lg">ویرایش</MudButton>
                     }
                 </MudStack>
             </EditForm>

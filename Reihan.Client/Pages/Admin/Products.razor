@@ -19,19 +19,34 @@
                 <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Id)">شناسه</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Name)">نام</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.CategoryName)">دسته بندی</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.StockQuantity)">تعداد</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Price)">قیمت</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.StockQuantity.ToString().En2Fa())">تعداد</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Price.ToNumeric().En2Fa())">قیمت</MudTableSortLabel></MudTh>
                 <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="شناسه">@context.Id</MudTd>
                 <MudTd DataLabel="نام">@context.Name</MudTd>
                 <MudTd DataLabel="دسته بندی">@context.CategoryName</MudTd>
-                <MudTd DataLabel="تعداد">@context.StockQuantity</MudTd>
-                <MudTd DataLabel="قیمت">@context.Price</MudTd>
+                <MudTd DataLabel="تعداد">@context.StockQuantity.ToString().En2Fa()</MudTd>
+                <MudTd DataLabel="قیمت">@context.Price.ToNumeric().En2Fa()</MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Rounded.Edit" Size="Size.Small" OnClick="@(() => OpenEditDialog(context))"></MudIconButton>
-                    <MudIconButton Icon="@Icons.Material.Rounded.Delete" Size="Size.Small" OnClick="@(() => OpenDeleteDialog(context))"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Rounded.Visibility"
+                                   Size="Size.Small"
+                                   Href="@($"/shop/product/{@context.Id}")"
+                                   Variant="Variant.Outlined"
+                                   Class="rounded-lg border-color-gray-Lighten2" />
+
+                    <MudIconButton Icon="@Icons.Material.Rounded.Edit"
+                                   Size="Size.Small"
+                                   OnClick="@(() => OpenEditDialog(context))" 
+                                   Variant="Variant.Outlined"
+                                   Class="rounded-lg border-color-gray-Lighten2" />
+
+                    <MudIconButton Icon="@Icons.Material.Rounded.Delete"
+                                   Size="Size.Small"
+                                   OnClick="@(() => OpenDeleteDialog(context))" 
+                                   Variant="Variant.Outlined"
+                                   Class="rounded-lg border-color-gray-Lighten2" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>
