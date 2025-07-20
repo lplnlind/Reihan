@@ -83,11 +83,33 @@
 
                     <MudText Typo="Typo.body1" Class="mr-2">@address.Title</MudText>
 
-                    <MudIconButton Icon="@Icons.Material.TwoTone.Delete"
-                                   OnClick="e => DeleteAddress(address.Id)"
-                                   Variant="Variant.Outlined"
-                                   Size="Size.Small"
-                                   Class="rounded-lg border-color-gray-Lighten2" />
+                    <MudStack Row Spacing="1">
+                        @if (address.IsDefault)
+                        {
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       DropShadow="false"
+                                       StartIcon="@Icons.Material.TwoTone.CheckCircle"
+                                       Size="Size.Small"
+                                       Class="rounded-lg px-2 py-0 ma-0 botton-tag">پیشفرض</MudButton>
+                        }
+                        else
+                        {
+                            <MudButton OnClick="e => DefaultAddress(address.Id)"
+                                       Variant="Variant.Outlined"
+                                       DropShadow="false"
+                                       StartIcon="@Icons.Material.TwoTone.Circle"
+                                       Size="Size.Small"
+                                       Class="rounded-lg px-2 py-0 ma-0 botton-tag">انتخاب</MudButton>
+                        }
+
+                        <MudIconButton Icon="@Icons.Material.TwoTone.Delete"
+                                       OnClick="e => DeleteAddress(address.Id)"
+                                       Variant="Variant.Outlined"
+                                       Size="Size.Small"
+                                       Class="rounded-lg border-color-gray-Lighten2" />
+
+                    </MudStack>
                 </MudStack>
             }
 
@@ -247,6 +269,12 @@
     {
         _userAddresses = await UserAddressClient.GetAllAsync();
         StateHasChanged();
+    }
+
+    private async Task DefaultAddress(int id)
+    {
+        await UserAddressClient.SetDefault(id);
+        await LoadUserAddress();
     }
 
 
