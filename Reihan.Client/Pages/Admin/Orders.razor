@@ -14,16 +14,17 @@
                 <MudItem lg="3"><MudTextField @bind-Value="searchString1" Placeholder="جستجو" Margin="Margin.Dense" Typo="Typo.caption" Adornment="Adornment.Start" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Rounded.Search" IconSize="Size.Medium" Class="ma-0"></MudTextField></MudItem>
             </ToolBarContent>
             <HeaderContent>
-                <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.Id)">تاریخ</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.CreatedAt)">تاریخ</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.UserFullName)">نام کابر</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.City)">شهر</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.ZipCode.ToString().En2Fa())">کدپستی</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.OrderItemCount)">چند نوع</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.TotalAmount.ToNumeric().En2Fa())">جمع</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<OrderDto, object>(x => x.Status.GetDisplayName())">وضعیت</MudTableSortLabel></MudTh>
+                <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="شناسه">@context.Id</MudTd>
+                <MudTd DataLabel="تاریخ">@context.CreatedAt.ToPersian().En2Fa()</MudTd>
                 <MudTd DataLabel="نام کابر">@context.UserFullName</MudTd>
                 <MudTd DataLabel="شهر">@context.City</MudTd>
                 <MudTd DataLabel="کدپستی">@context.ZipCode.ToString().En2Fa()</MudTd>
@@ -36,6 +37,13 @@
                             <MudSelectItem Value="status">@status</MudSelectItem>
                         }
                     </MudSelect>
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Rounded.Visibility"
+                                   Size="Size.Small"
+                                   Href="@($"/admin/order/details/{@context.Id}")"
+                                   Variant="Variant.Outlined"
+                                   Class="rounded-lg border-color-gray-Lighten2" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>

@@ -15,8 +15,11 @@ namespace Reihan.Client.Models
         [Required(ErrorMessage ="مقدار فیلد را به درستی وارد کنید")]
         public int StockQuantity { get; set; }
 
+        public bool IsActive { get; set; }
         public string Description { get; set; } = string.Empty;
-         
+        public DateTime CreatedAt { get; set; }
+
+
         [Required(ErrorMessage ="مقدار فیلد را به درستی وارد کنید")]
         public int CategoryId { get; set; }
 

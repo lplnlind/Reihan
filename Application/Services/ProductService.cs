@@ -38,14 +38,19 @@ namespace Application.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
+        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync(bool includeInactive = false)
         {
             var products = await _productRepo.GetAllAsync();
+            products = products.OrderByDescending(p => p.CreatedAt).ToList();
+
+            if (!includeInactive)
+                products = products.Where(p => p.IsActive).ToList();
+
             var images = await _productImageRepo.GetAllAsync();
             var categories = await _categoryRepo.GetAllAsync();
 
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
-            var productsDto = _mapper.Map<List<ProductDto>>(products.OrderByDescending(p => p.CreatedAt));
+            var productsDto = _mapper.Map<List<ProductDto>>(products);
 
             foreach (var p in productsDto)
             {
@@ -174,7 +179,7 @@ namespace Application.Services
             var categories = await _categoryRepo.GetAllAsync();
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
-            var latest = products.OrderByDescending(p => p.CreatedAt).Take(count).ToList();
+            var latest = products.Where(p => p.IsActive).OrderByDescending(p => p.CreatedAt).Take(count).ToList();
             var latestIds = latest.Select(s => s.Id).ToList();
             var images = await _productImageRepo.GetByProductIdsAsync(latestIds);
 
@@ -196,6 +201,8 @@ namespace Application.Services
         public async Task<List<ProductDto>> GetFilteredProductsAsync(int? categoryId = null)
         {
             var products = await _productRepo.GetAllAsync();
+            products = products.Where(p => p.IsActive).OrderByDescending(p => p.CreatedAt).ToList();
+
             var images = await _productImageRepo.GetAllAsync();
             var categories = await _categoryRepo.GetAllAsync();
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
@@ -216,6 +223,26 @@ namespace Application.Services
         {
             var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
             return cart.Items.Any(i => i.ProductId == productId);
+        }
+
+        public async Task SetActiveStatusAsync(int productId, bool isActive)
+        {
+            var product = await _productRepo.GetByIdAsync(productId);
+            if (product is null)
+            {
+                _logger.LogWarning("محصول با شناسه {Id} یافت نشد", productId);
+                throw new AppException("محصول یافت نشد",
+                    StatusCodes.Status404NotFound,
+                    ErrorCode.ProductNotFound);
+            }
+
+            if (isActive)
+                product.Activate();
+            else
+                product.Deactivate();
+
+            await _productRepo.UpdateAsync(product);
+            _logger.LogInformation("وضعیت 'IsActive' محصول به روز شد: {Id}", product.Id);
         }
     }
 }

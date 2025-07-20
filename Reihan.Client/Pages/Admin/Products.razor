@@ -18,17 +18,41 @@
             <HeaderContent>
                 <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Id)">شناسه</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Name)">نام</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.CreatedAt)">تاریخ ایجاد</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.CategoryName)">دسته بندی</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.StockQuantity.ToString().En2Fa())">تعداد</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.Price.ToNumeric().En2Fa())">قیمت</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<ProductDto, object>(x => x.IsActive)">وضعیت</MudTableSortLabel></MudTh>
                 <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="شناسه">@context.Id</MudTd>
                 <MudTd DataLabel="نام">@context.Name</MudTd>
+                <MudTd DataLabel="تاریخ ایجاد">@context.CreatedAt.ToPersian().En2Fa()</MudTd>
                 <MudTd DataLabel="دسته بندی">@context.CategoryName</MudTd>
                 <MudTd DataLabel="تعداد">@context.StockQuantity.ToString().En2Fa()</MudTd>
                 <MudTd DataLabel="قیمت">@context.Price.ToNumeric().En2Fa()</MudTd>
+                <MudTd DataLabel="وضعیت">
+                    @if (context.IsActive)
+                    {
+                        <MudButton OnClick="e => ToggleStatus(context.Id, false)"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   DropShadow="false"
+                                   StartIcon="@Icons.Material.TwoTone.CheckCircle"
+                                   Size="Size.Small"
+                                   Class="rounded-lg px-2 py-0 ma-0 botton-tag">فعال</MudButton>
+                    }
+                    else
+                    {
+                        <MudButton OnClick="e => ToggleStatus(context.Id, true)"
+                                   Variant="Variant.Outlined"
+                                   DropShadow="false"
+                                   StartIcon="@Icons.Material.TwoTone.Circle"
+                                   Size="Size.Small"
+                                   Class="rounded-lg px-2 py-0 ma-0 botton-tag">غیرفعال</MudButton>
+                    }
+                </MudTd>
                 <MudTd>
                     <MudIconButton Icon="@Icons.Material.Rounded.Visibility"
                                    Size="Size.Small"
@@ -38,13 +62,13 @@
 
                     <MudIconButton Icon="@Icons.Material.Rounded.Edit"
                                    Size="Size.Small"
-                                   OnClick="@(() => OpenEditDialog(context))" 
+                                   OnClick="@(() => OpenEditDialog(context))"
                                    Variant="Variant.Outlined"
                                    Class="rounded-lg border-color-gray-Lighten2" />
 
                     <MudIconButton Icon="@Icons.Material.Rounded.Delete"
                                    Size="Size.Small"
-                                   OnClick="@(() => OpenDeleteDialog(context))" 
+                                   OnClick="@(() => OpenDeleteDialog(context))"
                                    Variant="Variant.Outlined"
                                    Class="rounded-lg border-color-gray-Lighten2" />
                 </MudTd>
@@ -146,6 +170,15 @@
                     await LoadProducts();
                 }
             }
+    }
+
+
+    private async Task ToggleStatus(int id, bool isActive)
+    {
+        await ProductClient.SetActiveStatusAsync(id, isActive);
+
+        var product = _product.FirstOrDefault(p => p.Id == id);
+        if (product is not null) product.IsActive = isActive;
     }
 
 

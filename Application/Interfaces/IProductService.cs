@@ -4,7 +4,7 @@ namespace Application.Interfaces
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductDto>> GetAllProductsAsync();
+        Task<IEnumerable<ProductDto>> GetAllProductsAsync(bool includeInactive = false);
         Task<ProductDto?> GetProductByIdAsync(int id);
         Task AddProductAsync(ProductDto product);
         Task UpdateProductAsync(ProductDto product);
@@ -13,5 +13,6 @@ namespace Application.Interfaces
         Task<List<ProductDto>> GetBestSellingProductsAsync(int count = 8);
         Task<List<ProductDto>> GetFilteredProductsAsync(int? categoryId = null);
         Task<bool> IsInCartAsync(int userId, int productId);
+        Task SetActiveStatusAsync(int productId, bool isActive);
     }
 }

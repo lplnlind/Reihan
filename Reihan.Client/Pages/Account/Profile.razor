@@ -1,4 +1,5 @@
 ﻿@page "/account/profile"
+@attribute [Authorize]
 @inject IAuthClient AuthClient
 @inject IFavoriteClient FavoriteClient
 @inject IOrderClient OrderClient
@@ -176,7 +177,7 @@
                             </MudItem>
                             <MudItem>
                                 <MudText Typo="Typo.caption">تاریخ سفارش:</MudText>
-                                <MudText Typo="Typo.body1">@order.OrderDate</MudText>
+                                <MudText Typo="Typo.body1">@order.OrderDate.ToPersian().En2Fa()</MudText>
                             </MudItem>
                             <MudStack Spacing="0" AlignItems="AlignItems.Start">
                                 <MudText Typo="Typo.caption">وضعیت سفارش:</MudText>

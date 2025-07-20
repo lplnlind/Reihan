@@ -9,6 +9,7 @@ namespace Application.DTOs
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public OrderStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public string City { get; set; } = string.Empty;
         public string ZipCode { get; set; } = string.Empty;

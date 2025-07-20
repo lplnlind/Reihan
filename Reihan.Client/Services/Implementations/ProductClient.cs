@@ -149,5 +149,21 @@ namespace Reihan.Client.Services
                 return false;
             }
         }
+
+        public async Task SetActiveStatusAsync(int id, bool isActive)
+        {
+            try
+            {
+                var url = $"api/products/{id}/" + (isActive ? "activate" : "deactivate");
+                var response = await _http.PutAsync(url, null);
+                await response.HandleResponseAsync(_snackbar,
+                    (isActive ? "محصول فعال شد" : "محصول غیرفعال شد"),
+                    isActive ? Severity.Success : Severity.Warning);
+            }
+            catch (Exception)
+            {
+                _snackbar.Add("ارتباط با سرور برقرار نشد", Severity.Error);
+            }
+        }
     }
 }

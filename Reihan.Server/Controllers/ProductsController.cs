@@ -22,7 +22,8 @@ namespace Reihan.Server.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
-            var products = await _productService.GetAllProductsAsync();
+            bool includeInactive = _userContext.IsAdmin();
+            var products = await _productService.GetAllProductsAsync(includeInactive);
             return Ok(products);
         }
 
@@ -102,6 +103,20 @@ namespace Reihan.Server.Controllers
             var userId = _userContext.GetUserId();
             var result = await _productService.IsInCartAsync(userId, productId);
             return Ok(result);
+        }
+
+        [HttpPut("{id}/activate")]
+        public async Task<IActionResult> Activate(int id)
+        {
+            await _productService.SetActiveStatusAsync(id, true);
+            return NoContent();
+        }
+
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            await _productService.SetActiveStatusAsync(id, false);
+            return NoContent();
         }
     }
 }

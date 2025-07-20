@@ -13,5 +13,6 @@ namespace Reihan.Client.Services
         Task<List<ProductDto>> GetLatestAsync();
         Task<List<ProductDto>> FilterAsync(int? categoryId = null);
         Task<bool> IsInCartAsync(int productId);
+        Task SetActiveStatusAsync(int id, bool isActive);
     }
 }

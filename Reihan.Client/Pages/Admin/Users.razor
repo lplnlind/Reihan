@@ -17,15 +17,35 @@
                 <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.FullName)">نام</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.UserName)">نام کاربری</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Email)">ایمیل</MudTableSortLabel></MudTh>
-                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Role.GetDisplayName())">نقش</MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.IsActive)">وضعیت</MudTableSortLabel></MudTh>
-                <MudTh></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<UserDto, object>(x => x.Role.GetDisplayName())">نقش</MudTableSortLabel></MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="شناسه">@context.Id</MudTd>
                 <MudTd DataLabel="نام">@context.FullName</MudTd>
                 <MudTd DataLabel="نام کاربری">@context.UserName</MudTd>
                 <MudTd DataLabel="ایمیل">@context.Email</MudTd>
+                <MudTd DataLabel="وضعیت">
+                    @if (context.IsActive)
+                    {
+                        <MudButton OnClick="e => ToggleStatus(context.Id, false)"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   DropShadow="false"
+                                   StartIcon="@Icons.Material.TwoTone.CheckCircle"
+                                   Size="Size.Small"
+                                   Class="rounded-lg px-2 py-0 ma-0 botton-tag">فعال</MudButton>
+                    }
+                    else
+                    {
+                        <MudButton OnClick="e => ToggleStatus(context.Id, true)"
+                                   Variant="Variant.Outlined"
+                                   DropShadow="false"
+                                   StartIcon="@Icons.Material.TwoTone.Circle"
+                                   Size="Size.Small"
+                                   Class="rounded-lg px-2 py-0 ma-0 botton-tag">غیرفعال</MudButton>
+                    }
+                </MudTd>
                 <MudTd DataLabel="نقش">
                     <MudSelect T="string" ValueChanged="@(v => UpdateRole(context.Id, v))" Value="context.Role.GetDisplayName()" Variant="Variant.Outlined" Dense="true" Margin="Margin.Dense" Typo="Typo.caption">
                         @foreach (var role in roles)
@@ -34,10 +54,7 @@
                         }
                     </MudSelect>
                 </MudTd>
-                <MudTd DataLabel="وضعیت">@(context.IsActive ? "فعال" : "غیرفعال")</MudTd>
-                <MudTd>
-                    <MudButton @onclick="() => ToggleStatus(context.Id, !context.IsActive)">@(context.IsActive ? "غیرفعال‌سازی" : "فعال‌سازی")</MudButton>
-                </MudTd>
+
             </RowTemplate>
             <PagerContent>
                 <MudTablePager />
@@ -74,6 +91,7 @@
     private async Task ToggleStatus(int userId, bool newStatus)
     {
         await UserClient.ToggleUserStatusAsync(userId, newStatus);
+
         var user = _users!.FirstOrDefault(u => u.Id == userId);
         if (user is not null) user.IsActive = newStatus;
     }
