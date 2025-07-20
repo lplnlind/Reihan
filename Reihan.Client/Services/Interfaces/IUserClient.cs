@@ -8,5 +8,6 @@ namespace Reihan.Client.Services
         Task<List<UserDto>> GetAllUsersAsync();
         Task UpdateUserRoleAsync(int userId, UserRole newRole);
         Task ToggleUserStatusAsync(int userId, bool isActive);
+        Task<UserDto> GetByIdAsync(int userId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Reihan.Client.Authentication;
+using Reihan.Client.Mappings;
 using Reihan.Client.Services;
 
 namespace Reihan.Client.DependencyInjection
@@ -16,6 +17,7 @@ namespace Reihan.Client.DependencyInjection
             services.AddScoped<IDashboardClient, DashboardClient>();
             services.AddScoped<IFavoriteClient, FavoriteClient>();
             services.AddScoped<IUserAddressClient, UserAddressClient>();
+            services.AddAutoMapper(typeof(ClientMappingProfile).Assembly);
 
             return services;
         }

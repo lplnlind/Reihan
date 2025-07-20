@@ -24,6 +24,13 @@ namespace Reihan.Server.Controllers
             return Ok(users);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+            return Ok(user);
+        }
+
         [HttpPut("{id}/role")]
         public async Task<IActionResult> UpdateRole(int id, UpdateUserRoleRequest request)
         {

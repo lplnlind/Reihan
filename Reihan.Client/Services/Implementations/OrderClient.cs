@@ -32,18 +32,18 @@ namespace Reihan.Client.Services
             }
         }
 
-        public async Task<List<OrderDetailsDto>> GetOrderDetailsAsync(int id)
+        public async Task<OrderDetailsDto> GetOrderDetailsAsync(int id)
         {
             try
             {
                 var response = await _http.GetAsync($"api/orders/{id}/details");
-                var result = await response.HandleResponseAsync<List<OrderDetailsDto>>(_snackbar);
-                return result ?? new List<OrderDetailsDto>();
+                var result = await response.HandleResponseAsync<OrderDetailsDto>(_snackbar);
+                return result ?? new OrderDetailsDto();
             }
             catch (Exception)
             {
                 _snackbar.Add("ارتباط با سرور برقرار نشد", Severity.Error);
-                return new List<OrderDetailsDto>();
+                return new OrderDetailsDto();
             }
         }
 
@@ -84,7 +84,7 @@ namespace Reihan.Client.Services
                 var result = await response.HandleResponseAsync<int>(_snackbar);
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _snackbar.Add("ارتباط با سرور برقرار نشد", Severity.Error);
                 return 0;

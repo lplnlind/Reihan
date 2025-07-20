@@ -227,13 +227,15 @@
     protected override async Task OnInitializedAsync()
     {
         var current = await AuthClient.GetProfileAsync();
-        profile = new UpdateProfileRequest
-        {
-            FullName = current.FullName,
-            Email = current.Email,
-            UserName = current.UserName,
-            PhoneNumber = current.PhoneNumber
-        };
+
+        if (current is not null)
+            profile = new UpdateProfileRequest
+            {
+                FullName = current.FullName,
+                Email = current.Email,
+                UserName = current.UserName,
+                PhoneNumber = current.PhoneNumber
+            };
 
         products = await FavoriteClient.GetUserFavoritesAsync();
         orders = await OrderClient.GetOrdersByUserAsync();

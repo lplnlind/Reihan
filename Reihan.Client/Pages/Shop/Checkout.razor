@@ -3,7 +3,7 @@
 @inject IOrderClient OrderClient
 @inject IDialogService DialogService
 @inject IUserAddressClient UserAddressClient
-
+@inject NavigationManager Nav
 
 <PageTitle>تسویه حساب</PageTitle>
 
@@ -31,7 +31,7 @@ else
                     <MudButton Href="/cart" Variant="Variant.Outlined" StartIcon="@Icons.Material.Rounded.ArrowForward"
                                Class="rounded-lg border-color-gray-Lighten2">سبد خرید</MudButton>
 
-                    <MudButton EndIcon="@Icons.Material.Rounded.ArrowBack" Class="rounded-lg"
+                    <MudButton OnClick="SubmitOrder" StartIcon="@Icons.Material.TwoTone.CreditCard" Class="rounded-lg"
                                Variant="Variant.Outlined" Color="Color.Primary">پرداخت</MudButton>
                 </MudStack>
             </MudItem>
@@ -171,5 +171,7 @@ else
         _order.ShippingAddress.Street = _userAddress.Street;
 
         await OrderClient.CreateAsync(_order);
+
+        Nav.NavigateTo("/account/profile");
     }
 }

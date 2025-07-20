@@ -31,6 +31,7 @@ namespace Application.Services
         public async Task AddAddressAsync(int userId, UserAddressDto dto)
         {
             var address = _mapper.Map<UserAddress>(dto);
+            address.SetUserId(userId);
 
             var isExists = await _repo.ExistsAsync(userId);
             if (!isExists)

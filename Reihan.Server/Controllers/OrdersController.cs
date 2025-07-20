@@ -30,8 +30,8 @@ namespace Reihan.Server.Controllers
         [HttpGet("{id}/details")]
         public async Task<IActionResult> GetOrderDetails(int id)
         {
-            var orders = await _orderService.GetOrderDetailsAsync(id);
-            return Ok(orders);
+            var order = await _orderService.GetOrderDetailsAsync(id);
+            return Ok(order);
         }
 
         [HttpPut("{id}/status")]

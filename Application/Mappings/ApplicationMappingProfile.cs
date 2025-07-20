@@ -53,7 +53,7 @@ namespace Application.Mappings
                 .ForMember(d => d.ProductImage, o => o.MapFrom(s => s.ProductImage)); // مستقیم
 
             CreateMap<OrderItem, CartItemDto>();
-
+            CreateMap<CartItem, OrderItem>();
 
             // Product
             CreateMap<Product, ProductDto>()

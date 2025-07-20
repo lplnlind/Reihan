@@ -1,0 +1,151 @@
+﻿@page "/admin/order/{id:int}"
+@inject ICartClient CartClient
+@inject IOrderClient OrderClient
+@inject IUserAddressClient UserAddressClient
+@inject IUserClient UserClient
+@inject IMapper Mapper
+@using Reihan.Client.Pages.Shop
+
+<PageTitle>سفارش</PageTitle>
+
+@if (_order is null)
+{
+    <p>در حال بارگذاری...</p>
+}
+else if (!_order.Items.Any())
+{
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="my-7">سفارش موردنظر پیدا نشد.</MudText>
+}
+else
+{
+    <MudItem sm="12" lg="9" Class="mx-auto">
+
+        <MudStack Row class="mb-4" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h5" Inline Class="pl-3 scondary-background rounded-lg">سفارش</MudText>
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudSelect T="string" ValueChanged="@(v => UpdateStatus(_order.Id, v))" Value="_order.Status.GetDisplayName()"
+                           Variant="Variant.Outlined" Dense="true" Margin="Margin.Dense" Typo="Typo.caption">
+                    @foreach (var status in statuses)
+                    {
+                        <MudSelectItem Value="status">@status</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudText Class="pr-3 primary-background rounded-lg" Typo="Typo.body1">@_order.OrderDate.ToPersian().En2Fa()</MudText>
+            </MudStack>
+        </MudStack>
+
+        <MudGrid>
+            <MudItem xs="12" lg="8">
+                <CartCard CartItems="_cartItems"></CartCard>
+            </MudItem>
+            <MudItem xs="12" lg="4">
+
+                @* User *@
+                <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
+
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudText Typo="Typo.h5" Class="pl-4 rounded-lg primary-background">کاربر</MudText>
+                    </MudStack>
+
+                    <MudDivider Class="mb-3" />
+
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">نام:</MudText>
+                        <MudText Typo="Typo.body1">@_user.FullName</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">نام کاربری:</MudText>
+                        <MudText Typo="Typo.body1">@_user.UserName</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">شماره تماس:</MudText>
+                        <MudText Typo="Typo.body1">@_user.PhoneNumber</MudText>
+                    </MudStack>
+
+                </MudPaper>
+
+                @* Address *@
+                <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
+
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudText Typo="Typo.h5" Class="pl-4 rounded-lg primary-background">آدرس</MudText>
+                    </MudStack>
+
+                    <MudDivider Class="mb-3" />
+
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">کدپستی:</MudText>
+                        <MudText Typo="Typo.body1">@_order.ZipCode</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">استان:</MudText>
+                        <MudText Typo="Typo.body1">@_order.State</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">شهر:</MudText>
+                        <MudText Typo="Typo.body1">@_order.City</MudText>
+                    </MudStack>
+                    <MudStack Justify="Justify.FlexEnd">
+                        <MudText Typo="Typo.body1">@_order.Street</MudText>
+                    </MudStack>
+
+                </MudPaper>
+
+                @* Payment *@
+                <MudPaper Outlined Class="rounded-xl pa-4">
+                    <div>
+                        <MudText Inline Typo="Typo.h5" Class="primary-background pl-3 rounded-lg">مشخصات سفارش</MudText>
+                    </div>
+                    <MudDivider Class="my-3" />
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">مجموعه کالاها:</MudText>
+                        <MudText Typo="Typo.body1">@_order.TotalAmount.ToNumeric().En2Fa()</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">هزینه ارسال:</MudText>
+                        <MudText Typo="Typo.body1">۳۰,۰۰۰</MudText>
+                    </MudStack>
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2">تخفیف:</MudText>
+                        <MudText Typo="Typo.body1">۰</MudText>
+                    </MudStack>
+                    <MudDivider Class="my-3" />
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body1">مبلغ کل:</MudText>
+                        <MudText Typo="Typo.h5" Class="primary-background pr-3 rounded-lg">@_order.TotalAmount.ToNumeric().En2Fa()</MudText>
+                    </MudStack>
+                </MudPaper>
+
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+}
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private UserDto _user = new();
+    private OrderDetailsDto _order = new();
+    private List<CartItemDto> _cartItems = new();
+    private List<string> statuses = EnumExtensions.GetDisplayNames<OrderStatus>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _order = await OrderClient.GetOrderDetailsAsync(id);
+        _cartItems = Mapper.Map<List<CartItemDto>>(_order.Items);
+
+        _user = await UserClient.GetByIdAsync(_order.UserId);
+    }
+
+    private async Task UpdateStatus(int id, string? status)
+    {
+        if (status is null) return;
+        var orderStatus = EnumExtensions.GetEnumFromDisplayName<OrderStatus>(status) ?? OrderStatus.Pending;
+        await OrderClient.UpdateOrderStatusAsync(id, orderStatus);
+
+        _order.Status = orderStatus;
+    }
+}

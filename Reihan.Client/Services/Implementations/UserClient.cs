@@ -33,6 +33,21 @@ namespace Reihan.Client.Services
             }
         }
 
+        public async Task<UserDto> GetByIdAsync(int userId)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/users/{userId}");
+                var result = await response.HandleResponseAsync<UserDto>(_snackbar);
+                return result ?? new UserDto();
+            }
+            catch
+            {
+                _snackbar.Add("ارتباط با سرور برقرار نشد", Severity.Error);
+                return new UserDto();
+            }
+        }
+
         public async Task UpdateUserRoleAsync(int userId, UserRole newRole)
         {
             try

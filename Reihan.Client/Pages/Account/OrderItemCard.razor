@@ -1,8 +1,11 @@
 ﻿<MudCard Class="rounded-xl pa-2 mb-2" Outlined="true" Elevation="2" Style="@($"background:{Colors.Gray.Lighten5}; width: 100%;")">
     <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
         <MudStack Row AlignItems="AlignItems.Center">
-            <MudLink Href="@($"/shop/product/{OrderItem.ProductId}")" Style="height: 100px">
-                <MudImage Class="rounded-xl" Src="@OrderItem.ProductImage" Height="100" />
+            <MudLink Href="@($"/shop/product/{OrderItem.ProductId}")" Style="height: 100px; width: 100px;">
+                <MudImage Class="rounded-xl mud-height-full mud-width-full"
+                          Src="@OrderItem.ProductImage"
+                          ObjectFit="ObjectFit.Cover"
+                          ObjectPosition="ObjectPosition.Center" />
             </MudLink>
             <MudCardContent>
                 <MudLink Href="@($"/shop/product/{OrderItem.ProductId}")" Underline="Underline.None" Color="Color.Dark" Typo="Typo.h5" Class="primary-background pl-2 rounded-lg">@OrderItem.ProductName</MudLink>
@@ -22,6 +25,6 @@
 </MudCard>
 
 @code {
-    [Parameter] 
+    [Parameter]
     public OrderItemDto OrderItem { get; set; } = new();
 }

@@ -47,7 +47,9 @@ public class OrderService : IOrderService
         _logger.LogInformation("دریافت تمام سفارش‌ها");
 
         var orders = await _orderRepo.GetAllAsync();
+        orders = orders.OrderByDescending(o => o.OrderDate).ToList();
         var orderIds = orders.Select(s => s.UserId).ToList();
+
         var users = await _userRepo.GetByIdsAsync(orderIds);
         var userDict = users.ToDictionary(u => u.Id, u => u.FullName);
 
@@ -153,15 +155,7 @@ public class OrderService : IOrderService
             }
         }
 
-        var productIds = cart.Items.Select(i => i.ProductId).ToList();
-        var productImages = await _productImageRepo.GetByProductIdsAsync(productIds);
-        var imageLookup = productImages.GroupBy(i => i.ProductId)
-                                       .ToDictionary(g => g.Key, g => g.First().Url);
-
         var orderItems = _mapper.Map<List<OrderItem>>(cart.Items);
-        foreach (var item in orderItems)
-            item.ProductImage = imageLookup.GetValueOrDefault(item.ProductId, string.Empty);
-
         var address = _mapper.Map<Address>(request.ShippingAddress);
 
         var order = new Order(userId, address, orderItems, OrderStatus.Pending);
