@@ -86,21 +86,6 @@ namespace Reihan.Client.Services
             }
         }
 
-        public async Task<ImageUploadResult> Upload(MultipartFormDataContent content)
-        {
-            try
-            {
-                var response = await _http.PostAsync("api/products/upload-image", content);
-                var result = await response.HandleResponseAsync<ImageUploadResult>(_snackbar);
-                return result ?? new ImageUploadResult();
-            }
-            catch (Exception)
-            {
-                _snackbar.Add("ارتباط با سرور برقرار نشد", Severity.Error);
-                return new ImageUploadResult();
-            }
-        }
-
         public async Task<List<ProductDto>> GetLatestAsync()
         {
             try

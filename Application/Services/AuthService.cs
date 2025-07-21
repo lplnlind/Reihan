@@ -152,7 +152,7 @@ namespace Application.Services
                 throw new AppException("کاربر پیدا نشد", 404, ErrorCode.UserNotFound);
             }
 
-            user.UpdateProfile(request.FullName, request.Email, request.UserName);
+            user.UpdateProfile(_mapper.Map<User>(request));
             await _userRepository.UpdateAsync(user);
 
             _logger.LogInformation("پروفایل با موفقیت بروزرسانی شد: {Username}", request.UserName);

@@ -17,6 +17,7 @@ namespace Reihan.Client.DependencyInjection
             services.AddScoped<IDashboardClient, DashboardClient>();
             services.AddScoped<IFavoriteClient, FavoriteClient>();
             services.AddScoped<IUserAddressClient, UserAddressClient>();
+            services.AddScoped<IUploadClient, UploadClient>();
             services.AddAutoMapper(typeof(ClientMappingProfile).Assembly);
 
             return services;

@@ -25,6 +25,7 @@ namespace Application.DependencyInjection
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IUserAddressService, UserAddressService>();
+            services.AddScoped<IImageService, ImageService>();
             services.AddAutoMapper(typeof(ApplicationMappingProfile).Assembly);
 
             return services;

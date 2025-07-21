@@ -1,4 +1,6 @@
 ﻿@inject IProductClient ProductClient
+@inject IUploadClient UploadClient
+
 
 @if (IsDisable)
 {
@@ -130,7 +132,6 @@ else
     private IMudDialogInstance MudDialog { get; set; }
 
     private MudForm form;
-    IList<IBrowserFile> files = new List<IBrowserFile>();
 
 
     private async void Submit()
@@ -156,8 +157,6 @@ else
 
         foreach (var file in files)
         {
-            this.files.Add(file);
-
             var content = new MultipartFormDataContent();
             var stream = file.OpenReadStream(5 * 1024 * 1024); // حداکثر ۵ مگابایت
             var fileContent = new StreamContent(stream);
@@ -165,13 +164,14 @@ else
 
             content.Add(content: fileContent, name: "image", fileName: file.Name);
 
-            var response = await ProductClient.Upload(content);
+            var response = await UploadClient.UploadProductImageAsync(content);
             Product.ImageUrls.Add(response!.ImageUrl);
         }
     }
 
-    private void DeleteImage(string url)
+    private async Task DeleteImage(string url)
     {
+        await UploadClient.DeleteImageAsync(url);
         Product.ImageUrls.Remove(url);
     }
 

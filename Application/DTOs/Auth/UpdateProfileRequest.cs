@@ -5,6 +5,7 @@
         public string UserName { get; set; } = default!;
         public string FullName { get; set; } = default!;
         public string Email { get; set; } = default!;
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = default!;
+        public string ImageUrl { get; set; } = default!;
     }
 }

@@ -27,7 +27,10 @@ namespace Application.Mappings
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => new Email(src.Email)));
 
             CreateMap<User, RegisterRequest>().ReverseMap();
-            CreateMap<User, UpdateProfileRequest>().ReverseMap();
+            CreateMap<User, UpdateProfileRequest>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
+                .ReverseMap()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => new Email(src.Email)));
 
 
             // Cart

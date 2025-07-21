@@ -8,6 +8,7 @@ namespace Reihan.Client.Mappings
         public ClientMappingProfile()
         {
             CreateMap<OrderItemDto, CartItemDto>().ReverseMap();
+            CreateMap<UserProfileDto, UpdateProfileRequest>().ReverseMap();
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Application.Services
         private readonly ICategoryRepository _categoryRepo;
         private readonly ICartRepository _cartRepo;
         private readonly IOrderItemRepository _orderItemRepo;
+        private readonly IImageService _imageService;
         private readonly IMapper _mapper;
         private readonly ILogger<ProductService> _logger;
 
@@ -27,7 +28,8 @@ namespace Application.Services
             ICartRepository cartRepo,
             IOrderItemRepository orderItemRepo,
             IMapper mapper,
-            ILogger<ProductService> logger)
+            ILogger<ProductService> logger,
+            IImageService imageService)
         {
             _productRepo = productRepo;
             _productImageRepo = productImageRepo;
@@ -36,6 +38,7 @@ namespace Application.Services
             _orderItemRepo = orderItemRepo;
             _mapper = mapper;
             _logger = logger;
+            _imageService = imageService;
         }
 
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync(bool includeInactive = false)
@@ -126,11 +129,8 @@ namespace Application.Services
             var toRemove = existingImages.Where(i => !newUrls.Contains(i.Url)).ToList();
             foreach (var image in toRemove)
             {
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", image.Url.TrimStart('/'));
                 if (await _orderItemRepo.IsImageUsedAsync(image.Url)) continue;
-
-                if (File.Exists(path))
-                    File.Delete(path);
+                await _imageService.DeleteImageAsync(image.Url);
             }
 
             if (toRemove.Any())

@@ -4,7 +4,9 @@
 @inject IFavoriteClient FavoriteClient
 @inject IOrderClient OrderClient
 @inject IUserAddressClient UserAddressClient
+@inject IUploadClient UploadClient
 @inject IDialogService DialogService
+@inject IMapper Mapper
 @inject NavigationManager Nav
 @using Reihan.Client.Pages.Shop
 
@@ -12,15 +14,41 @@
 <MudGrid Justify="Justify.Center">
 
     <MudItem xs="12" sm="3">
+
+        @* User *@
         <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
-            <MudStack AlignItems="AlignItems.Center">
-                <MudBadge Icon="@Icons.Material.Outlined.Close" Overlap Color="Color.Error" Bordered>
-                    <MudImage Width="150" Src="/images/profile/photo_2024-05-18_02-30-21.jpg" Class="rounded-circle"></MudImage>
-                </MudBadge>
+            <MudStack AlignItems="AlignItems.Center" Class="relative">
+
+                <MudImage Width="150" Style="min-height:150px" Src="@profile.ImageUrl" Class="rounded-circle border border-color-gray-Lighten2">
+
+                </MudImage>
+
+                @if (string.IsNullOrEmpty(profile.ImageUrl))
+                {
+                    <MudFileUpload T="IBrowserFile" Accept=".png, .jpg" FilesChanged="UpdateImageProfile" MaximumFileCount="100"
+                                   Class="absolute" Style="left:4px; top:4px;">
+                        <ActivatorContent>
+                            <MudIconButton Size="Size.Small"
+                                           Color="Color.Primary"
+                                           Class="rounded-lg"
+                                           Icon="@Icons.Material.TwoTone.Edit" />
+                        </ActivatorContent>
+                    </MudFileUpload>
+                }
+                else
+                {
+                    <MudIconButton Icon="@Icons.Material.Rounded.Delete"
+                                   Size="Size.Small"
+                                   OnClick="DeleteImageProfile"
+                                   Style="left:4px; top:4px;"
+                                   Class="rounded-lg border-color-gray-Lighten2 absolute" />
+                }
+
                 <MudText Typo="Typo.h4" Class="scondary-background rounded-lg py-1 px-1">@profile.FullName</MudText>
             </MudStack>
         </MudPaper>
 
+        @* Update User *@
         <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
             <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
                 <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">اطلاعات کاربری</MudText>
@@ -71,6 +99,7 @@
             </EditForm>
         </MudPaper>
 
+        @* User Address *@
         <MudPaper Outlined Class="rounded-xl pa-6 mb-3" Elevation="2">
             <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
                 <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">آدرس</MudText>
@@ -116,6 +145,7 @@
 
         </MudPaper>
 
+        @* Change Password *@
         <MudPaper Outlined Class="rounded-xl pa-6" Elevation="2">
             <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
                 <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">تغییر رمز عبور</MudText>
@@ -152,6 +182,7 @@
                 </MudStack>
             </EditForm>
         </MudPaper>
+
     </MudItem>
     <MudItem xs="12" sm="9">
         <MudPaper Outlined Class="rounded-xl pa-6" Elevation="2">
@@ -159,8 +190,21 @@
                 <MudText Typo="Typo.h5" Class="pl-4 rounded-lg scondary-background">@title</MudText>
 
                 <MudStack Row Spacing="1">
-                    <MudButton OnClick="SwitchContent" Variant="orderVariant" Color="Color.Primary" DropShadow="false" StartIcon="@Icons.Material.Rounded.ShoppingCart" Size="Size.Small" Class="rounded-lg px-2 py-0 ma-0 botton-tag">سفارش‌ها</MudButton>
-                    <MudButton OnClick="SwitchContent" Variant="favoriteVariant" Color="Color.Primary" DropShadow="false" StartIcon="@Icons.Material.Rounded.Favorite" Size="Size.Small" Class="rounded-lg px-2 py-0 ma-0 botton-tag">علاقه‌مندی‌ها</MudButton>
+                    <MudButton OnClick="SwitchContent"
+                               Variant="orderVariant"
+                               Color="Color.Primary"
+                               DropShadow="false"
+                               StartIcon="@Icons.Material.Rounded.ShoppingCart"
+                               Size="Size.Small"
+                               Class="rounded-lg px-2 py-0 ma-0 botton-tag">سفارش‌ها</MudButton>
+
+                    <MudButton OnClick="SwitchContent"
+                               Variant="favoriteVariant"
+                               Color="Color.Primary"
+                               DropShadow="false"
+                               StartIcon="@Icons.Material.Rounded.Favorite"
+                               Size="Size.Small"
+                               Class="rounded-lg px-2 py-0 ma-0 botton-tag">علاقه‌مندی‌ها</MudButton>
                 </MudStack>
 
             </MudStack>
@@ -226,20 +270,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var current = await AuthClient.GetProfileAsync();
-
-        if (current is not null)
-            profile = new UpdateProfileRequest
-            {
-                FullName = current.FullName,
-                Email = current.Email,
-                UserName = current.UserName,
-                PhoneNumber = current.PhoneNumber
-            };
+        await LoadProfile();
+        await LoadUserAddress();
 
         products = await FavoriteClient.GetUserFavoritesAsync();
         orders = await OrderClient.GetOrdersByUserAsync();
-        await LoadUserAddress();
     }
 
 
@@ -281,6 +316,14 @@
     }
 
 
+    private async Task LoadProfile()
+    {
+        var current = await AuthClient.GetProfileAsync();
+
+        if (current is not null)
+            profile = Mapper.Map<UpdateProfileRequest>(current);
+    }
+
     private async Task UpdateProfile()
     {
         await AuthClient.UpdateProfileAsync(profile);
@@ -290,6 +333,34 @@
     private void IsUpdateProfile()
     {
         isUpdateProfile = !isUpdateProfile;
+    }
+
+    private async Task UpdateImageProfile(IBrowserFile file)
+    {
+        if (file is null)
+            return;
+
+
+        var content = new MultipartFormDataContent();
+        var stream = file.OpenReadStream(1 * 1024 * 1024); // حداکثر ۵ مگابایت
+        var fileContent = new StreamContent(stream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+        content.Add(content: fileContent, name: "image", fileName: file.Name);
+
+        var response = await UploadClient.UploadProfileImageAsync(content);
+
+
+        profile.ImageUrl = response!.ImageUrl;
+        await AuthClient.UpdateProfileAsync(profile);
+    }
+
+    private async Task DeleteImageProfile()
+    {
+        await UploadClient.DeleteImageByUserAsync(profile.ImageUrl);
+
+        profile.ImageUrl = string.Empty;
+        await AuthClient.UpdateProfileAsync(profile);
     }
 
 

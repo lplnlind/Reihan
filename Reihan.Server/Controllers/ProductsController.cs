@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,12 +11,16 @@ namespace Reihan.Server.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IImageService _imageService;
         private readonly IUserContextService _userContext;
 
-        public ProductsController(IProductService productService, IUserContextService userContext)
+        public ProductsController(IProductService productService, 
+            IUserContextService userContext,
+            IImageService imageService)
         {
             _productService = productService;
             _userContext = userContext;
+            _imageService = imageService;
         }
 
         [HttpGet]
@@ -61,29 +66,6 @@ namespace Reihan.Server.Controllers
             return Ok("محصول حذف شد.");
         }
 
-        [HttpPost("upload-image")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UploadImage([FromForm] IFormFile image)
-        {
-            if (image == null || image.Length == 0)
-                return BadRequest("تصویری انتخاب نشده است.");
-
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await image.CopyToAsync(stream);
-            }
-
-            var imageUrl = $"/images/products/{uniqueFileName}";
-            return Ok(new { imageUrl });
-        }
-
         [HttpGet("latest")]
         [AllowAnonymous]
         public async Task<IActionResult> GetLatestProducts() =>
@@ -98,7 +80,8 @@ namespace Reihan.Server.Controllers
         }
 
         [HttpGet("{productId}/is")]
-        public async Task<IActionResult> IsFavorite(int productId)
+        [AllowAnonymous]
+        public async Task<IActionResult> IsInCart(int productId)
         {
             var userId = _userContext.GetUserId();
             var result = await _productService.IsInCartAsync(userId, productId);
@@ -106,6 +89,7 @@ namespace Reihan.Server.Controllers
         }
 
         [HttpPut("{id}/activate")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Activate(int id)
         {
             await _productService.SetActiveStatusAsync(id, true);
@@ -113,6 +97,7 @@ namespace Reihan.Server.Controllers
         }
 
         [HttpPut("{id}/deactivate")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Deactivate(int id)
         {
             await _productService.SetActiveStatusAsync(id, false);
