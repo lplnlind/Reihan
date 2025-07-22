@@ -11,9 +11,11 @@ namespace Reihan.Client.Models
         public string FullName { get; set; } = string.Empty;
         
         [Required(ErrorMessage ="ایمیل خود را وارد کنید.")]
+        [EmailAddress(ErrorMessage = "ایمیل معتبر نیست")]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage ="لطفا شماره موبایل خود را وارد کنید")]
+        [Phone(ErrorMessage = "شماره تلفن معتبر نیست")]
         public string PhoneNumber { get; set; } = string.Empty;
         
         [Required(ErrorMessage ="گذرواژه خود را مشخص کنید.")]

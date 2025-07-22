@@ -9,14 +9,18 @@
 
     <EditForm Model="_model" OnValidSubmit="LoginUser">
         <DataAnnotationsValidator />
-        <MudTextField Label="نام کاربری" @bind-Value="_model.UserNameOrEmail"
+        <MudTextField Label="نام کاربری"
+                      @bind-Value="_model.UserNameOrEmail"
+                      For="@(() => _model.UserNameOrEmail)"
                       Margin="Margin.Dense"
                       Placeholder="نام کاربری یا ایمیل"
                       Required
                       Variant="Variant.Outlined"
                       AutoFocus />
 
-        <MudTextField Label="رمز عبور" @bind-Value="_model.Password"
+        <MudTextField Label="رمز عبور"
+                      @bind-Value="_model.Password"
+                      For="@(() => _model.Password)"
                       InputType="InputType.Password"
                       Required
                       Variant="Variant.Outlined"
