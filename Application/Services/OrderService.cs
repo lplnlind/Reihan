@@ -1,10 +1,10 @@
-﻿using Application.DTOs;
+﻿using Reihan.Shared.DTOs;
 using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using AutoMapper;
 using Domain.Entities;
-using Domain.Enums;
+using Reihan.Shared.Enums;
 using Domain.ValueObjects;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -155,7 +155,7 @@ public class OrderService : IOrderService
             }
         }
 
-        var orderItems = _mapper.Map<List<OrderItem>>(cart.Items);
+        var orderItems = _mapper.Map<List<OrderItem>>(request.CartItems);
         var address = _mapper.Map<Address>(request.ShippingAddress);
 
         var order = new Order(userId, address, orderItems, OrderStatus.Pending);
@@ -188,6 +188,7 @@ public class OrderService : IOrderService
             _logger.LogWarning("هیچ سفارشی برای کاربر {UserId} یافت نشد", userId);
             return new();
         }
+        orders = orders.OrderByDescending(o => o.OrderDate);
 
         var orderIds = orders.Select(o => o.Id).ToList();
         var items = await _orderItemRepo.GetByOrderIdsAsync(orderIds);

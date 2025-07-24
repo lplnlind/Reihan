@@ -3,7 +3,9 @@
 @inject IOrderClient OrderClient
 @inject IDialogService DialogService
 @inject IUserAddressClient UserAddressClient
+@inject IMapper Mapper
 @inject NavigationManager Nav
+
 
 <PageTitle>تسویه حساب</PageTitle>
 
@@ -41,12 +43,12 @@ else
                     <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
                         <MudText Typo="Typo.h5" Class="pl-4 rounded-lg primary-background">آدرس</MudText>
 
-                        <MudButton OnClick="OpenChoiceAddressDialog" 
-                            Variant="Variant.Filled" Color="Color.Primary" 
-                            DropShadow="false" 
-                            Size="Size.Small" 
-                            Class="rounded-lg px-1 py-0 ma-0 botton-tag">تغییر</MudButton>
-                       
+                        <MudButton OnClick="OpenChoiceAddressDialog"
+                                   Variant="Variant.Filled" Color="Color.Primary"
+                                   DropShadow="false"
+                                   Size="Size.Small"
+                                   Class="rounded-lg px-1 py-0 ma-0 botton-tag">تغییر</MudButton>
+
                     </MudStack>
 
                     <MudDivider Class="mb-3" />
@@ -81,29 +83,7 @@ else
 
                 </MudPaper>
 
-                <MudPaper Outlined Class="rounded-xl pa-4">
-                    <div>
-                        <MudText Inline Typo="Typo.h5" Class="primary-background pl-3 rounded-lg">مشخصات سفارش</MudText>
-                    </div>
-                    <MudDivider Class="my-3" />
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.body2">مجموعه کالاها:</MudText>
-                        <MudText Typo="Typo.body1">@_cart.TotalPrice.ToNumeric().En2Fa()</MudText>
-                    </MudStack>
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.body2">هزینه ارسال:</MudText>
-                        <MudText Typo="Typo.body1">۳۰,۰۰۰</MudText>
-                    </MudStack>
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.body2">تخفیف:</MudText>
-                        <MudText Typo="Typo.body1">۰</MudText>
-                    </MudStack>
-                    <MudDivider Class="my-3" />
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.body1">مبلغ کل:</MudText>
-                        <MudText Typo="Typo.h5" Class="primary-background pr-3 rounded-lg">@_cart.TotalPrice.ToNumeric().En2Fa()</MudText>
-                    </MudStack>
-                </MudPaper>
+                <OrderSummary Model="_orderSummary" />
 
             </MudItem>
         </MudGrid>
@@ -114,6 +94,7 @@ else
 @code {
     private UserAddressDto? _userAddress;
     private CreateOrderRequest _order = new();
+    private OrderSummaryModel _orderSummary = new();
     private CartDto? _cart;
 
 
@@ -159,16 +140,19 @@ else
     private async Task LoadCart()
     {
         _cart = await CartClient.GetCartAsync();
+
+        _orderSummary = Mapper.Map<OrderSummaryModel>(_cart);
         StateHasChanged();
     }
 
 
     private async Task SubmitOrder()
     {
-        _order.ShippingAddress.State = _userAddress.State;
-        _order.ShippingAddress.City = _userAddress.City;
-        _order.ShippingAddress.ZipCode = _userAddress.ZipCode;
-        _order.ShippingAddress.Street = _userAddress.Street;
+        if (_cart is not null && _cart.Items.Any())
+            _order.CartItems = _cart.Items;
+
+        if (_userAddress is not null)
+            _order.ShippingAddress = Mapper.Map<AddressDto>(_userAddress);
 
         await OrderClient.CreateAsync(_order);
 

@@ -1,17 +1,70 @@
-.content {
-    padding-top: 1.1rem;
+﻿:root {
+    --color-pink-lighten5: #FCE4EC;
+    --color-amber-lighten4: #FFECB3;
+    --color-gray-lighten5: #FAFAFA;
+    --color-gray-lighten2: #E0E0E0;
+    --d: #fffaef;
 }
 
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+
+.primary-background {
+    background: var(--color-pink-lighten5) !important;
 }
 
-.invalid {
-    outline: 1px solid red;
+.scondary-background {
+    background: var(--color-amber-lighten4) !important;
 }
 
-.validation-message {
-    color: red;
+.gray-background {
+    background: var(--color-gray-lighten5) !important;
+}
+
+.primary-shadow {
+    box-shadow: -5px 9px 0 var(--color-pink-lighten5);
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.botton-tag {
+    font-size: 12px !important;
+    font-weight: normal !important;
+}
+
+.dialog-blur {
+    backdrop-filter: blur(10px);
+}
+
+.border-color-gray-Lighten2 {
+    border-color: var(--color-gray-lighten2) !important;
+}
+
+.mud-input-outlined-border {
+    border-radius: 8px !important;
+}
+
+.product-quantity .mud-input-outlined-border {
+    border-color: var(--color-gray-lighten2) !important;
+}
+
+.product-quantity > .mud-input-control-input-container > .mud-input >
+input.mud-input-root-outlined {
+    padding: 5px 8px !important;
+    font-size: 14px !important;
+    background-color: white !important;
+}
+
+.text-through {
+    text-decoration: line-through !important;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* تعداد خطوط مورد نظر */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #blazor-error-ui {
@@ -80,13 +133,4 @@
 
 code {
     color: #c02d76;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-    color: var(--bs-secondary-color);
-    text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-    text-align: start;
 }

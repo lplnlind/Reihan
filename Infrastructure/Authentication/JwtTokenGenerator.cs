@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Auth;
+﻿using Reihan.Shared.DTOs;
 using Application.Interfaces;
 using Application.Setting;
 using Microsoft.Extensions.Options;

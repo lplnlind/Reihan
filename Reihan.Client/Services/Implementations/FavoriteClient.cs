@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 using Reihan.Client.Extensions;
-using Reihan.Client.Models;
+using Reihan.Shared.DTOs;
 using Reihan.Client.Services;
 using System.Net;
 using System.Net.Http.Json;

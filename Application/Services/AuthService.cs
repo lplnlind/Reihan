@@ -1,9 +1,9 @@
-﻿using Application.DTOs.Auth;
+﻿using Reihan.Shared.DTOs;
 using Application.Exceptions;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
-using Domain.Enums;
+using Reihan.Shared.Enums;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;

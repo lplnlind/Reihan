@@ -20,6 +20,7 @@
 		<ProjectReference Include="..\Application\Application.csproj" />
 		<ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
 		<ProjectReference Include="..\Reihan.Client\Reihan.Client.csproj" />
+		<ProjectReference Include="..\Reihan.Shared\Reihan.Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

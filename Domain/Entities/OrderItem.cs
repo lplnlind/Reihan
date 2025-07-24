@@ -17,6 +17,7 @@ namespace Domain.Entities
 
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
+        public decimal FinalPrice { get; set; }
 
         // ارتباط با Order و Product
         public Order Order { get; set; } = null!;

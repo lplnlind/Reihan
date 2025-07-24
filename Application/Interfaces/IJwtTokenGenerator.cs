@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Auth;
+﻿using Reihan.Shared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

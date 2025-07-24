@@ -1,10 +1,11 @@
-﻿using Application.DTOs;
+﻿using Reihan.Shared.DTOs;
 using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using AutoMapper;
 using Domain.Entities;
 using Domain.ValueObjects;
+using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Services
@@ -12,24 +13,46 @@ namespace Application.Services
     public class CartService : ICartService
     {
         private readonly ICartRepository _cartRepo;
+        private readonly IProductRepository _productRepo;
         private readonly IMapper _mapper;
 
-        public CartService(ICartRepository cartRepos, IMapper mapper)
+        public CartService(ICartRepository cartRepos, IMapper mapper, IProductRepository productRepo)
         {
             _cartRepo = cartRepos;
             _mapper = mapper;
+            _productRepo = productRepo;
         }
 
         public async Task<CartDto> GetCartAsync(int userId)
         {
             var cart = await _cartRepo.GetByUserIdAsync(userId) ?? new Cart(userId);
 
-            return new CartDto
+
+            var cartDto = new CartDto
             {
                 UserId = userId,
-                TotalPrice = cart.GetTotalPrice(),
-                Items = _mapper.Map<List<CartItemDto>>(cart.Items),
+                Items = new List<CartItemDto>()
             };
+
+            foreach (var item in cart.Items)
+            {
+                var product = await _productRepo.GetByIdAsync(item.ProductId);
+                if (product == null) continue;
+
+                var finalPrice = product.GetPriceAfterDiscount();
+
+                cartDto.Items.Add(new CartItemDto
+                {
+                    ProductId = product.Id,
+                    ProductName = product.Name,
+                    ProductImage = product.ImageUrl ?? "",
+                    UnitPrice = product.Price,
+                    FinalPrice = finalPrice,
+                    Quantity = item.Quantity
+                });
+            }
+
+            return cartDto;
         }
 
         public async Task AddItemAsync(int userId, AddToCartRequest request)

@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Reihan.Shared.DTOs;
 using Application.Interfaces;
 using Application.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -78,6 +78,11 @@ namespace Reihan.Server.Controllers
             var result = await _productService.GetFilteredProductsAsync(categoryId);
             return Ok(result);
         }
+
+        [HttpGet("special-sales")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetSpecialSales() =>
+            Ok(await _productService.GetSpecialSalesAsync());
 
         [HttpGet("{productId}/is")]
         [AllowAnonymous]

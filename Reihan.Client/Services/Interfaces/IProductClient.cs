@@ -1,4 +1,4 @@
-﻿using Reihan.Client.Models;
+﻿using Reihan.Shared.DTOs;
 
 namespace Reihan.Client.Services
 {
@@ -11,6 +11,7 @@ namespace Reihan.Client.Services
         Task DeleteAsync(int id);
         Task<List<ProductDto>> GetLatestAsync();
         Task<List<ProductDto>> FilterAsync(int? categoryId = null);
+        Task<List<ProductDto>> SpecialSalesAsync();
         Task<bool> IsInCartAsync(int productId);
         Task SetActiveStatusAsync(int id, bool isActive);
     }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using Reihan.Client.Authentication;
 using Reihan.Client.Extensions;
-using Reihan.Client.Models;
+using Reihan.Shared.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -170,7 +170,7 @@ namespace Reihan.Client.Services
                 return new JwtUserDto
                 {
                     Id = int.Parse(jwt.Claims.First(c => c.Type == "sub").Value),
-                    FullName = jwt.Claims.FirstOrDefault(c => c.Type == "fullname")?.Value ?? "",
+                    UserName = jwt.Claims.FirstOrDefault(c => c.Type == "username")?.Value ?? "",
                     Role = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? ""
                 };
             }

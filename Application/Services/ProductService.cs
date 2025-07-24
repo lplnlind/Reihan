@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Reihan.Shared.DTOs;
 using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
@@ -51,8 +51,8 @@ namespace Application.Services
 
             var images = await _productImageRepo.GetAllAsync();
             var categories = await _categoryRepo.GetAllAsync();
-
             var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
+
             var productsDto = _mapper.Map<List<ProductDto>>(products);
 
             foreach (var p in productsDto)
@@ -215,6 +215,26 @@ namespace Application.Services
             {
                 product.CategoryName = categoryDict.GetValueOrDefault(product.CategoryId);
                 product.ImageUrl = images.FirstOrDefault(w => w.ProductId == product.Id)?.Url ?? string.Empty;
+            }
+            return productsDto;
+        }
+
+        public async Task<List<ProductDto>> GetSpecialSalesAsync(int count = 2)
+        {
+            var products = await _productRepo.GetAllAsync();
+            var categories = await _categoryRepo.GetAllAsync();
+            var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
+
+            var specialSales = products.Where(p => p.IsActive).OrderByDescending(p => p.DiscountPercentage).Take(count).ToList();
+            var specialSalesIds = specialSales.Select(s => s.Id).ToList();
+            var images = await _productImageRepo.GetByProductIdsAsync(specialSalesIds);
+
+            var productsDto = _mapper.Map<List<ProductDto>>(specialSales);
+            foreach (var product in productsDto)
+            {
+                product.CategoryName = categoryDict.GetValueOrDefault(product.CategoryId);
+                product.ImageUrl = images.FirstOrDefault(w => w.ProductId == product.Id)?.Url ?? string.Empty;
+                product.ImageUrls = images.Where(w => w.ProductId == product.Id).Select(i => i.Url).ToList();
             }
             return productsDto;
         }

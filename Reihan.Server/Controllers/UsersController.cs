@@ -1,7 +1,8 @@
-﻿using Application.DTOs;
+﻿using Reihan.Shared.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Reihan.Shared.Enums;
 
 namespace Reihan.Server.Controllers
 {
@@ -34,7 +35,7 @@ namespace Reihan.Server.Controllers
         [HttpPut("{id}/role")]
         public async Task<IActionResult> UpdateRole(int id, UpdateUserRoleRequest request)
         {
-            await _userService.UpdateUserRoleAsync(id, request.NewRole);
+            await _userService.UpdateUserRoleAsync(id, (UserRole)(int)request.NewRole);
             return NoContent();
         }
 

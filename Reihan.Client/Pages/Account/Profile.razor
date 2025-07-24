@@ -8,8 +8,9 @@
 @inject IDialogService DialogService
 @inject IMapper Mapper
 @inject NavigationManager Nav
-@using Reihan.Client.Pages.Shop
 
+
+<PageTitle>پروفایل</PageTitle>
 
 <MudGrid Justify="Justify.Center">
 
@@ -213,7 +214,7 @@
             {
                 foreach (var order in orders)
                 {
-                    <MudPaper Outlined Class="rounded-xl" Elevation="2">
+                    <MudPaper Outlined Class="rounded-xl mb-5" Elevation="2">
                         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="pa-6 rounded-t-xl" Style="@($"background:{Colors.Gray.Lighten4}")">
                             <MudItem>
                                 <MudText Typo="Typo.caption">شماره سفارش:</MudText>
@@ -233,10 +234,7 @@
                             </MudItem>
                         </MudStack>
                         <MudItem Class="pa-6">
-                            @foreach (var orderItem in order.Items)
-                            {
-                                <OrderItemCard OrderItem="orderItem" />
-                            }
+                            <CartCard CartItems="Mapper.Map<List<CartItemDto>>(order.Items)" IsOrder></CartCard>
                         </MudItem>
 
                     </MudPaper>

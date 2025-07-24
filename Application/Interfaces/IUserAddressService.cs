@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Reihan.Shared.DTOs;
 
 namespace Application.Interfaces
 {

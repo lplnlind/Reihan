@@ -65,7 +65,7 @@
 
 @code {
     private List<UserDto> _users = new();
-    private List<string> roles = Extensions.EnumExtensions.GetDisplayNames<UserRole>();
+    private List<string> roles = Extensions.EnumExtensions.GetDisplayNames<SharedUserRole>();
     private string searchString1 = "";
     private bool _loading = true;
 
@@ -82,7 +82,7 @@
     private async Task UpdateRole(int userId, string? role)
     {
         if (role is null) return;
-        var userRole = EnumExtensions.GetEnumFromDisplayName<UserRole>(role) ?? UserRole.Customer;
+        var userRole = EnumExtensions.GetEnumFromDisplayName<SharedUserRole>(role) ?? SharedUserRole.Customer;
         await UserClient.UpdateUserRoleAsync(userId, userRole);
         
         _users.FirstOrDefault(u => u.Id == userId)!.Role = userRole;

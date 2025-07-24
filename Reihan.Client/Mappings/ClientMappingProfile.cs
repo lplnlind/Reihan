@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using Reihan.Client.Models;
+using Reihan.Client.Pages.Common;
+using Reihan.Shared.DTOs;
 
 namespace Reihan.Client.Mappings
 {
@@ -8,7 +9,14 @@ namespace Reihan.Client.Mappings
         public ClientMappingProfile()
         {
             CreateMap<OrderItemDto, CartItemDto>().ReverseMap();
+
             CreateMap<UserProfileDto, UpdateProfileRequest>().ReverseMap();
+
+            CreateMap<UserAddressDto, AddressDto>();
+
+            // Order Summary Component 
+            CreateMap<CartDto, OrderSummaryModel>();
+            CreateMap<OrderDetailsDto, OrderSummaryModel>();
         }
     }
 }

@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Reihan.Shared\Reihan.Shared.csproj" />
   </ItemGroup>
 
 </Project>

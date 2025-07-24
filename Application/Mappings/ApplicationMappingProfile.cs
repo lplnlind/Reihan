@@ -1,5 +1,5 @@
-﻿using Application.DTOs;
-using Application.DTOs.Auth;
+﻿using Reihan.Shared.DTOs;
+using Reihan.Shared.DTOs;
 using AutoMapper;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -55,7 +55,7 @@ namespace Application.Mappings
             CreateMap<OrderItem, OrderItemDto>()
                 .ForMember(d => d.ProductImage, o => o.MapFrom(s => s.ProductImage)); // مستقیم
 
-            CreateMap<OrderItem, CartItemDto>();
+            CreateMap<OrderItem, CartItemDto>().ReverseMap();
             CreateMap<CartItem, OrderItem>();
 
             // Product
@@ -63,6 +63,7 @@ namespace Application.Mappings
                 .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
                 .ForMember(dest => dest.ImageUrls, opt => opt.Ignore())
                 .ForMember(dest => dest.CategoryName, opt => opt.Ignore())
+                .ForMember(d => d.PriceAfterDiscount, o => o.MapFrom(s => s.GetPriceAfterDiscount()))
                 .ReverseMap()
                 .ForMember(dest => dest.Images, opt => opt.Ignore());
 

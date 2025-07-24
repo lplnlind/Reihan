@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 using Reihan.Client.Extensions;
-using Reihan.Client.Models;
+using Reihan.Shared.DTOs;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -110,6 +110,21 @@ namespace Reihan.Client.Services
                     url += $"?categoryId={categoryId}";
 
                 var response = await _http.GetAsync(url);
+                var result = await response.HandleResponseAsync<List<ProductDto>>(_snackbar);
+                return result ?? new List<ProductDto>();
+            }
+            catch (Exception)
+            {
+                _snackbar.Add("ارتباط با سرور برقرار نشد", Severity.Error);
+                return new List<ProductDto>();
+            }
+        }
+
+        public async Task<List<ProductDto>> SpecialSalesAsync()
+        {
+            try
+            {
+                var response = await _http.GetAsync("api/products/special-sales");
                 var result = await response.HandleResponseAsync<List<ProductDto>>(_snackbar);
                 return result ?? new List<ProductDto>();
             }

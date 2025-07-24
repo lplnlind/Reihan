@@ -4,7 +4,7 @@
 @inject IUserAddressClient UserAddressClient
 @inject IUserClient UserClient
 @inject IMapper Mapper
-@using Reihan.Client.Pages.Shop
+
 
 <PageTitle>سفارش</PageTitle>
 
@@ -36,7 +36,7 @@ else
 
         <MudGrid>
             <MudItem xs="12" lg="8">
-                <CartCard CartItems="_cartItems"></CartCard>
+                <CartCard CartItems="_cartItems" IsOrder></CartCard>
             </MudItem>
             <MudItem xs="12" lg="4">
 
@@ -92,29 +92,7 @@ else
                 </MudPaper>
 
                 @* Payment *@
-                <MudPaper Outlined Class="rounded-xl pa-4">
-                    <div>
-                        <MudText Inline Typo="Typo.h5" Class="primary-background pl-3 rounded-lg">مشخصات سفارش</MudText>
-                    </div>
-                    <MudDivider Class="my-3" />
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.body2">مجموعه کالاها:</MudText>
-                        <MudText Typo="Typo.body1">@_order.TotalAmount.ToNumeric().En2Fa()</MudText>
-                    </MudStack>
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.body2">هزینه ارسال:</MudText>
-                        <MudText Typo="Typo.body1">۳۰,۰۰۰</MudText>
-                    </MudStack>
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.body2">تخفیف:</MudText>
-                        <MudText Typo="Typo.body1">۰</MudText>
-                    </MudStack>
-                    <MudDivider Class="my-3" />
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.body1">مبلغ کل:</MudText>
-                        <MudText Typo="Typo.h5" Class="primary-background pr-3 rounded-lg">@_order.TotalAmount.ToNumeric().En2Fa()</MudText>
-                    </MudStack>
-                </MudPaper>
+                <OrderSummary Model="_orderSummary" />
 
             </MudItem>
         </MudGrid>
@@ -129,13 +107,15 @@ else
     private UserDto _user = new();
     private OrderDetailsDto _order = new();
     private List<CartItemDto> _cartItems = new();
-    private List<string> statuses = EnumExtensions.GetDisplayNames<OrderStatus>();
+    private OrderSummaryModel _orderSummary = new();
+    private List<string> statuses = EnumExtensions.GetDisplayNames<SharedOrderStatus>();
 
 
     protected override async Task OnInitializedAsync()
     {
         _order = await OrderClient.GetOrderDetailsAsync(id);
         _cartItems = Mapper.Map<List<CartItemDto>>(_order.Items);
+        _orderSummary = Mapper.Map<OrderSummaryModel>(_order);
 
         _user = await UserClient.GetByIdAsync(_order.UserId);
     }
@@ -143,7 +123,7 @@ else
     private async Task UpdateStatus(int id, string? status)
     {
         if (status is null) return;
-        var orderStatus = EnumExtensions.GetEnumFromDisplayName<OrderStatus>(status) ?? OrderStatus.Pending;
+        var orderStatus = EnumExtensions.GetEnumFromDisplayName<SharedOrderStatus>(status) ?? SharedOrderStatus.Pending;
         await OrderClient.UpdateOrderStatusAsync(id, orderStatus);
 
         _order.Status = orderStatus;

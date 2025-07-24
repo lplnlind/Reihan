@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Auth;
+﻿using Reihan.Shared.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

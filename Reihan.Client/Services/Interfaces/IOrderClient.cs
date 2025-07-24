@@ -1,5 +1,5 @@
-﻿using Reihan.Client.Enums;
-using Reihan.Client.Models;
+﻿using Reihan.Shared.Enums;
+using Reihan.Shared.DTOs;
 
 namespace Reihan.Client.Services
 {
@@ -7,7 +7,7 @@ namespace Reihan.Client.Services
     {
         Task<List<OrderDto>> GetAllAsync();
         Task<OrderDetailsDto> GetOrderDetailsAsync(int id);
-        Task UpdateOrderStatusAsync(int id, OrderStatus newStatus);
+        Task UpdateOrderStatusAsync(int id, SharedOrderStatus newStatus);
         Task<List<OrderDetailsDto>> GetOrdersByUserAsync();
         Task<int> CreateAsync(CreateOrderRequest request);
     }

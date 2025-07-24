@@ -1,7 +1,8 @@
-﻿using Application.DTOs;
-using Application.Interfaces;
+﻿using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Reihan.Shared.DTOs;
+using Reihan.Shared.Enums;
 
 namespace Reihan.Server.Controllers
 {
@@ -38,7 +39,7 @@ namespace Reihan.Server.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusRequest request)
         {
-            await _orderService.UpdateOrderStatusAsync(id, request.NewStatus);
+            await _orderService.UpdateOrderStatusAsync(id, (OrderStatus)(int)request.NewStatus);
             return NoContent();
         }
 

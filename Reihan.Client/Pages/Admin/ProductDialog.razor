@@ -1,4 +1,5 @@
-﻿@inject IProductClient ProductClient
+﻿@using System.Globalization
+@inject IProductClient ProductClient
 @inject IUploadClient UploadClient
 
 
@@ -17,7 +18,7 @@
         </DialogActions>
     </MudDialog>
 }
-else
+else if (Product != null)
 {
     <MudForm @ref="form" Model="@Product" Validation="OnValidated">
         <MudDialog>
@@ -60,6 +61,23 @@ else
                             }
                         </MudSelect>
                     </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="درصد تخفیف"
+                                      @bind-Value="Product.DiscountPercentage"
+                                      For="@(() => Product.DiscountPercentage)"
+                                      Disabled="IsDisable"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Label="تاریخ اتمام"
+                                      @bind-Value="persianDate"
+                                      T="string"
+                                      Mask="@(new DateMask("YYYY/MM/DD", 'Y', 'M', 'D'))"
+                                      Placeholder="1404/01/01"
+                                      Disabled="IsDisable"
+                                      Variant="Variant.Outlined" />
+                    </MudItem>
+
                     <MudItem xs="12" sm="12">
                         <Editor ScriptSrc="/lib/tinymce/tinymce.min.js" @bind-value="Product.Description" />
                     </MudItem>
@@ -132,7 +150,15 @@ else
     private IMudDialogInstance MudDialog { get; set; }
 
     private MudForm form;
+    private CultureInfo culture = CultureInfo.GetCultureInfo("fa-IR");
+    private string? persianDate;
 
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Product != null)
+            persianDate = Product.DiscountEndDate.ToPersianNullAble();
+    }
 
     private async void Submit()
     {
@@ -143,7 +169,10 @@ else
         {
             await form.Validate();
             if (form.IsValid)
+            {
+                Product.DiscountEndDate = string.IsNullOrEmpty(persianDate) ? null : persianDate.ToMiladi();
                 MudDialog.Close(DialogResult.Ok(Product));
+            }
         }
     }
 

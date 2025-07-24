@@ -5,6 +5,8 @@
 @inject NavigationManager Navigation
 
 
+<PageTitle>محصول</PageTitle>
+
 @if (Loading)
 {
     <MudProgressCircular Indeterminate="true" />
@@ -15,7 +17,9 @@ else if (Product is null)
 }
 else
 {
-    <ProductCard Product="Product" CardMode="CardMode.DetailsCard"></ProductCard>
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <ProductCard Product="Product" CardMode="CardMode.DetailsCard"></ProductCard>
+    </MudContainer>
 }
 
 

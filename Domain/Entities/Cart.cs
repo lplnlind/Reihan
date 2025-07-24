@@ -24,12 +24,12 @@ namespace Domain.Entities
             {
                 _items.Remove(existingItem);
 
-                var updatedItem = new CartItem(cart);
+                var updatedItem = new CartItem(cart.ProductId, cart.Quantity);
                 _items.Add(updatedItem);
             }
             else
             {
-                _items.Add(new CartItem(cart));
+                _items.Add(new CartItem(cart.ProductId, cart.Quantity));
             }
         }
 
@@ -53,8 +53,5 @@ namespace Domain.Entities
         {
             _items.Clear();
         }
-
-        public decimal GetTotalPrice()
-            => _items.Sum(i => i.TotalPrice);
     }
 }

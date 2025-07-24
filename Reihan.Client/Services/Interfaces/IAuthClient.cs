@@ -1,4 +1,4 @@
-﻿using Reihan.Client.Models;
+﻿using Reihan.Shared.DTOs;
 
 namespace Reihan.Client.Services
 {

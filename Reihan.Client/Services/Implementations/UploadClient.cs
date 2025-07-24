@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 using Reihan.Client.Extensions;
-using Reihan.Client.Models;
+using Reihan.Shared.DTOs;
 
 namespace Reihan.Client.Services
 {

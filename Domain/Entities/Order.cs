@@ -11,7 +11,7 @@ namespace Domain.Entities
         public DateTime OrderDate { get; private set; } = DateTime.UtcNow;
         public Address ShippingAddress { get; private set; }
         public decimal TotalAmount { get; private set; }
-
+        
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         public User User { get; set; } = null!;
@@ -24,7 +24,7 @@ namespace Domain.Entities
             UserId = userId;
             ShippingAddress = shippingAddress;
             OrderItems = items;
-            TotalAmount = OrderItems.Sum(x => x.UnitPrice * x.Quantity);
+            TotalAmount = OrderItems.Sum(x => x.FinalPrice * x.Quantity);
             Status = orderStatus;
         }
 

@@ -1,7 +1,7 @@
 ﻿using MudBlazor;
-using Reihan.Client.Enums;
+using Reihan.Shared.Enums;
 using Reihan.Client.Extensions;
-using Reihan.Client.Models;
+using Reihan.Shared.DTOs;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Json;
 
@@ -48,7 +48,7 @@ namespace Reihan.Client.Services
             }
         }
 
-        public async Task UpdateUserRoleAsync(int userId, UserRole newRole)
+        public async Task UpdateUserRoleAsync(int userId, SharedUserRole newRole)
         {
             try
             {

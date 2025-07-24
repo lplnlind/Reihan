@@ -3,6 +3,7 @@
 @inject IOrderClient OrderClient
 @inject IDialogService DialogService
 
+
 <PageTitle>مدیریت سفارش ها</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Medium">
@@ -58,7 +59,7 @@
     private List<OrderDto> _orders = new();
     private string searchString1 = "";
     private bool _loading = true;
-    private List<string> statuses = EnumExtensions.GetDisplayNames<OrderStatus>();
+    private List<string> statuses = EnumExtensions.GetDisplayNames<SharedOrderStatus>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,7 +73,7 @@
     private async Task UpdateStatus(int id, string? status)
     {
         if (status is null) return;
-        var orderStatus = EnumExtensions.GetEnumFromDisplayName<OrderStatus>(status) ?? OrderStatus.Pending;
+        var orderStatus = EnumExtensions.GetEnumFromDisplayName<SharedOrderStatus>(status) ?? SharedOrderStatus.Pending;
         await OrderClient.UpdateOrderStatusAsync(id, orderStatus);
 
         _orders.FirstOrDefault(o => o.Id == id)!.Status = orderStatus;

@@ -3,6 +3,9 @@
 @inject ICategoryClient CategoryClient
 @inject NavigationManager NavigationManager
 
+
+<PageTitle>خانه</PageTitle>
+
 <MudItem xs="12" lg="9" Class="mx-auto mb-6">
     <MudCarousel TData="object" Class="mud-width-full rounded-xl" Style="padding-top:56.25%;" ShowArrows="false">
         <BulletTemplate Context="selected">
@@ -28,14 +31,32 @@
 </MudItem>
 
 <MudContainer MaxWidth="MaxWidth.Large">
+
+    @if (_specialSales.Count == 2)
+    {
+        <div class="mb-2 mr-2">
+            <MudText Typo="Typo.h4" Class="py-0 pl-3 rounded-lg scondary-background" Inline>فروش ویژه</MudText>
+        </div>
+        <MudGrid Justify="Justify.Center" Class="mb-6" Spacing="3">
+            @foreach (var product in _specialSales)
+            {
+                <MudItem sm="12" lg="6">
+                    <ProductCard CardMode="CardMode.SpecialSales" Product="product" />
+                </MudItem>
+            }
+
+        </MudGrid>
+    }
+
+
     <div class="mb-2 mr-2">
         <MudText Typo="Typo.h4" Class="py-0 pl-3 rounded-lg scondary-background" Inline>دسته‌بندی‌ها</MudText>
     </div>
     <MudGrid Justify="Justify.Center" Class="mb-6">
-        @foreach (var category in Categories.Where(w => w.ProductsInThisCategory > 0).ToList())
+        @foreach (var category in _categories.Where(w => w.ProductsInThisCategory > 0).ToList())
         {
             <MudItem xs="6" sm="4" md="3">
-                <MudPaper Class="pa-4 hover:shadow-lg cursor-pointer rounded-xl"  @onclick="@(() => GoToCategory(category.Id))">
+                <MudPaper Class="pa-4 hover:shadow-lg cursor-pointer rounded-xl" @onclick="@(() => GoToCategory(category.Id))">
                     <div><MudText Typo="Typo.h5" Class="py-0 pl-4 rounded-lg primary-background" Inline>@category.Name</MudText></div>
                     <MudText Typo="Typo.caption">@category.ProductsInThisCategory محصول</MudText>
                 </MudPaper>
@@ -43,27 +64,32 @@
         }
     </MudGrid>
 
+
     <div class="mb-2 mr-2">
         <MudText Typo="Typo.h4" Class="py-0 pl-3 rounded-lg scondary-background" Inline>محصولات جدید</MudText>
     </div>
     <MudGrid>
-        @foreach (var product in LatestProducts)
+        @foreach (var product in _latestProducts)
         {
-            <MudItem xs="12" sm="6" md="3">
+            <MudItem xs="12" sm="6" md="4" lg="3">
                 <ProductCard Product="product" />
             </MudItem>
         }
     </MudGrid>
+
 </MudContainer>
 
+
 @code {
-    private List<ProductDto> LatestProducts = new();
-    private List<CategoryDto> Categories = new();
+    private List<ProductDto> _latestProducts = new();
+    private List<ProductDto> _specialSales = new();
+    private List<CategoryDto> _categories = new();
 
     protected override async Task OnInitializedAsync()
     {
-        LatestProducts = await ProductClient.GetLatestAsync();
-        Categories = await CategoryClient.GetAllAsync();
+        _latestProducts = await ProductClient.GetLatestAsync();
+        _specialSales = await ProductClient.SpecialSalesAsync();
+        _categories = await CategoryClient.GetAllAsync();
     }
 
     private void GoToCategory(int categoryId)
