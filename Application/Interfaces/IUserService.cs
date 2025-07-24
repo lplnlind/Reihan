@@ -1,10 +1,5 @@
-﻿using Reihan.Shared.DTOs;
-using Reihan.Shared.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Enums;
+using Reihan.Shared.DTOs;
 
 namespace Application.Interfaces
 {

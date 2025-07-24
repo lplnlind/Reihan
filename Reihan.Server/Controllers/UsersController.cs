@@ -2,7 +2,7 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Reihan.Shared.Enums;
+using Domain.Enums;
 
 namespace Reihan.Server.Controllers
 {

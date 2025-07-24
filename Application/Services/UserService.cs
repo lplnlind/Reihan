@@ -2,12 +2,10 @@
 using Application.Exceptions;
 using Application.Interfaces;
 using AutoMapper;
-using Domain.Entities;
-using Reihan.Shared.Enums;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Data;
+using Domain.Enums;
 
 namespace Application.Services
 {

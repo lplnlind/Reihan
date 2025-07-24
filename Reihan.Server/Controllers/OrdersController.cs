@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces;
+using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Reihan.Shared.DTOs;
-using Reihan.Shared.Enums;
 
 namespace Reihan.Server.Controllers
 {

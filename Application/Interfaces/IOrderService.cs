@@ -1,5 +1,5 @@
-﻿using Reihan.Shared.DTOs;
-using Reihan.Shared.Enums;
+﻿using Domain.Enums;
+using Reihan.Shared.DTOs;
 
 namespace Application.Interfaces
 {
