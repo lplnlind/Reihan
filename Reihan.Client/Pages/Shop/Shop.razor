@@ -9,74 +9,121 @@
 <PageTitle>محصولات</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large">
-    <MudText Typo="Typo.h5" Class="mb-4">فروشگاه</MudText>
 
-    <MudGrid>
+    <MudStack Row class="mb-4" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h4" Inline Class="pl-3 scondary-background rounded-lg">محصولات</MudText>
 
-        <MudItem xs="12" md="9">
-            <!-- لیست محصولات -->
-            <MudGrid>
-                @if (Products.Count == 0)
+        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+
+            <MudSelect T="string" Value="_sortingMode" ValueChanged="(v => Sort(v))"
+                       Variant="Variant.Outlined" Dense FitContent Margin="Margin.Dense" Typo="Typo.caption">
+                @foreach (var sort in _sortingModes)
                 {
-                    <MudText Class="ma-4">محصولی یافت نشد.</MudText>
+                    <MudSelectItem Value="sort">@sort</MudSelectItem>
                 }
-                else
+            </MudSelect>
+
+            <MudSelect T="int" Value="_selectedCategory" ValueChanged="(v => SelectCategory(v))"
+                       Variant="Variant.Outlined" Dense FitContent Margin="Margin.Dense" Typo="Typo.caption">
+
+                <MudSelectItem Value="0">همه محصولات</MudSelectItem>
+                @foreach (var cat in _categories)
                 {
-                    @foreach (var product in Products)
-                    {
-                        <MudItem xs="12" sm="6" md="4">
-                            <ProductCard Product="product" />
-                        </MudItem>
-                    }
+                    <MudSelectItem Value="cat.Id">@cat.Name</MudSelectItem>
                 }
-            </MudGrid>
-        </MudItem>
-        <MudItem xs="12" md="3">
-            <!-- فیلتر دسته‌بندی -->
-            <MudPaper Outlined="true" Class="rounded-xl pa-4" Elevation="2" Style="@($"background:{Colors.Gray.Lighten4}")">
-                <MudText Typo="Typo.subtitle1" Class="mb-2">دسته‌بندی‌ها</MudText>
+            </MudSelect>
 
-                <MudList T="string" @bind-SelectedValue="selectedCat" Dense="true" Color="Color.Primary" Class="rounded-xl">
-                    <MudListItem OnClick="@(() => SelectCategory(null))" Value="string.Empty" Text="همه محصولات" Class="rounded-lg" />
-                    @foreach (var cat in Categories)
-                    {
-                        <MudListItem OnClick="@(() => SelectCategory(cat.Id))" Value="cat.Id.ToString()" Text="@($"{cat.Name} ({cat.ProductsInThisCategory})")" />
-                    }
-                </MudList>
-            </MudPaper>
-        </MudItem>
+            <MudToggleGroup T="string" @bind-Value="displayModel" Outlined Delimiters Size="Size.Small" Color="Color.Dark" Vertical="false" Class="rounded-lg">
+                <MudToggleItem Value="@("grid")">
+                    <MudIcon Icon="@Icons.Material.Rounded.GridView" />
+                </MudToggleItem>
+                <MudToggleItem Value="@("list")">
+                    <MudIcon Icon="@Icons.Material.Rounded.ViewAgenda" />
+                </MudToggleItem>
+            </MudToggleGroup>
 
-    </MudGrid>
+        </MudStack>
+
+    </MudStack>
+
+    @if (_products.Count == 0)
+    {
+        <MudText Class="ma-7" Align="Align.Center">محصولی یافت نشد.</MudText>
+    }
+    else
+    {
+        <MudGrid>
+            @foreach (var product in _products)
+            {
+                if (displayModel == "grid")
+                {
+                    <MudItem xs="12" sm="6" md="4" lg="3">
+                        <ProductCard Product="product" />
+                    </MudItem>
+                }
+                else if (displayModel == "list")
+                {
+                    <MudItem xs="12">
+                        <ProductCard Product="product" CardMode="CardMode.ListCard" />
+                    </MudItem>
+                }
+            }
+        </MudGrid>
+    }
 </MudContainer>
 
 @code {
     [Parameter]
     public int categoryId { get; set; }
 
-    private List<ProductDto> Products = new();
-    private List<CategoryDto> Categories = new();
-    private int? _selectedCategory;
+    private List<ProductDto> _products = new();
+    private List<CategoryDto> _categories = new();
+    private List<string> _sortingModes = new() { "جدیدترین", "گران‌ترین", "ارزان‌ترین" };
+    private string _sortingMode = "جدیدترین";
+    private string displayModel = "grid";
+    private int _selectedCategory;
     private string selectedCat = string.Empty;
 
 
     protected override async Task OnInitializedAsync()
     {
-        Categories = await CategoryClient.GetAllAsync();
+        _categories = await CategoryClient.GetAllAsync();
 
-        if (categoryId > 0)
-            _selectedCategory = categoryId;
-
+        _selectedCategory = categoryId;
         await LoadProductsAsync();
     }
 
     private async Task LoadProductsAsync()
     {
-        Products = await ProductClient.FilterAsync(_selectedCategory);
+        if (_selectedCategory > 0)
+            _products = await ProductClient.FilterAsync(_selectedCategory);
+        else
+            _products = await ProductClient.FilterAsync();
     }
 
-    private async Task SelectCategory(int? categoryId)
+    private async Task SelectCategory(int categoryId)
     {
         _selectedCategory = categoryId;
         await LoadProductsAsync();
+    }
+
+    private void Sort(string sort)
+    {
+        switch (sort)
+        {
+            case "جدیدترین":
+                _products = _products.OrderByDescending(p => p.CreatedAt).ToList();
+                _sortingMode = "جدیدترین";
+                break;
+            case "گران‌ترین":
+                _products = _products.OrderByDescending(p => p.Price).ToList();
+                _sortingMode = "گران‌ترین";
+                break;
+            case "ارزان‌ترین":
+                _products = _products.OrderBy(p => p.Price).ToList();
+                _sortingMode = "ارزان‌ترین";
+                break;
+        }
+        StateHasChanged();
     }
 }

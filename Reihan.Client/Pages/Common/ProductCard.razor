@@ -308,17 +308,20 @@ else if (CardMode == CardMode.DetailsCard)
                     <MudItem>
                         <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
                             <MudStack Row AlignItems="AlignItems.Center">
+
                                 @if (!IsInCart)
                                 {
-                                    <MudNumericField T="int"
-                                                     @bind-Value="Quantity"
-                                                     Min="1"
-                                                     Max="@Product.StockQuantity"
-                                                     Variant="Variant.Outlined"
-                                                     Margin="Margin.Dense"
-                                                     Class="ma-0 product-quantity"
-                                                     Disabled="!Available"
-                                                     HideSpinButtons />
+                                    <div style="width: 40px">
+                                        <MudNumericField T="int"
+                                                         @bind-Value="Quantity"
+                                                         Min="1"
+                                                         Max="@Product.StockQuantity"
+                                                         Variant="Variant.Outlined"
+                                                         Margin="Margin.Dense"
+                                                         Class="ma-0 product-quantity"
+                                                         Disabled="!Available"
+                                                         HideSpinButtons />
+                                    </div>
                                 }
 
                                 <AuthorizeView>
@@ -467,15 +470,17 @@ else if (CardMode == CardMode.SpecialSales)
                             <MudStack Row AlignItems="AlignItems.Center">
                                 @if (!IsInCart)
                                 {
-                                    <MudNumericField T="int"
-                                                     @bind-Value="Quantity"
-                                                     Min="1"
-                                                     Max="@Product.StockQuantity"
-                                                     Variant="Variant.Outlined"
-                                                     Margin="Margin.Dense"
-                                                     Class="ma-0 product-quantity"
-                                                     Disabled="!Available"
-                                                     HideSpinButtons />
+                                    <div style="width: 40px">
+                                        <MudNumericField T="int"
+                                                         @bind-Value="Quantity"
+                                                         Min="1"
+                                                         Max="@Product.StockQuantity"
+                                                         Variant="Variant.Outlined"
+                                                         Margin="Margin.Dense"
+                                                         Class="ma-0 product-quantity"
+                                                         Disabled="!Available"
+                                                         HideSpinButtons />
+                                    </div>
                                 }
 
                                 <AuthorizeView>
